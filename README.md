@@ -158,7 +158,7 @@ Issues and pull requests are welcome.
 - [x] Difficulty, tags, languages and contest summary
 - [x] Performance pass for very large accounts (Web Worker)
 - [x] Compare two handles
-- [x] Contest-type patterns, accessibility pass, screenshots
+- [x] Accessibility pass, screenshots
 - [ ] First deployment to GitHub Pages
 
 ## Credits

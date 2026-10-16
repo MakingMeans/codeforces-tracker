@@ -4,7 +4,6 @@ import { isRated, type ContestEntry } from '../../lib/codeforces/contests'
 import { formatNumber, plural } from '../../lib/codeforces/format'
 import { Button } from '../ui/button'
 import { Panel } from '../ui/panel'
-import { ContestPatternDefs } from './contest-pattern'
 import { ContestRow } from './contest-row'
 
 type Filter = 'all' | 'rated' | 'unrated'
@@ -66,7 +65,6 @@ export function MatchHistory({ contests }: { contests: ContestEntry[] }) {
         </p>
       ) : (
         <>
-          <ContestPatternDefs />
           <ol className="grid gap-1.5">
             {rows.map((contest) => (
               <ContestRow key={contest.id} contest={contest} />

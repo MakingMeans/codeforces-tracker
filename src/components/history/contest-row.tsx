@@ -1,12 +1,10 @@
 import { ArrowUpRight, Clock, Hourglass, Minus, TrendingDown, TrendingUp, type LucideIcon } from 'lucide-react'
 import { memo } from 'react'
 import { cn } from '../../lib/cn'
-import { contestKind } from '../../lib/codeforces/contest-kind'
 import type { ContestEntry, ContestOutcome } from '../../lib/codeforces/contests'
 import { formatDate, formatDelta, formatDuration, formatNumber } from '../../lib/codeforces/format'
 import { rankFor, UNRATED } from '../../lib/codeforces/ranks'
 import { RankEmblem } from '../rank-emblem'
-import { ContestPattern } from './contest-pattern'
 import { ProblemChips } from './problem-chips'
 
 /** A result is said three ways: tint and bar, the signed delta, and this label with its icon. */
@@ -68,8 +66,6 @@ export const ContestRow = memo(function ContestRow({ contest }: { contest: Conte
 
   return (
     <li className={cn('contest-row', contest.outcome === 'gain' && 'is-gain', contest.outcome === 'loss' && 'is-loss')}>
-      <ContestPattern kind={contestKind(contest.name)} />
-
       <div className="cr-date text-sm leading-snug">
         <time dateTime={new Date(contest.start).toISOString()} className="font-semibold">
           {formatDate(contest.start)}
