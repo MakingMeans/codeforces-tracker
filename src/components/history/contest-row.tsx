@@ -85,7 +85,7 @@ export const ContestRow = memo(function ContestRow({ contest }: { contest: Conte
       </div>
 
       <div className="cr-emblem">
-        <RankEmblem rank={rank} size={56} label={`${rank.name} going in`} />
+        <RankEmblem rank={rank} size={72} label={`${rank.name} going in`} />
       </div>
 
       <a

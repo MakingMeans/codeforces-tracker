@@ -146,7 +146,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-body); 
   <section class="plate" aria-labelledby="sizes-title">
     <div class="plate-head">
       <h2 id="sizes-title">Sizes</h2>
-      <p>112 px in the profile header, 76 px on the rank ladder, 72 px on the rating card, 56 px in the match history (48 px on phones).</p>
+      <p>112 px in the profile header, 76 px on the rank ladder, 72 px on the rating card and in the match history, 56 px in the comparison header and in rows on phones.</p>
     </div>
     <div class="sizes cut" id="sizes"></div>
   </section>
@@ -191,7 +191,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-body); 
 
   document.getElementById('hero').innerHTML = ALL.map((r) => '<div>' + svg(r.tier, 104) + '<span style="color:' + r.color + '">' + r.name + '</span></div>').join('')
 
-  document.getElementById('sizes').innerHTML = [112, 76, 72, 56, 48]
+  document.getElementById('sizes').innerHTML = [112, 76, 72, 56]
     .map((s) => '<div class="row"><span class="label">' + s + ' px</span><div class="strip">' + ALL.map((r) => svg(r.tier, s)).join('') + '</div></div>')
     .join('')
 
@@ -210,7 +210,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-body); 
     ['loss', 2341, 'Codeforces Round (Div. 1)', 'Sep 14, 2026 · Place #96', MINUS + '18'],
     ['gain', 3104, 'Codeforces Global Round', 'Sep 2, 2026 · Place #3', '+41'],
   ]
-    .map(([cls, before, name, sub, d]) => '<div class="pv-row ' + cls + '">' + svg(E.rankFor(before).tier, 56) + '<div style="min-width:0"><div class="nm">' + name + '</div><div class="sub num">' + sub + '</div></div><span class="d num">' + d + '</span></div>')
+    .map(([cls, before, name, sub, d]) => '<div class="pv-row ' + cls + '">' + svg(E.rankFor(before).tier, 72) + '<div style="min-width:0"><div class="nm">' + name + '</div><div class="sub num">' + sub + '</div></div><span class="d num">' + d + '</span></div>')
     .join('')
 
   const cards = document.getElementById('cards')
