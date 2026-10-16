@@ -7,6 +7,10 @@ The look is inspired by competitive game trackers and Riot's Valorant client, bu
 copied**: no Riot or Valorant logos, agent art, map images or proprietary fonts (Tungsten,
 DIN Next). Everything here is original or from Google Fonts.
 
+To see it rather than read it, open [`docs/design/visual-sample.html`](design/visual-sample.html)
+in a browser. It is the approved sample: palette with contrast ratios, type, controls, emblems, and
+the profile page mocked with example data.
+
 ## Colour
 
 All colours are tokens, defined once in `src/index.css` (`@theme`). The page is dark-only.
