@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Footer } from './components/layout/footer'
 import { TopBar } from './components/layout/top-bar'
 import { SearchBox } from './components/search/search-box'
@@ -13,6 +13,7 @@ export default function App() {
   const { route } = useRoute()
   const handle = route.handle
   const problem = handle ? handleProblem(handle) : null
+  const [fetchedAt, setFetchedAt] = useState<number | null>(null)
 
   useEffect(() => {
     document.title = handle && !problem ? `${cleanHandle(handle)} · ${site.name}` : site.name
@@ -33,10 +34,10 @@ export default function App() {
         ) : problem ? (
           <InvalidHandle handle={handle} problem={problem} />
         ) : (
-          <Profile key={cleanHandle(handle).toLowerCase()} handle={cleanHandle(handle)} />
+          <Profile handle={cleanHandle(handle)} onFetched={setFetchedAt} />
         )}
       </main>
-      <Footer />
+      <Footer fetchedAt={handle && !problem ? (fetchedAt ?? undefined) : undefined} />
     </div>
   )
 }
