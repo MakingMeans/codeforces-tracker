@@ -29,7 +29,7 @@ match history, styled like a game tracker. Think tracker.gg for Valorant, but fo
   (all time, last year, last month) and longest streaks of consecutive days.
 - **Match history.** Every contest entered live, most recent first, Valorant-style: tinted by result,
   with the rank held going in, problems solved and missed, failed attempts, place, rating before → after
-  and the delta. Filter by All / Rated / Unrated.
+  and the delta. Filter by Rated / Unrated and by year.
 - **Insights.** Problems solved by difficulty, most-solved tags, languages used and a contest summary
   (best place, biggest gain, biggest loss).
 - **Upcoming contests** on the home page, with a countdown.
