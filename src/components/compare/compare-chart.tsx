@@ -1,9 +1,9 @@
 import { useMemo, useState, type KeyboardEvent, type PointerEvent } from 'react'
 import {
-  heldPath,
   monthTicks,
   nearestIndex,
   ratingDomain,
+  ratingPath,
   ratingTicks,
   timeDomain,
 } from '../../lib/charts/rating-scale'
@@ -11,6 +11,7 @@ import { formatMonthYear } from '../../lib/codeforces/format'
 import { rankFor, RANKS } from '../../lib/codeforces/ranks'
 import type { RatingPoint } from '../../lib/codeforces/user'
 import { useElementWidth } from '../../lib/use-element-width'
+import { useNow } from '../../lib/use-now'
 
 export interface Series {
   handle: string
@@ -51,13 +52,14 @@ function Swatch({ series }: { series: Series }) {
 }
 
 /**
- * Both ratings over time on the rank bands, drawn as the rating each one held:
- * flat between contests, so the cursor's dots always sit on the lines. Arrow
- * keys step through every contest of either.
+ * Both ratings over time on the rank bands, each carried on flat to today
+ * after its last contest. The cursor reads what each one held at that moment;
+ * arrow keys step through every contest of either.
  */
 export function CompareChart({ series }: { series: Series[] }) {
   const [ref, width] = useElementWidth<HTMLDivElement>()
   const [active, setActive] = useState<number | null>(null)
+  const now = useNow(60 * 60 * 1000)
   const plotted = useMemo(() => series.filter((entry) => entry.history.length > 0), [series])
   const times = useMemo(
     () => [...new Set(plotted.flatMap((entry) => entry.history.map((point) => point.time)))].sort((a, b) => a - b),
@@ -68,7 +70,7 @@ export function CompareChart({ series }: { series: Series[] }) {
     if (times.length === 0 || width === 0) return null
     const plotWidth = Math.max(0, width - MARGIN.left - MARGIN.right)
     const plotHeight = HEIGHT - MARGIN.top - MARGIN.bottom
-    const [x0, x1] = timeDomain(times)
+    const [x0, x1] = timeDomain([...times, now])
     const [lo, hi] = ratingDomain(plotted.flatMap((entry) => entry.history.map((point) => point.rating)))
     const x = (time: number) => MARGIN.left + ((time - x0) / (x1 - x0)) * plotWidth
     const y = (rating: number) => MARGIN.top + ((hi - rating) / (hi - lo)) * plotHeight
@@ -77,9 +79,9 @@ export function CompareChart({ series }: { series: Series[] }) {
       const to = Math.min(hi, RANKS[i + 1]?.min ?? Infinity)
       return to > from ? [{ rank, top: y(to), height: y(from) - y(to) }] : []
     })
-    // Both lines run to the latest contest of either, so one who stopped early still shows what they hold.
-    const until = times[times.length - 1]
-    const paths = plotted.map((entry) => heldPath(entry.history, until, x, y))
+    // A rating holds until the next contest, so both lines run on flat to today.
+    const until = Math.max(now, times[times.length - 1])
+    const paths = plotted.map((entry) => ratingPath(entry.history, until, x, y))
     // End labels: above the higher line and below the lower one, so neither sits on the other line.
     const lastY = plotted.map((entry) => y(entry.history[entry.history.length - 1].rating))
     const below = lastY.length === 2 ? (lastY[1] >= lastY[0] ? 1 : 0) : -1
@@ -96,7 +98,7 @@ export function CompareChart({ series }: { series: Series[] }) {
       ratingTicks: ratingTicks(lo, hi, y),
       monthTicks: monthTicks(x0, x1, plotWidth),
     }
-  }, [times, plotted, width])
+  }, [times, plotted, width, now])
 
   if (plotted.length === 0) {
     return <p className="py-8 text-center text-sm text-ink-muted">Neither has taken a rated contest yet.</p>

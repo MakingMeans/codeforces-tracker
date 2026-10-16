@@ -73,10 +73,9 @@ Validated with the `dataviz` palette validator against `surface`.
   `#D95926` with a dashed line: the first two language slots, which pass every check as a pair,
   even with all pairs compared. A legend and a label at the end of each line name them, so neither
   colour nor dash is the only cue. `ink` with `accent` was rejected: `ink` fails the lightness and
-  chroma checks for a series colour. Each line is the rating that player held: flat between
-  contests, a vertical step at each one, and carried on to the latest contest of either player.
-  That way the cursor's two dots always sit on their lines, and someone who stopped competing
-  still has a line to compare against.
+  chroma checks for a series colour. Lines join contest to contest, as on Codeforces, and run on
+  flat from each player's last contest to today, since a rating holds until the next one. Someone
+  who stopped competing still has a line to compare against.
 
 ## Type
 
