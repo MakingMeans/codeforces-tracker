@@ -200,7 +200,10 @@ export function RatingChart({ history }: { history: RatingPoint[] }) {
             x={chart.xs[last] - 8}
             y={chart.ys[last] - 12}
             textAnchor="end"
-            className={cn('fill-ink font-display text-lg transition-opacity', point && 'opacity-0')}
+            className={cn(
+              'fill-ink stroke-surface font-display text-lg transition-opacity [paint-order:stroke] [stroke-width:4px]',
+              point && 'opacity-0',
+            )}
           >
             {history[last].rating}
           </text>
