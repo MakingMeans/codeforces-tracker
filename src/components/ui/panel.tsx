@@ -15,7 +15,7 @@ export function Panel({ title, aside, className, children }: PanelProps) {
   return (
     <section
       aria-labelledby={headingId}
-      className={cn('cut grid min-w-0 content-start gap-4 p-5 [--cut:14px] sm:p-6', className)}
+      className={cn('cut grid min-w-0 animate-enter content-start gap-4 p-5 [--cut:14px] sm:p-6', className)}
     >
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <h2
