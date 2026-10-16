@@ -170,6 +170,132 @@
   }
 }
 
+/*
+ * Match history rows (see docs/DESIGN.md, "Match history rows"). One line on
+ * wide containers; under 640 px of container width they fold into three lines
+ * and keep every field. Written as CSS because of the grid areas.
+ */
+@layer components {
+  .match-history {
+    container-type: inline-size;
+  }
+
+  .contest-row {
+    --tint: rgb(139 151 163 / 0.14);
+    --bar: var(--color-neutral);
+    position: relative;
+    display: grid;
+    grid-template-columns: 6.8rem 44px minmax(0, 1fr) 8.8rem 5.8rem 28px;
+    grid-template-areas:
+      'date emblem name ratings delta link'
+      'date emblem detail ratings delta link';
+    gap: 4px 18px;
+    align-items: center;
+    padding: 12px 14px 12px 22px;
+    background: linear-gradient(90deg, var(--tint), transparent 72%), var(--color-surface-2);
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+    content-visibility: auto;
+    contain-intrinsic-size: auto 76px;
+  }
+  .contest-row::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: var(--bar);
+  }
+  .contest-row.is-gain {
+    --tint: rgb(79 224 182 / 0.16);
+    --bar: var(--color-win);
+  }
+  .contest-row.is-loss {
+    --tint: rgb(255 70 85 / 0.16);
+    --bar: var(--color-loss);
+  }
+  .contest-row > * {
+    position: relative;
+    z-index: 1;
+  }
+  .contest-row .cr-pattern {
+    position: absolute;
+    z-index: 0;
+    inset: 0 0 0 auto;
+    width: 240px;
+    height: 100%;
+    opacity: 0.38;
+    color: var(--bar);
+    pointer-events: none;
+    mask-image: linear-gradient(90deg, transparent, #000 75%);
+  }
+  .cr-date {
+    grid-area: date;
+  }
+  .cr-emblem {
+    grid-area: emblem;
+  }
+  .cr-name {
+    grid-area: name;
+    align-self: end;
+  }
+  .cr-detail {
+    grid-area: detail;
+    align-self: start;
+  }
+  .cr-ratings {
+    grid-area: ratings;
+  }
+  .cr-delta {
+    grid-area: delta;
+  }
+  .cr-link {
+    grid-area: link;
+  }
+}
+
+/*
+ * What shows and hides between the wide and folded rows. Left outside the
+ * layers on purpose: these must beat the display utilities on the same elements.
+ */
+.cr-date-sep,
+.cr-detail .cr-tag-compact {
+  display: none;
+}
+
+@container (max-width: 640px) {
+  .contest-row {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    grid-template-areas:
+      'emblem name delta'
+      'emblem date ratings'
+      'detail detail detail';
+    gap: 2px 12px;
+    padding: 10px 12px 12px 18px;
+  }
+  .contest-row .cr-emblem svg {
+    width: 40px;
+    height: 40px;
+  }
+  .cr-date {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 6px;
+  }
+  .cr-date-sep,
+  .cr-detail .cr-tag-compact {
+    display: inline-flex;
+  }
+  .cr-date .cr-clock,
+  .cr-ratings .cr-ratings-label,
+  .cr-delta .cr-tag,
+  .contest-row .cr-link,
+  .contest-row .cr-pattern {
+    display: none;
+  }
+  .cr-detail {
+    margin-top: 6px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,
