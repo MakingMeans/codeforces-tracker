@@ -1,0 +1,1424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+<title>CF/TRACKER Design Sample</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: a spec sheet. Labelled plates down one column (foundations, emblems), then the
+   profile page mocked at real size with example data, then the same rows at phone width. */
+:root {
+  color-scheme: dark;
+  --bg: #0F1923;
+  --surface: #16232F;
+  --surface-2: #1D2C3A;
+  --surface-3: #243545;
+  --line: rgba(236, 232, 225, 0.12);
+  --line-strong: rgba(236, 232, 225, 0.28);
+  --ink: #ECE8E1;
+  --ink-muted: #9AA5B1;
+  --accent: #FF4655;
+  --on-accent: #0F1923;
+  --win: #4FE0B6;
+  --loss: #FF4655;
+  --neutral: #8B97A3;
+  --heat-0: #1D2C3A;
+  --heat-1: #1F634F;
+  --heat-2: #2B8D71;
+  --heat-3: #36BA96;
+  --heat-4: #4FE0B6;
+  --lang-1: #3987E5;
+  --lang-2: #D95926;
+  --lang-3: #199E70;
+  --lang-4: #C98500;
+  --lang-5: #D55181;
+  --lang-6: #9085E9;
+  --lang-other: #5C6875;
+  --font-display: "Anton", Impact, "Arial Narrow", sans-serif;
+  --font-label: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+}
+::selection { background: rgba(255, 70, 85, 0.35); color: var(--ink); }
+a { color: inherit; }
+* { box-sizing: border-box; }
+
+.page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 72px;
+  display: grid;
+  gap: 56px;
+}
+
+/* ---------- shared texture and shapes ---------- */
+.stripes {
+  background-image: repeating-linear-gradient(-45deg, rgba(236, 232, 225, 0.035) 0 1px, transparent 1px 9px);
+}
+.ticks {
+  --tick: var(--line-strong);
+  background-image:
+    linear-gradient(var(--tick), var(--tick)), linear-gradient(var(--tick), var(--tick)),
+    linear-gradient(var(--tick), var(--tick)), linear-gradient(var(--tick), var(--tick)),
+    linear-gradient(var(--tick), var(--tick)), linear-gradient(var(--tick), var(--tick)),
+    linear-gradient(var(--tick), var(--tick)), linear-gradient(var(--tick), var(--tick)),
+    repeating-linear-gradient(-45deg, rgba(236, 232, 225, 0.035) 0 1px, transparent 1px 9px);
+  background-size: 14px 1px, 1px 14px, 14px 1px, 1px 14px, 14px 1px, 1px 14px, 14px 1px, 1px 14px, auto;
+  background-position: top left, top left, top right, top right, bottom left, bottom left, bottom right, bottom right, 0 0;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat;
+}
+
+/* Cut corners live on two background layers, so the element itself never clips its focus outline. */
+.cut {
+  --cut: 12px;
+  --cut-fill: var(--surface);
+  --cut-line: var(--line);
+  position: relative;
+  isolation: isolate;
+}
+.cut::before,
+.cut::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  transition: background-color 150ms var(--ease);
+}
+.cut::before {
+  inset: 0;
+  background: var(--cut-line);
+  clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
+}
+.cut::after {
+  inset: 1px;
+  background: var(--cut-fill);
+  clip-path: polygon(calc(var(--cut) - 0.4px) 0, 100% 0, 100% calc(100% - var(--cut) + 0.4px), calc(100% - var(--cut) + 0.4px) 100%, 0 100%, 0 calc(var(--cut) - 0.4px));
+}
+
+.label {
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.num { font-variant-numeric: tabular-nums; }
+.muted { color: var(--ink-muted); }
+
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+/* ---------- plate headings ---------- */
+.masthead {
+  padding-block: 40px 8px;
+  display: grid;
+  gap: 14px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 28px;
+}
+.wordmark {
+  font-family: var(--font-display);
+  font-size: 26px;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--ink);
+}
+.wordmark::before { content: ""; width: 4px; height: 1em; background: var(--accent); }
+.wordmark .slash { color: var(--accent); display: inline-block; transform: skewX(-8deg); margin-inline: 1px; }
+.masthead h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(40px, 7vw, 76px);
+  line-height: 0.95;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-wrap: balance;
+}
+.masthead p { margin: 0; max-width: 64ch; color: var(--ink-muted); }
+
+.plate { display: grid; gap: 22px; min-width: 0; }
+.plate-head { display: grid; gap: 6px; }
+.plate-head h2 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.plate-head h2::before { content: ""; width: 4px; height: 0.9em; background: var(--accent); }
+.plate-head p { margin: 0; max-width: 70ch; color: var(--ink-muted); }
+
+/* ---------- palette ---------- */
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(178px, 1fr)); gap: 12px; }
+.swatch { --cut: 10px; padding: 12px; display: grid; gap: 8px; }
+.swatch .chip-color { height: 54px; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); box-shadow: inset 0 0 0 1px var(--line); }
+.swatch .name { font-family: var(--font-label); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; font-size: 14px; }
+.swatch .meta { font-size: 13px; color: var(--ink-muted); line-height: 1.35; }
+.swatch .meta b { color: var(--ink); font-weight: 600; }
+.sub-title { margin: 6px 0 0; }
+
+.ramp { display: flex; gap: 3px; align-items: center; flex-wrap: wrap; }
+.ramp span { width: 46px; height: 28px; display: grid; place-items: center; font-family: var(--font-label); font-size: 12px; font-weight: 600; color: var(--ink); }
+.ramp-row { display: grid; gap: 8px; }
+
+/* ---------- type ---------- */
+.type-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.type-card { --cut: 14px; padding: 20px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.type-card .specimen-display { font-family: var(--font-display); font-size: 64px; line-height: 1; letter-spacing: 0.01em; }
+.type-card .specimen-handles { font-family: var(--font-display); font-size: 34px; line-height: 1.1; display: flex; gap: 18px; flex-wrap: wrap; }
+.type-card .specimen-label { font-family: var(--font-label); font-weight: 700; font-size: 22px; letter-spacing: 0.16em; text-transform: uppercase; }
+.type-card .specimen-body { font-size: 17px; max-width: 46ch; }
+.check { display: inline-flex; gap: 8px; align-items: center; font-size: 14px; }
+.check .dot { width: 8px; height: 8px; background: var(--neutral); }
+.check.ok .dot { background: var(--win); }
+.check.bad .dot { background: var(--loss); }
+.num-columns { display: flex; gap: 28px; flex-wrap: wrap; font-size: 18px; }
+.num-columns div { display: grid; text-align: right; }
+
+/* ---------- controls ---------- */
+.controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
+.control-card { --cut: 14px; padding: 20px; display: grid; gap: 16px; align-content: start; min-width: 0; }
+.row-flex { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+.btn {
+  --cut: 10px;
+  --cut-fill: var(--bg);
+  --cut-line: var(--line-strong);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  border: 0;
+  background: none;
+  padding: 11px 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  line-height: 1.2;
+}
+.btn svg { width: 16px; height: 16px; flex: none; }
+.btn:hover { --cut-fill: var(--surface-2); }
+.btn-primary { --cut-fill: var(--accent); --cut-line: var(--accent); color: var(--on-accent); }
+.btn-primary:hover { --cut-fill: var(--ink); --cut-line: var(--ink); }
+.btn-ghost { --cut-line: transparent; --cut-fill: transparent; color: var(--ink-muted); padding-inline: 10px; }
+.btn-ghost:hover { --cut-fill: var(--surface-2); color: var(--ink); }
+.btn.is-focus { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+.search { --cut: 14px; --cut-fill: var(--surface); --cut-line: var(--line-strong); display: flex; align-items: stretch; min-width: 0; }
+.search:focus-within { --cut-line: var(--ink); }
+.search .icon { display: grid; place-items: center; padding-left: 16px; color: var(--ink-muted); }
+.search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 18px;
+  padding: 14px 12px;
+}
+.search input::placeholder { color: var(--ink-muted); }
+.search input:focus-visible { outline: none; }
+.search .btn { --cut: 10px; margin: 5px; }
+.hint { font-size: 14px; color: var(--ink-muted); margin: 0; }
+.hint.error { color: var(--accent); }
+.kbd { font-family: var(--font-label); font-weight: 700; font-size: 12px; padding: 1px 7px; box-shadow: inset 0 0 0 1px var(--line-strong); color: var(--ink-muted); }
+
+.recent { display: flex; gap: 8px; flex-wrap: wrap; }
+.recent-chip { --cut: 7px; --cut-fill: var(--surface-2); --cut-line: var(--line); display: inline-flex; align-items: center; }
+.recent-chip a { padding: 5px 4px 5px 12px; text-decoration: none; font-weight: 500; }
+.recent-chip a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.recent-chip button { border: 0; background: none; color: var(--ink-muted); cursor: pointer; padding: 5px 9px 5px 6px; display: grid; place-items: center; }
+.recent-chip button:hover { color: var(--accent); }
+.recent-chip svg { width: 13px; height: 13px; }
+
+.select {
+  --cut: 8px;
+  --cut-fill: var(--surface-2);
+  --cut-line: var(--line-strong);
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+.select select {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 8px 36px 8px 14px;
+  cursor: pointer;
+}
+.select select option { background: var(--surface-2); color: var(--ink); }
+.select svg { position: absolute; right: 12px; width: 14px; height: 14px; pointer-events: none; color: var(--ink-muted); }
+
+.pchip {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  min-width: 26px;
+  padding: 1px 6px;
+  text-align: center;
+  display: inline-block;
+  clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+}
+.pchip.solved { background: rgba(236, 232, 225, 0.16); color: var(--ink); }
+.pchip.missed { color: var(--ink-muted); text-decoration: line-through; box-shadow: inset 0 0 0 1px var(--line-strong); }
+.chips { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+
+.tag { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-label); font-weight: 700; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-muted); }
+.tag svg { width: 13px; height: 13px; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- emblems ---------- */
+.emblems { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.emblem-card { --cut: 12px; padding: 18px 12px 14px; display: grid; justify-items: center; gap: 6px; text-align: center; }
+.emblem-card .em-big svg { width: 76px; height: 76px; display: block; }
+.emblem-card .em-small { display: flex; gap: 8px; align-items: center; }
+.emblem-card .em-small svg { display: block; }
+.emblem-card .rank-name { font-family: var(--font-label); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; font-size: 14px; line-height: 1.15; }
+.emblem-card .from { font-size: 13px; color: var(--ink-muted); }
+.emblem svg { display: block; }
+
+/* ---------- profile mock ---------- */
+.mock { display: grid; gap: 0; border: 1px solid var(--line); background: var(--bg); min-width: 0; }
+.mock-note { font-family: var(--font-label); font-weight: 700; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--on-accent); background: var(--accent); padding: 3px 10px; justify-self: start; }
+
+.topbar { display: flex; align-items: center; gap: 16px; padding: 12px 20px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.topbar .search { flex: 1; max-width: 420px; margin-left: auto; --cut: 10px; }
+.topbar .search input { font-size: 15px; padding: 8px 10px; }
+.topbar .search .icon { padding-left: 12px; }
+.topbar .search .kbd { align-self: center; margin-right: 10px; }
+.topbar .gh { color: var(--ink-muted); display: grid; place-items: center; padding: 6px; }
+.topbar .gh:hover { color: var(--ink); }
+.topbar .gh svg { width: 20px; height: 20px; }
+
+.header { padding: 28px 24px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 24px; align-items: center; border-bottom: 1px solid var(--line); }
+.photo { --c: #60A5FA; width: 132px; height: 132px; padding: 2px; background: var(--c); clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px); }
+.photo img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); background: var(--surface-2); }
+.identity { display: grid; gap: 6px; min-width: 0; }
+.handle { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(38px, 5vw, 56px); line-height: 1; letter-spacing: 0.01em; overflow-wrap: anywhere; }
+.where { color: var(--ink-muted); margin: 0; }
+.meta-row { display: flex; gap: 8px 22px; flex-wrap: wrap; margin-top: 6px; }
+.meta-row div { display: grid; gap: 0; }
+.meta-row dt { font-family: var(--font-label); font-weight: 600; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-muted); }
+.meta-row dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.rankblock { display: grid; grid-template-columns: auto auto; gap: 4px 16px; align-items: center; }
+.rankblock .emblem svg { width: 88px; height: 88px; }
+.rankblock .rank-line { font-family: var(--font-label); font-weight: 700; font-size: 17px; letter-spacing: 0.12em; text-transform: uppercase; }
+.rankblock .rating { font-family: var(--font-display); font-size: 64px; line-height: 0.95; font-variant-numeric: tabular-nums; }
+.rankblock .max { font-size: 14px; color: var(--ink-muted); }
+.header-actions { grid-column: 1 / -1; display: flex; gap: 10px; flex-wrap: wrap; }
+
+.body { display: grid; grid-template-columns: 20rem minmax(0, 1fr); gap: 16px; padding: 20px; align-items: start; }
+.side, .main { display: grid; gap: 16px; min-width: 0; }
+
+.panel { --cut: 14px; padding: 18px 20px 20px; display: grid; gap: 14px; min-width: 0; }
+.panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 6px 16px; flex-wrap: wrap; }
+.panel-head h3 {
+  margin: 0;
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.panel-head h3::before { content: ""; width: 3px; height: 14px; background: var(--accent); }
+.panel-head .aside { font-size: 14px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+
+.rating-cards { display: grid; gap: 10px; }
+.rating-card { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.rating-card:first-child { border-top: 0; padding-top: 0; }
+.rating-card .emblem svg { width: 52px; height: 52px; }
+.rating-card .big { font-family: var(--font-display); font-size: 34px; line-height: 1; font-variant-numeric: tabular-nums; }
+.rating-card .small { font-family: var(--font-label); font-weight: 700; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+.dl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 12px; margin: 0; }
+.dl-grid div { display: flex; flex-direction: column-reverse; }
+.dl-grid dt { font-size: 13px; color: var(--ink-muted); }
+.dl-grid dd { margin: 0; font-family: var(--font-display); font-size: 26px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+
+.langbar { display: flex; gap: 2px; height: 12px; }
+.langbar span { display: block; height: 100%; }
+.lang-list { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.lang-list li { display: grid; grid-template-columns: 10px 1fr auto; gap: 10px; align-items: center; font-size: 14px; }
+.lang-list .sw { width: 10px; height: 10px; }
+.lang-list .pct { font-variant-numeric: tabular-nums; font-weight: 600; }
+
+.tags { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.tags li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; font-size: 14px; }
+.tags .bar { grid-column: 1 / -1; height: 4px; background: var(--surface-2); }
+.tags .bar span { display: block; height: 100%; background: var(--ink-muted); }
+.tags .n { font-variant-numeric: tabular-nums; font-weight: 600; }
+
+.chart { position: relative; height: 240px; outline-offset: 4px; }
+.chart svg { display: block; }
+.chart text { font-family: var(--font-label); }
+.tooltip {
+  --cut: 10px;
+  --cut-fill: var(--surface-3);
+  --cut-line: var(--line-strong);
+  position: absolute;
+  pointer-events: none;
+  padding: 10px 12px;
+  width: 240px;
+  display: grid;
+  gap: 2px;
+  z-index: 2;
+}
+.tooltip .tt-top { display: flex; gap: 8px; align-items: baseline; }
+.tooltip .tt-rating { font-family: var(--font-display); font-size: 24px; line-height: 1; font-variant-numeric: tabular-nums; }
+.tooltip .tt-delta { font-family: var(--font-label); font-weight: 700; font-size: 15px; font-variant-numeric: tabular-nums; }
+.tooltip .tt-rank { margin-left: auto; font-family: var(--font-label); font-weight: 700; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+.tooltip .tt-name { font-size: 13px; }
+.tooltip .tt-meta { font-size: 12px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+
+.heatmap { position: relative; }
+.heatmap svg { display: block; }
+.heatmap text { font-family: var(--font-label); font-size: 11px; fill: var(--ink-muted); }
+.h0 { fill: var(--heat-0); } .h1 { fill: var(--heat-1); } .h2 { fill: var(--heat-2); } .h3 { fill: var(--heat-3); } .h4 { fill: var(--heat-4); }
+.legend { display: flex; justify-content: flex-end; align-items: center; gap: 5px; font-size: 12px; color: var(--ink-muted); }
+.legend i { width: 11px; height: 11px; display: inline-block; }
+.hm-tip { --cut: 8px; --cut-fill: var(--surface-3); --cut-line: var(--line-strong); position: absolute; padding: 6px 10px; pointer-events: none; text-align: center; transform: translate(-50%, -100%); white-space: nowrap; z-index: 2; }
+.hm-tip b { display: block; font-size: 14px; }
+.hm-tip span { font-size: 12px; color: var(--ink-muted); }
+
+.statcards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.statcard { --cut: 10px; --cut-fill: var(--surface-2); padding: 12px 14px; display: grid; gap: 8px; min-width: 0; }
+.statcard .trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.statcard .trio div { display: flex; flex-direction: column-reverse; }
+.statcard dd { margin: 0; font-family: var(--font-display); font-size: 30px; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.statcard dt { font-size: 13px; color: var(--ink-muted); }
+.statcard dl { margin: 0; }
+
+.diff svg { display: block; }
+.diff text { font-family: var(--font-label); font-size: 11px; fill: var(--ink-muted); }
+
+/* ---------- match history ---------- */
+.history-tools { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.history { container-type: inline-size; display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; min-width: 0; }
+.row {
+  --tint: rgba(139, 151, 163, 0.14);
+  --bar: var(--neutral);
+  position: relative;
+  display: grid;
+  grid-template-columns: 6.6rem 44px minmax(0, 1fr) 8.6rem 5.6rem 28px;
+  grid-template-areas:
+    "date emblem name ratings delta link"
+    "date emblem detail ratings delta link";
+  gap: 4px 18px;
+  align-items: center;
+  padding: 12px 14px 12px 22px;
+  background: linear-gradient(90deg, var(--tint), transparent 72%), var(--surface);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+  overflow: hidden;
+  color: var(--ink);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 74px;
+}
+.row::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--bar); }
+.row.gain { --tint: rgba(79, 224, 182, 0.16); --bar: var(--win); }
+.row.loss { --tint: rgba(255, 70, 85, 0.16); --bar: var(--loss); }
+.row > * { position: relative; z-index: 1; }
+.r-date { grid-area: date; font-weight: 600; font-size: 14px; line-height: 1.3; }
+.r-date .dur { display: flex; align-items: center; gap: 4px; font-weight: 400; color: var(--ink-muted); font-size: 13px; }
+.r-date .dur svg { width: 12px; height: 12px; }
+.r-date .sep { display: none; }
+.r-emblem { grid-area: emblem; }
+.r-emblem svg { width: 44px; height: 44px; display: block; }
+.r-name { grid-area: name; font-weight: 600; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; align-self: end; justify-self: start; max-width: 100%; }
+.r-name:hover { text-decoration: underline; text-underline-offset: 3px; }
+.r-detail { grid-area: detail; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; font-size: 13px; color: var(--ink-muted); align-self: start; font-variant-numeric: tabular-nums; }
+.r-ratings { grid-area: ratings; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; font-size: 15px; }
+.r-ratings .arrow { color: var(--ink-muted); }
+.r-ratings small { display: block; }
+.r-delta { grid-area: delta; text-align: right; display: grid; justify-items: end; }
+.r-delta .d { font-family: var(--font-display); font-size: 30px; line-height: 1; font-variant-numeric: tabular-nums; }
+.gain .r-delta .d { color: var(--win); }
+.loss .r-delta .d { color: var(--loss); }
+.r-link { grid-area: link; color: var(--ink-muted); display: grid; place-items: center; height: 28px; }
+.r-link:hover { color: var(--ink); }
+.r-link svg { width: 16px; height: 16px; }
+.r-pattern { position: absolute !important; z-index: 0 !important; right: 0; top: 0; bottom: 0; width: 240px; height: 100%; opacity: 0.38; -webkit-mask-image: linear-gradient(90deg, transparent, #000 75%); mask-image: linear-gradient(90deg, transparent, #000 75%); pointer-events: none; color: var(--bar); }
+
+@container (max-width: 640px) {
+  .row {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "emblem name delta"
+      "emblem date ratings"
+      "detail detail detail";
+    gap: 2px 12px;
+    padding: 10px 12px 12px 18px;
+  }
+  .r-emblem svg { width: 40px; height: 40px; }
+  .r-date { display: flex; gap: 6px; font-weight: 400; color: var(--ink-muted); font-size: 13px; }
+  .r-date .dur { display: inline-flex; }
+  .r-date .dur svg { display: none; }
+  .r-date .sep { display: inline; }
+  .r-name { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .r-ratings { font-size: 13px; }
+  .r-ratings small { display: none; }
+  .r-delta { flex-direction: row; }
+  .r-delta .d { font-size: 26px; }
+  .r-delta .tag { display: none; }
+  .r-detail { margin-top: 6px; }
+  .r-detail .mtag { display: inline-flex; }
+  .r-link, .r-pattern { display: none; }
+}
+.r-detail .mtag { display: none; }
+
+.load-more { justify-self: center; }
+.footer-mock { padding: 18px 24px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 8px 20px; flex-wrap: wrap; font-size: 13px; color: var(--ink-muted); }
+
+/* ---------- phone frame ---------- */
+.phones { display: flex; gap: 20px; flex-wrap: wrap; align-items: start; }
+.phone { width: 375px; max-width: 100%; border: 1px solid var(--line-strong); background: var(--bg); display: grid; gap: 12px; padding: 14px 12px 18px; }
+.phone .mini-head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center; }
+.phone .photo { width: 72px; height: 72px; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+.phone .photo img { clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px); }
+.phone .handle { font-size: 32px; }
+.phone .rank-mini { display: flex; gap: 8px; align-items: center; }
+.phone .rank-mini svg { width: 30px; height: 30px; }
+.phone .rank-mini b { font-family: var(--font-display); font-weight: 400; font-size: 24px; line-height: 1; }
+.phone-caption { font-size: 13px; color: var(--ink-muted); margin: 0; }
+
+/* ---------- decisions ---------- */
+.decisions { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; max-width: 80ch; }
+.decisions li { display: grid; grid-template-columns: 14px 1fr; gap: 12px; }
+.decisions li::before { content: ""; width: 8px; height: 8px; background: var(--accent); margin-top: 8px; }
+
+@media (max-width: 1023px) {
+  .body { grid-template-columns: minmax(0, 1fr); }
+  .header { grid-template-columns: auto minmax(0, 1fr); }
+  .rankblock { grid-column: 1 / -1; }
+}
+@media (max-width: 560px) {
+  .header { grid-template-columns: minmax(0, 1fr); padding: 20px 16px; }
+  .photo { width: 96px; height: 96px; }
+  .body { padding: 12px; }
+  .statcards { grid-template-columns: minmax(0, 1fr); }
+  .rankblock .rating { font-size: 52px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <pattern id="p-div1" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="1.3" height="5" fill="currentColor"/></pattern>
+    <pattern id="p-div2" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="1.3" height="8" fill="currentColor"/></pattern>
+    <pattern id="p-div3" width="13" height="13" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="1.3" height="13" fill="currentColor"/></pattern>
+    <pattern id="p-div4" width="9" height="9" patternUnits="userSpaceOnUse"><rect x="3.5" y="3.5" width="2" height="2" fill="currentColor"/></pattern>
+    <pattern id="p-edu" width="12" height="12" patternUnits="userSpaceOnUse"><path d="M12 0H0V12" fill="none" stroke="currentColor" stroke-width="1"/></pattern>
+    <pattern id="p-global" width="16" height="12" patternUnits="userSpaceOnUse"><path d="M0 10 L8 2 L16 10" fill="none" stroke="currentColor" stroke-width="1.3"/></pattern>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="masthead">
+    <span class="wordmark" aria-label="CF/TRACKER">CF<span class="slash">/</span>TRACKER</span>
+    <h1>Design sample</h1>
+    <p>Colours, type, controls, rank emblems and the profile page with example data, drawn at real size. Everything here becomes tokens and components in the app. Handles, contests and numbers are made up.</p>
+  </header>
+
+  <!-- ===================== PALETTE ===================== -->
+  <section class="plate" aria-labelledby="palette-title">
+    <div class="plate-head">
+      <h2 id="palette-title">Palette</h2>
+      <p>Navy surfaces, bone text, one red for actions and losses, teal for gains. Ratios are WCAG contrast against the page background unless noted.</p>
+    </div>
+    <div class="swatches" id="swatches"></div>
+
+    <h3 class="label sub-title">Rank colours (Codeforces hues, lifted for a dark background)</h3>
+    <div class="swatches" id="rank-swatches" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));"></div>
+
+    <h3 class="label sub-title">Chart colours</h3>
+    <div class="swatches" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+      <div class="swatch cut ramp-row">
+        <span class="name">Activity ramp</span>
+        <div class="ramp" id="heat-ramp"></div>
+        <span class="meta">One teal hue, five levels: 0, 1, 2–3, 4–6, 7+. Lightness rises at every step, and the dimmest step is 2.25:1 on panels.</span>
+      </div>
+      <div class="swatch cut ramp-row">
+        <span class="name">Languages</span>
+        <div class="ramp" id="lang-ramp"></div>
+        <span class="meta">Six colours in a fixed order, safe for colour-blind readers when adjacent, all ≥3:1 on panels. "Other" is grey. Each one is always labelled.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TYPE ===================== -->
+  <section class="plate" aria-labelledby="type-title">
+    <div class="plate-head">
+      <h2 id="type-title">Type</h2>
+      <p>A condensed display face for titles and big numbers, a condensed face for labels, and a regular sans-serif for reading.</p>
+    </div>
+    <div class="type-grid">
+      <div class="type-card cut">
+        <span class="label">Anton · display and numbers</span>
+        <span class="specimen-display num">3786 <span style="color:var(--win)">+62</span></span>
+        <span class="specimen-handles"><span style="color:#F87171"><span style="color:var(--ink)">t</span>ourist</span><span style="color:#F87171">jiangly</span><span style="color:#FB923C">Benq</span></span>
+        <span class="muted" style="font-size:14px">Handles are never uppercased: Codeforces handles are case-sensitive. A legendary grandmaster's first letter takes the text colour.</span>
+      </div>
+      <div class="type-card cut">
+        <span class="label">Barlow Condensed · labels, buttons, chips</span>
+        <span class="specimen-label">Match history</span>
+        <span class="specimen-label" style="font-size:16px;color:var(--ink-muted)">Rated · Unrated · Pending</span>
+        <span class="label">Barlow · text</span>
+        <span class="specimen-body">Every contest entered live, most recent first. Problems solved are filled; problems tried and missed are struck through.</span>
+      </div>
+      <div class="type-card cut">
+        <span class="label">Tabular figures</span>
+        <div class="num-columns" id="num-columns"></div>
+        <span class="check" id="tnum-barlow"><span class="dot"></span><span>Checking Barlow…</span></span>
+        <span class="check" id="tnum-cond"><span class="dot"></span><span>Checking Barlow Condensed…</span></span>
+        <span class="check" id="tnum-anton"><span class="dot"></span><span>Checking Anton…</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONTROLS ===================== -->
+  <section class="plate" aria-labelledby="controls-title">
+    <div class="plate-head">
+      <h2 id="controls-title">Controls</h2>
+      <p>Corners cut at 45°, 1-pixel lines, uppercase labels. Red buttons carry navy text: white on this red is only 3.4:1.</p>
+    </div>
+    <div class="controls">
+      <div class="control-card cut">
+        <span class="label">Buttons</span>
+        <div class="row-flex">
+          <a class="btn btn-primary cut" href="https://codeforces.com/profile/" target="_blank" rel="noopener noreferrer">Open on Codeforces <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
+          <button class="btn cut" type="button">Compare</button>
+          <button class="btn btn-ghost cut" type="button">Load more</button>
+        </div>
+        <div class="row-flex">
+          <button class="btn btn-primary cut is-focus" type="button" tabindex="-1">Search</button>
+          <button class="btn cut is-focus" type="button" tabindex="-1">Try again</button>
+          <span class="muted" style="font-size:13px">Keyboard focus: a 2px bone outline, never clipped by the cut.</span>
+        </div>
+      </div>
+
+      <div class="control-card cut">
+        <label class="label" for="search-sample">Search</label>
+        <form class="search cut" id="search-form" role="search">
+          <span class="icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.2-4.2"/></svg></span>
+          <input id="search-sample" name="handle" autocomplete="off" spellcheck="false" placeholder="Codeforces handle" value="tourist">
+          <button class="btn btn-primary cut" type="submit">Search</button>
+        </form>
+        <p class="hint" id="search-hint">3–24 characters: letters, digits, _ . or -</p>
+        <div class="recent" aria-label="Recent searches">
+          <span class="recent-chip cut"><a href="#search-sample">tourist</a><button type="button" aria-label="Remove tourist from recent searches"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 6l12 12M18 6 6 18"/></svg></button></span>
+          <span class="recent-chip cut"><a href="#search-sample">jiangly</a><button type="button" aria-label="Remove jiangly from recent searches"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 6l12 12M18 6 6 18"/></svg></button></span>
+          <span class="recent-chip cut"><a href="#search-sample">Benq</a><button type="button" aria-label="Remove Benq from recent searches"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 6l12 12M18 6 6 18"/></svg></button></span>
+        </div>
+      </div>
+
+      <div class="control-card cut">
+        <span class="label">Filter, problems, result tags</span>
+        <div class="row-flex">
+          <span class="select cut">
+            <label class="sr-only" for="filter-sample">Show contests</label>
+            <select id="filter-sample"><option>All contests (31)</option><option>Rated (27)</option><option>Unrated (4)</option></select>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="m6 9 6 6 6-6"/></svg>
+          </span>
+        </div>
+        <div class="row-flex">
+          <span class="chips"><span class="pchip solved" title="A. Solved first try">A</span><span class="pchip solved" title="B. Solved after 1 failed attempt">B</span><span class="pchip solved" title="C1. Solved first try">C1</span><span class="pchip missed" title="C2. Not solved, 2 failed attempts">C2</span><span class="pchip missed" title="D. Not solved, 0 failed attempts">D</span></span>
+        </div>
+        <div class="row-flex" id="tag-samples"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== EMBLEMS ===================== -->
+  <section class="plate" aria-labelledby="emblems-title">
+    <div class="plate-head">
+      <h2 id="emblems-title">Rank emblems</h2>
+      <p>The approved set: a hex frame that grows with the rank, a chess figure inside and 1–7 stars, one per rank colour. Drawn by rank-emblems.js; see rank-emblems.html and docs/DESIGN.md for the rules. Shown at 76 px and at the 44 and 28 px sizes used in rows.</p>
+    </div>
+    <div class="emblems" id="emblems"></div>
+  </section>
+
+  <!-- ===================== PROFILE MOCK ===================== -->
+  <section class="plate" aria-labelledby="profile-title">
+    <div class="plate-head">
+      <h2 id="profile-title">Profile page</h2>
+      <p>Two columns as on tracker.gg: summaries on the left, the rating chart, activity, difficulty and match history on the right. One column below 1024 px.</p>
+    </div>
+    <span class="mock-note">Example data</span>
+
+    <div class="mock">
+      <div class="topbar">
+        <span class="wordmark">CF<span class="slash">/</span>TRACKER</span>
+        <form class="search cut" role="search" onsubmit="return false">
+          <span class="icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.2-4.2"/></svg></span>
+          <label class="sr-only" for="top-search">Search a handle</label>
+          <input id="top-search" placeholder="Search a handle" autocomplete="off" spellcheck="false">
+          <span class="kbd" aria-hidden="true">/</span>
+        </form>
+        <a class="gh" href="https://github.com/MakingMeans/codeforces-tracker" target="_blank" rel="noopener noreferrer" aria-label="Source code on GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg></a>
+      </div>
+
+      <div class="header ticks">
+        <div class="photo"><img id="photo-main" alt="Profile photo of sample_handle" width="128" height="128"></div>
+        <div class="identity">
+          <h3 class="handle" style="color:#60A5FA">sample_handle</h3>
+          <p class="where">Example University · Bogotá, Colombia</p>
+          <dl class="meta-row" style="margin:6px 0 0">
+            <div><dt>Contribution</dt><dd>+12</dd></div>
+            <div><dt>Friends of</dt><dd>48</dd></div>
+            <div><dt>Registered</dt><dd>Mar 2023</dd></div>
+            <div><dt>Last online</dt><dd>2 hours ago</dd></div>
+          </dl>
+        </div>
+        <div class="rankblock">
+          <span class="emblem" data-tier="3"></span>
+          <div style="display:grid;gap:2px">
+            <span class="rank-line" style="color:#60A5FA">Expert</span>
+            <span class="rating">1874</span>
+            <span class="max">Max <b class="num" style="color:var(--ink)">1932</b> · <span style="color:#E879F9">Candidate Master</span></span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <a class="btn btn-primary cut" href="https://codeforces.com/profile/" target="_blank" rel="noopener noreferrer">Open on Codeforces <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
+          <button class="btn cut" type="button">Compare</button>
+        </div>
+      </div>
+
+      <div class="body">
+        <aside class="side">
+          <section class="panel cut">
+            <div class="panel-head"><h3>Rating</h3></div>
+            <div class="rating-cards">
+              <div class="rating-card">
+                <span class="emblem" data-tier="3"></span>
+                <div><span class="label">Current</span><div class="big">1874</div><span class="small" style="color:#60A5FA">Expert</span></div>
+              </div>
+              <div class="rating-card">
+                <span class="emblem" data-tier="4"></span>
+                <div><span class="label">Peak</span><div class="big">1932</div><span class="small" style="color:#E879F9">Candidate Master</span></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel cut">
+            <div class="panel-head"><h3>Contests</h3><span class="aside">31 entered</span></div>
+            <dl class="dl-grid">
+              <div><dt>Rated</dt><dd>27</dd></div>
+              <div><dt>Unrated</dt><dd>4</dd></div>
+              <div><dt>Best place</dt><dd>#212</dd></div>
+              <div><dt>Average delta</dt><dd>+54</dd></div>
+              <div><dt>Biggest gain</dt><dd style="color:var(--win)">+319</dd></div>
+              <div><dt>Biggest loss</dt><dd style="color:var(--loss)">−61</dd></div>
+            </dl>
+          </section>
+
+          <section class="panel cut">
+            <div class="panel-head"><h3>Languages</h3><span class="aside">2,148 submissions</span></div>
+            <div class="langbar" id="langbar" role="img" aria-label="Languages by share of submissions"></div>
+            <ul class="lang-list" id="lang-list"></ul>
+          </section>
+
+          <section class="panel cut">
+            <div class="panel-head"><h3>Top tags</h3><span class="aside">solved problems</span></div>
+            <ul class="tags" id="tags"></ul>
+          </section>
+        </aside>
+
+        <div class="main">
+          <section class="panel cut">
+            <div class="panel-head"><h3>Rating</h3><span class="aside">27 rated contests</span></div>
+            <div class="chart" id="chart" tabindex="0" role="group" aria-label="Rating history across 27 rated contests. Use the arrow keys to read each one."></div>
+            <div class="sr-only" aria-live="polite" id="chart-live"></div>
+          </section>
+
+          <section class="panel cut">
+            <div class="panel-head"><h3>Activity</h3><span class="aside" id="hm-total"></span></div>
+            <div class="heatmap" id="heatmap"></div>
+            <div class="legend" aria-hidden="true"><span>Less</span><i class="lv" style="background:var(--heat-0)"></i><i style="background:var(--heat-1)"></i><i style="background:var(--heat-2)"></i><i style="background:var(--heat-3)"></i><i style="background:var(--heat-4)"></i><span>More</span></div>
+            <div class="statcards">
+              <div class="statcard cut">
+                <span class="label">Problems solved</span>
+                <dl class="trio"><div><dt>All time</dt><dd>486</dd></div><div><dt>Last year</dt><dd>211</dd></div><div><dt>Last 30 days</dt><dd>23</dd></div></dl>
+              </div>
+              <div class="statcard cut">
+                <span class="label">Longest streak · days</span>
+                <dl class="trio"><div><dt>All time</dt><dd>14</dd></div><div><dt>Last year</dt><dd>9</dd></div><div><dt>Last 30 days</dt><dd>4</dd></div></dl>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel cut">
+            <div class="panel-head"><h3>Solved by difficulty</h3><span class="aside">468 rated problems · 18 without a rating</span></div>
+            <div class="diff" id="diff"></div>
+          </section>
+
+          <section class="panel cut">
+            <div class="panel-head"><h3>Match history</h3></div>
+            <div class="history-tools">
+              <span class="select cut">
+                <label class="sr-only" for="filter-mock">Show contests</label>
+                <select id="filter-mock"><option>All contests (31)</option><option>Rated (27)</option><option>Unrated (4)</option></select>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="m6 9 6 6 6-6"/></svg>
+              </span>
+              <span class="aside muted num" style="font-size:14px">Showing 4 of 31</span>
+            </div>
+            <ol class="history" id="history"></ol>
+            <button class="btn cut load-more" type="button" style="--cut-fill:var(--surface)">Load more</button>
+          </section>
+        </div>
+      </div>
+
+      <div class="footer-mock">
+        <span>Not affiliated with Codeforces or Riot Games. Data from the public Codeforces API.</span>
+        <span class="num">Fetched at 14:32</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PHONE ===================== -->
+  <section class="plate" aria-labelledby="phone-title">
+    <div class="plate-head">
+      <h2 id="phone-title">At phone width</h2>
+      <p>Each history row folds into three lines: contest and delta; date, duration and ratings; then problems, failed attempts, place and result. Nothing is dropped.</p>
+    </div>
+    <div class="phones">
+      <div class="phone">
+        <div class="mini-head">
+          <div class="photo"><img id="photo-phone" alt="Profile photo of sample_handle" width="68" height="68"></div>
+          <div style="display:grid;gap:4px;min-width:0">
+            <span class="handle" style="color:#60A5FA">sample_handle</span>
+            <span class="rank-mini"><span class="emblem" data-tier="3"></span><b>1874</b><span class="label" style="color:#60A5FA">Expert</span></span>
+          </div>
+        </div>
+        <ol class="history" id="history-phone"></ol>
+      </div>
+      <p class="phone-caption">375 px frame. The sidebar cards stack above the chart in the same order.</p>
+    </div>
+  </section>
+
+  <!-- ===================== DECISIONS ===================== -->
+  <section class="plate" aria-labelledby="decisions-title">
+    <div class="plate-head">
+      <h2 id="decisions-title">Decisions behind this sample</h2>
+    </div>
+    <ul class="decisions">
+      <li><span>Red buttons use navy text (5.3:1). White on #FF4655 is 3.4:1, which fails WCAG AA for normal text.</span></li>
+      <li><span>Handles are set in Anton without uppercasing, so <b>Benq</b> and <b>jiangly</b> keep their real case. That rules out Bebas Neue, which has no lowercase.</span></li>
+      <li><span>Anton has no tabular figures (checked live above), so it is used only for standalone numbers: the current rating, deltas, stat values. Numbers that line up in columns use Barlow or Barlow Condensed, which both have them.</span></li>
+      <li><span>Cut corners are painted on background layers, not on the element, so keyboard focus outlines are never clipped.</span></li>
+      <li><span>Activity uses one teal ramp. Red stays reserved for actions and rating losses, so a busy month never reads as a bad one.</span></li>
+      <li><span>The rating line is bone, the one colour that stays apart from every rank band behind it. Chart text uses text colours, never data colours.</span></li>
+      <li><span>Every row says its result three ways: tint, the signed delta, and a Rated / Unrated / Pending label with an icon.</span></li>
+      <li><span>The patterns at the right of each row encode the contest type: dense hatching for Div. 1, then wider for Div. 2 and 3, dots for Div. 4, a grid for Educational and chevrons for Global rounds.</span></li>
+    </ul>
+  </section>
+</main>
+
+<script src="rank-emblems.js"></script>
+<script>
+(function () {
+  'use strict'
+
+  const RANKS = [
+    { name: 'Newbie', min: -Infinity, color: '#A3A3A3', tier: 0 },
+    { name: 'Pupil', min: 1200, color: '#4ADE80', tier: 1 },
+    { name: 'Specialist', min: 1400, color: '#2DD4BF', tier: 2 },
+    { name: 'Expert', min: 1600, color: '#60A5FA', tier: 3 },
+    { name: 'Candidate Master', min: 1900, color: '#E879F9', tier: 4 },
+    { name: 'Master', min: 2100, color: '#FB923C', tier: 5 },
+    { name: 'International Master', min: 2300, color: '#FB923C', tier: 6 },
+    { name: 'Grandmaster', min: 2400, color: '#F87171', tier: 7 },
+    { name: 'International Grandmaster', min: 2600, color: '#F87171', tier: 8 },
+    { name: 'Legendary Grandmaster', min: 3000, color: '#F87171', tier: 9 },
+  ]
+  const UNRATED = { name: 'Unrated', color: '#8B97A3', tier: -1 }
+  const rankFor = (r) => RANKS.filter((k) => r >= k.min).pop() || RANKS[0]
+  const MINUS = '−'
+  const fmtDelta = (d) => (d > 0 ? '+' + d : d < 0 ? MINUS + -d : '0')
+  const fmtNum = (n) => n.toLocaleString('en-US')
+  const fmtDate = (t) => new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+
+  // ---------------- contrast (WCAG) ----------------
+  const lin = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
+  const lum = (hex) => {
+    const [r, g, b] = [1, 3, 5].map((i) => lin(parseInt(hex.slice(i, i + 2), 16) / 255))
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+  }
+  const contrast = (a, b) => {
+    const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p)
+    return (x + 0.05) / (y + 0.05)
+  }
+  const ratio = (a, b) => contrast(a, b).toFixed(1) + ':1'
+
+  // ---------------- emblems ----------------
+  const pt = (x, y) => x.toFixed(2) + ',' + y.toFixed(2)
+  function ring(n, r, cx, cy, rot) {
+    return Array.from({ length: n }, (_, i) => {
+      const a = ((Math.PI * 2) / n) * i - Math.PI / 2 + (rot || 0)
+      return pt(cx + r * Math.cos(a), cy + r * Math.sin(a))
+    }).join(' ')
+  }
+  function star(points, outer, inner, cx, cy) {
+    return Array.from({ length: points * 2 }, (_, i) => {
+      const a = (Math.PI / points) * i - Math.PI / 2
+      const r = i % 2 ? inner : outer
+      return pt(cx + r * Math.cos(a), cy + r * Math.sin(a))
+    }).join(' ')
+  }
+  const CX = 32
+  const CY = 30
+  const SHIELD = '22,6 42,6 52,16 52,38 32,58 12,38 12,16'
+  const SHIELD_IN = '24,10.5 40,10.5 47.5,18 47.5,36 32,52 16.5,36 16.5,18'
+  const OCT = ring(8, 14.5, CX, CY, Math.PI / 8)
+  const CROWN = 'M20 38 L18.5 21 L26 28 L32 17 L38 28 L45.5 21 L44 38 Z'
+
+  function glyph(tier) {
+    if (tier < 0) return '<path d="M25 30 H39" stroke="currentColor" stroke-width="3.5" stroke-linecap="square"/>'
+    if (tier <= 2) {
+      const n = tier + 1
+      let out = '<g fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="butt" stroke-linejoin="miter">'
+      for (let i = 0; i < n; i++) {
+        const y = CY + 1 - (7 * (n - 1)) / 2 + 7 * i
+        out += '<path d="M23 ' + (y + 4.5) + ' L32 ' + (y - 4) + ' L41 ' + (y + 4.5) + '"/>'
+      }
+      return out + '</g>'
+    }
+    if (tier === 3) {
+      return (
+        '<polygon points="32,15 43,29 32,45 21,29" fill="currentColor"/>' +
+        '<path d="M21 29 H43 M27 22 L32 29 L37 22 M32 29 V45" fill="none" stroke="#0F1923" stroke-opacity="0.5" stroke-width="1.2"/>'
+      )
+    }
+    if (tier === 4) return '<polygon points="' + star(4, 14, 4.2, CX, CY) + '" fill="currentColor"/>'
+    if (tier <= 6) return '<polygon points="' + star(5, 14, 5.6, CX, CY + 1) + '" fill="currentColor"/>'
+    return '<g fill="currentColor"><path d="' + CROWN + '"/><rect x="20" y="40" width="24" height="3"/></g>'
+  }
+
+  // The emblems come from the approved set in rank-emblems.js; the shield drawing above is the
+  // first proposal, kept only for history.
+  function emblemSVG(rank, size, label) {
+    return window.CFRankEmblems.emblemSVG(rank.tier, { size, title: label })
+  }
+
+  document.querySelectorAll('.emblem[data-tier]').forEach((el) => {
+    const t = Number(el.dataset.tier)
+    el.innerHTML = emblemSVG(t < 0 ? UNRATED : RANKS[t], 64)
+  })
+
+  const emblemsEl = document.getElementById('emblems')
+  ;[...RANKS, UNRATED].forEach((rank) => {
+    const card = document.createElement('div')
+    card.className = 'emblem-card cut'
+    const from = rank.tier < 0 ? 'No rated contest yet' : rank.tier === 0 ? 'Below 1200' : 'From ' + rank.min
+    card.innerHTML =
+      '<span class="em-big">' + emblemSVG(rank, 76) + '</span>' +
+      '<span class="rank-name" style="color:' + rank.color + '">' + rank.name + '</span>' +
+      '<span class="from num">' + from + '</span>' +
+      '<span class="em-small" aria-hidden="true">' + emblemSVG(rank, 44) + emblemSVG(rank, 28) + '</span>'
+    emblemsEl.appendChild(card)
+  })
+
+  // ---------------- palette ----------------
+  const css = getComputedStyle(document.documentElement)
+  const tok = (name) => css.getPropertyValue(name).trim().toUpperCase()
+  const BG = tok('--bg')
+  const SURFACE = tok('--surface')
+  const SURFACE2 = tok('--surface-2')
+  const swatches = [
+    ['bg', '--bg', 'Page background', null],
+    ['surface', '--surface', 'Panels and rows', null],
+    ['surface-2', '--surface-2', 'Inputs, stat cards, hover', null],
+    ['ink', '--ink', 'Main text', [[BG, 'bg'], [SURFACE2, 'surface-2']]],
+    ['ink-muted', '--ink-muted', 'Secondary text', [[BG, 'bg'], [SURFACE2, 'surface-2']]],
+    ['accent', '--accent', 'Actions, accent bars, losses', [[BG, 'bg'], [SURFACE, 'surface']]],
+    ['on-accent', '--on-accent', 'Text on red buttons', [[tok('--accent'), 'red']]],
+    ['win', '--win', 'Rating gained', [[BG, 'bg'], [SURFACE, 'surface']]],
+    ['neutral', '--neutral', 'No change, unrated, pending', [[BG, 'bg'], [SURFACE2, 'surface-2']]],
+  ]
+  const swEl = document.getElementById('swatches')
+  swatches.forEach(([name, varName, role, pairs]) => {
+    const hex = tok(varName)
+    const ratios = pairs ? pairs.map(([b, bn]) => '<b>' + ratio(hex, b) + '</b> on ' + bn).join(' · ') : 'Surface'
+    const d = document.createElement('div')
+    d.className = 'swatch cut'
+    d.innerHTML =
+      '<div class="chip-color" style="background:' + hex + '"></div>' +
+      '<span class="name">' + name + '</span>' +
+      '<span class="meta"><span class="num">' + hex + '</span> · ' + role + '<br>' + ratios + '</span>'
+    swEl.appendChild(d)
+  })
+
+  const rankSw = document.getElementById('rank-swatches')
+  const groups = {}
+  RANKS.forEach((r) => (groups[r.color] = groups[r.color] || []).push(r.name))
+  Object.entries(groups).forEach(([hex, names]) => {
+    const d = document.createElement('div')
+    d.className = 'swatch cut'
+    d.innerHTML =
+      '<div class="chip-color" style="background:' + hex + '"></div>' +
+      '<span class="name" style="color:' + hex + '">' + names.join(' · ') + '</span>' +
+      '<span class="meta"><span class="num">' + hex + '</span><br><b>' + ratio(hex, SURFACE) + '</b> on surface · <b>' + ratio(hex, SURFACE2) + '</b> on surface-2</span>'
+    rankSw.appendChild(d)
+  })
+
+  const heat = ['--heat-0', '--heat-1', '--heat-2', '--heat-3', '--heat-4']
+  document.getElementById('heat-ramp').innerHTML = heat
+    .map((v, i) => '<span style="background:var(' + v + ')">' + ['0', '1', '2–3', '4–6', '7+'][i] + '</span>')
+    .join('')
+  const LANGS = ['--lang-1', '--lang-2', '--lang-3', '--lang-4', '--lang-5', '--lang-6', '--lang-other']
+  document.getElementById('lang-ramp').innerHTML = LANGS.map((v, i) => '<span style="background:var(' + v + ')">' + (i < 6 ? i + 1 : '·') + '</span>').join('')
+
+  // ---------------- tabular figures check ----------------
+  const numCols = document.getElementById('num-columns')
+  numCols.innerHTML = [['var(--font-body)', 'Barlow'], ['var(--font-label)', 'Condensed']]
+    .map(([f, n]) => '<div style="font-family:' + f + ';font-variant-numeric:tabular-nums"><span class="label" style="font-size:11px">' + n + '</span><span>1,111</span><span>8,808</span><span>+1,234</span><span>' + MINUS + '61</span></div>')
+    .join('')
+  function tnumCheck(family, elId, name) {
+    const probe = (text) => {
+      const s = document.createElement('span')
+      s.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;font-size:40px;font-variant-numeric:tabular-nums;font-family:' + family
+      s.textContent = text
+      document.body.appendChild(s)
+      const w = s.getBoundingClientRect().width
+      s.remove()
+      return w
+    }
+    const a = probe('1111111111')
+    const b = probe('0000000000')
+    const el = document.getElementById(elId)
+    const ok = Math.abs(a - b) < 0.5
+    el.classList.add(ok ? 'ok' : 'bad')
+    el.lastElementChild.textContent = name + (ok ? ': tabular figures work' : ': no tabular figures (1 and 0 differ in width)')
+  }
+  const runChecks = () => {
+    tnumCheck('"Barlow"', 'tnum-barlow', 'Barlow')
+    tnumCheck('"Barlow Condensed"', 'tnum-cond', 'Barlow Condensed')
+    tnumCheck('"Anton"', 'tnum-anton', 'Anton')
+  }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(runChecks)
+  else runChecks()
+
+  // ---------------- tags ----------------
+  const ICON = {
+    up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="m3 17 6-6 4 4 8-8M15 7h6v6"/></svg>',
+    down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="m3 7 6 6 4-4 8 8M15 17h6v-6"/></svg>',
+    flat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="M5 12h14"/></svg>',
+    wait: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="miter"><path d="M6 3h12M6 21h12M7 3v4l5 5 5-5V3M7 21v-4l5-5 5 5v4"/></svg>',
+    clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    out: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"><path d="M7 17 17 7M8 7h9v9"/></svg>',
+  }
+  const OUTCOME = {
+    gain: { label: 'Rated', icon: ICON.up },
+    loss: { label: 'Rated', icon: ICON.down },
+    even: { label: 'Rated', icon: ICON.flat },
+    unrated: { label: 'Unrated', icon: ICON.flat },
+    pending: { label: 'Pending', icon: ICON.wait },
+  }
+  document.getElementById('tag-samples').innerHTML = ['gain', 'loss', 'unrated', 'pending']
+    .map((o) => '<span class="tag" style="color:' + (o === 'gain' ? 'var(--win)' : o === 'loss' ? 'var(--loss)' : 'var(--ink-muted)') + '">' + OUTCOME[o].icon + OUTCOME[o].label + '</span>')
+    .join('')
+
+  // ---------------- photos ----------------
+  const PHOTO =
+    'data:image/svg+xml,' +
+    encodeURIComponent(
+      "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect width='120' height='120' fill='#1D2C3A'/>" +
+        "<path d='M0 0H120V120H0Z' fill='none'/><g fill='#33475A'><path d='M60 24 L79 34 L81 57 L69 72 L51 72 L39 57 L41 34 Z'/>" +
+        "<path d='M18 120 L26 93 L50 80 L60 90 L70 80 L94 93 L102 120 Z'/></g>" +
+        "<path d='M0 104 L120 64' stroke='#ECE8E1' stroke-opacity='0.05' stroke-width='14'/></svg>",
+    )
+  document.getElementById('photo-main').src = PHOTO
+  document.getElementById('photo-phone').src = PHOTO
+
+  // ---------------- languages & tags ----------------
+  const langs = [
+    ['C++', 71.4],
+    ['Python', 17.8],
+    ['Java', 5.6],
+    ['Kotlin', 2.9],
+    ['Other', 2.3],
+  ]
+  const langColor = (i, name) => (name === 'Other' ? 'var(--lang-other)' : 'var(--lang-' + (i + 1) + ')')
+  document.getElementById('langbar').innerHTML = langs
+    .map(([n, p], i) => '<span title="' + n + ' ' + p + '%" style="width:' + p + '%;background:' + langColor(i, n) + '"></span>')
+    .join('')
+  document.getElementById('lang-list').innerHTML = langs
+    .map(([n, p], i) => '<li><span class="sw" style="background:' + langColor(i, n) + '"></span><span>' + n + '</span><span class="pct">' + p.toFixed(1) + '%</span></li>')
+    .join('')
+  const tags = [
+    ['greedy', 212],
+    ['math', 187],
+    ['implementation', 160],
+    ['constructive algorithms', 98],
+    ['brute force', 91],
+    ['dp', 74],
+    ['sortings', 69],
+    ['binary search', 52],
+  ]
+  document.getElementById('tags').innerHTML = tags
+    .map(([n, c]) => '<li><span>' + n + '</span><span class="n">' + c + '</span><span class="bar"><span style="width:' + (c / tags[0][1]) * 100 + '%"></span></span></li>')
+    .join('')
+
+  // ---------------- width observer ----------------
+  function onWidth(el, draw) {
+    let last = -1
+    const ro = new ResizeObserver(([e]) => {
+      const w = Math.floor(e.contentRect.width)
+      if (w !== last && w > 0) {
+        last = w
+        draw(w)
+      }
+    })
+    ro.observe(el)
+  }
+
+  // ---------------- rating chart ----------------
+  const DAY = 86400000
+  const END = new Date(2026, 9, 12).getTime()
+  const ratings = [412, 731, 958, 1104, 1189, 1236, 1198, 1302, 1355, 1421, 1388, 1467, 1512, 1489, 1563, 1608, 1587, 1642, 1701, 1668, 1745, 1812, 1932, 1871, 1845, 1812, 1874]
+  const places = [8120, 5410, 4311, 3872, 3410, 2988, 4102, 2210, 2470, 1904, 3305, 1588, 1402, 2690, 1120, 940, 1876, 760, 512, 1660, 498, 380, 212, 1530, 1388, 4210, 1631]
+  const history = ratings.map((rating, i) => {
+    const time = END - (ratings.length - 1 - i) * 27 * DAY
+    const old = i ? ratings[i - 1] : 0
+    const div = i % 4 === 1 ? 'Educational Codeforces Round (Rated for Div. 2)' : i % 5 === 3 ? 'Codeforces Round (Div. 3)' : 'Codeforces Round (Div. 2)'
+    return { time, rating, delta: rating - old, place: places[i], name: div }
+  })
+
+  function monthTicks(from, to, plotWidth) {
+    const ticks = []
+    const c = new Date(from)
+    c.setHours(0, 0, 0, 0)
+    c.setDate(1)
+    c.setMonth(c.getMonth() + 1)
+    for (; c.getTime() <= to; c.setMonth(c.getMonth() + 1)) ticks.push(c.getTime())
+    const every = Math.max(1, Math.ceil((ticks.length * 64) / plotWidth))
+    return ticks
+      .filter((_, i) => i % every === 0)
+      .map((time, i) => {
+        const d = new Date(time)
+        const m = d.toLocaleDateString('en-US', { month: 'short' })
+        return { time, label: i === 0 || d.getMonth() === 0 ? m + ' ' + d.getFullYear() : m }
+      })
+  }
+  function ratingTicks(lo, hi, y) {
+    const thresholds = RANKS.slice(1).map((r) => r.min).filter((v) => v > lo && v < hi)
+    const step = hi - lo > 1600 ? 400 : 200
+    const ticks = thresholds.slice()
+    for (let v = Math.ceil(lo / step) * step; v < hi; v += step) {
+      if (ticks.every((t) => Math.abs(y(t) - y(v)) >= 18)) ticks.push(v)
+    }
+    return ticks.sort((a, b) => a - b)
+  }
+
+  const chartEl = document.getElementById('chart')
+  const live = document.getElementById('chart-live')
+  let active = 22
+  let drawChart = () => {}
+  const H = 240
+  const M = { top: 14, right: 18, bottom: 28, left: 44 }
+
+  drawChart = function (width) {
+    const pw = Math.max(0, width - M.left - M.right)
+    const ph = H - M.top - M.bottom
+    const first = history[0].time
+    const last = history[history.length - 1].time
+    const span = Math.max(last - first, 60 * DAY)
+    const mid = (first + last) / 2
+    const x0 = mid - span * 0.54
+    const x1 = mid + span * 0.54
+    const values = history.map((p) => p.rating)
+    const top = Math.max(...values)
+    const next = (RANKS.find((r) => r.min > top) || { min: top }).min
+    const lo = Math.max(0, Math.floor((Math.min(...values) - 100) / 100) * 100)
+    const hi = Math.ceil(Math.max(top + 150, next + 100) / 100) * 100
+    const x = (t) => M.left + ((t - x0) / (x1 - x0)) * pw
+    const y = (r) => M.top + ((hi - r) / (hi - lo)) * ph
+
+    let s = '<svg width="' + width + '" height="' + H + '" aria-hidden="true">'
+    RANKS.forEach((rank, i) => {
+      const from = Math.max(lo, rank.min)
+      const to = Math.min(hi, RANKS[i + 1] ? RANKS[i + 1].min : Infinity)
+      if (to <= from) return
+      const bt = y(to)
+      const bh = y(from) - y(to)
+      s += '<rect x="' + M.left + '" y="' + bt + '" width="' + pw + '" height="' + bh + '" fill="' + rank.color + '" fill-opacity="0.11"/>'
+      if (bh >= 16) s += '<text x="' + (M.left + 8) + '" y="' + (bt + 13) + '" style="fill:var(--ink-muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:600">' + rank.name + '</text>'
+    })
+    ratingTicks(lo, hi, y).forEach((t) => {
+      s += '<line x1="' + M.left + '" x2="' + (M.left + pw) + '" y1="' + y(t) + '" y2="' + y(t) + '" stroke="#ECE8E1" stroke-opacity="0.07"/>'
+      s += '<text x="' + (M.left - 8) + '" y="' + y(t) + '" dy="0.32em" text-anchor="end" style="fill:var(--ink-muted);font-size:12px;font-variant-numeric:tabular-nums">' + t + '</text>'
+    })
+    monthTicks(x0, x1, pw).forEach((t) => {
+      s += '<text x="' + x(t.time) + '" y="' + (H - 8) + '" text-anchor="middle" style="fill:var(--ink-muted);font-size:12px">' + t.label + '</text>'
+    })
+    const p = active === null ? null : history[active]
+    if (p) s += '<line x1="' + x(p.time) + '" x2="' + x(p.time) + '" y1="' + M.top + '" y2="' + (M.top + ph) + '" stroke="#ECE8E1" stroke-opacity="0.35" stroke-dasharray="3 3"/>'
+    s += '<path d="' + history.map((q, i) => (i ? 'L' : 'M') + x(q.time) + ' ' + y(q.rating)).join(' ') + '" fill="none" stroke="#ECE8E1" stroke-width="2" stroke-linejoin="miter"/>'
+    const small = history.length >= 300
+    history.forEach((q, i) => {
+      const r = i === active ? 5.5 : small ? 2 : 3.5
+      s += '<rect x="' + (x(q.time) - r) + '" y="' + (y(q.rating) - r) + '" width="' + r * 2 + '" height="' + r * 2 + '" transform="rotate(45 ' + x(q.time) + ' ' + y(q.rating) + ')" fill="' + (i === active ? rankFor(q.rating).color : '#ECE8E1') + '" stroke="#16232F" stroke-width="2"/>'
+    })
+    const lp = history[history.length - 1]
+    if (!p || active !== history.length - 1) {
+      s += '<text x="' + (x(lp.time) - 8) + '" y="' + (y(lp.rating) - 12) + '" text-anchor="end" style="fill:var(--ink);font-family:Anton,Impact,sans-serif;font-size:18px;font-variant-numeric:tabular-nums' + (p ? ';opacity:0' : '') + '">' + lp.rating + '</text>'
+    }
+    s += '<rect x="' + M.left + '" y="' + M.top + '" width="' + pw + '" height="' + ph + '" fill="transparent" id="chart-hit"/>'
+    s += '</svg>'
+
+    let tip = ''
+    if (p) {
+      const px = x(p.time)
+      const TW = 240
+      const left = px + 14 + TW <= width ? px + 14 : Math.max(0, px - 14 - TW)
+      const rk = rankFor(p.rating)
+      const dColor = p.delta > 0 ? 'var(--win)' : p.delta < 0 ? 'var(--loss)' : 'var(--ink-muted)'
+      tip =
+        '<div class="tooltip cut" style="left:' + left + 'px;top:' + M.top + 'px" aria-hidden="true">' +
+        '<div class="tt-top"><span class="tt-rating">' + p.rating + '</span><span class="tt-delta" style="color:' + dColor + '">' + fmtDelta(p.delta) + '</span><span class="tt-rank" style="color:' + rk.color + '">' + rk.name + '</span></div>' +
+        '<span class="tt-name">' + p.name + '</span>' +
+        '<span class="tt-meta">' + fmtDate(p.time) + ' · Place #' + fmtNum(p.place) + '</span></div>'
+      live.textContent = p.name + ': ' + p.rating + ' (' + fmtDelta(p.delta) + '), ' + fmtDate(p.time)
+    }
+    chartEl.innerHTML = s + tip
+
+    const hit = document.getElementById('chart-hit')
+    hit.addEventListener('pointermove', (ev) => {
+      const bounds = chartEl.getBoundingClientRect()
+      const px = ev.clientX - bounds.left
+      let best = 0
+      history.forEach((q, i) => {
+        if (Math.abs(x(q.time) - px) < Math.abs(x(history[best].time) - px)) best = i
+      })
+      if (best !== active) {
+        active = best
+        drawChart(width)
+      }
+    })
+    hit.addEventListener('pointerleave', () => {
+      active = null
+      drawChart(width)
+    })
+  }
+  let chartWidth = 0
+  onWidth(chartEl, (w) => {
+    chartWidth = w
+    drawChart(w)
+  })
+  chartEl.addEventListener('keydown', (ev) => {
+    const cur = active === null ? history.length - 1 : active
+    const nxt = ev.key === 'ArrowLeft' ? cur - 1 : ev.key === 'ArrowRight' ? cur + 1 : ev.key === 'Home' ? 0 : ev.key === 'End' ? history.length - 1 : null
+    if (nxt === null) return
+    ev.preventDefault()
+    active = Math.min(history.length - 1, Math.max(0, nxt))
+    drawChart(chartWidth)
+  })
+
+  // ---------------- heatmap ----------------
+  function mulberry32(a) {
+    return function () {
+      a |= 0
+      a = (a + 0x6d2b79f5) | 0
+      let t = Math.imul(a ^ (a >>> 15), 1 | a)
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+    }
+  }
+  const rand = mulberry32(1874)
+  const TODAY = new Date(2026, 9, 15)
+  const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n)
+  const key = (d) => d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()
+  const perDay = new Map()
+  for (let i = 0; i < 380; i++) {
+    const d = addDays(TODAY, -i)
+    const busy = d.getDay() === 0 || d.getDay() === 6 ? 0.62 : 0.4
+    const season = 0.6 + 0.4 * Math.sin(i / 40)
+    if (rand() < busy * season) perDay.set(key(d), Math.max(1, Math.round(rand() ** 2.2 * 11 * season)))
+  }
+  const levelFor = (c) => (c === 0 ? 0 : c === 1 ? 1 : c <= 3 ? 2 : c <= 6 ? 3 : 4)
+  const CELL = 11
+  const GAP = 3
+  const STEP = CELL + GAP
+  const LW = 30
+  const TOP = 18
+  const hmEl = document.getElementById('heatmap')
+  let yearTotal = 0
+  const yearAgo = addDays(TODAY, -365)
+  perDay.forEach((v, k) => {
+    const [yy, mm, dd] = k.split('-').map(Number)
+    if (new Date(yy, mm - 1, dd) > yearAgo) yearTotal += v
+  })
+  document.getElementById('hm-total').textContent = fmtNum(yearTotal) + ' submissions in the last year'
+
+  onWidth(hmEl, (width) => {
+    const weeks = Math.max(12, Math.min(53, Math.floor((width - LW + GAP) / STEP)))
+    const start = addDays(TODAY, -((TODAY.getDay() + 6) % 7) - (weeks - 1) * 7)
+    const cells = []
+    for (let w = 0; w < weeks; w++) {
+      for (let wd = 0; wd < 7; wd++) {
+        const date = addDays(start, w * 7 + wd)
+        if (date > TODAY) break
+        cells.push({ w, wd, date, count: perDay.get(key(date)) || 0 })
+      }
+    }
+    const svgW = LW + weeks * STEP - GAP
+    const svgH = TOP + 7 * STEP - GAP
+    let s = '<svg width="' + svgW + '" height="' + svgH + '" role="img" aria-label="Daily submissions over the last ' + weeks + ' weeks">'
+    for (let w = 1; w < weeks - 2; w++) {
+      const mon = addDays(start, w * 7)
+      if (mon.getMonth() !== addDays(start, (w - 1) * 7).getMonth()) {
+        s += '<text x="' + (LW + w * STEP) + '" y="11">' + mon.toLocaleDateString('en-US', { month: 'short' }) + '</text>'
+      }
+    }
+    ;['Mon', '', 'Wed', '', 'Fri', '', ''].forEach((l, wd) => {
+      if (l) s += '<text x="0" y="' + (TOP + wd * STEP + CELL - 2) + '">' + l + '</text>'
+    })
+    cells.forEach((c) => {
+      s += '<rect class="h' + levelFor(c.count) + '" x="' + (LW + c.w * STEP) + '" y="' + (TOP + c.wd * STEP) + '" width="' + CELL + '" height="' + CELL + '" data-i="' + cells.indexOf(c) + '"/>'
+    })
+    s += '</svg><div class="hm-tip cut" hidden></div>'
+    hmEl.innerHTML = s
+    const tipEl = hmEl.querySelector('.hm-tip')
+    hmEl.querySelector('svg').addEventListener('pointermove', (ev) => {
+      const t = ev.target
+      if (!t.dataset || t.dataset.i === undefined) {
+        tipEl.hidden = true
+        return
+      }
+      const c = cells[Number(t.dataset.i)]
+      tipEl.innerHTML = '<b>' + (c.count === 0 ? 'No' : c.count) + ' submission' + (c.count === 1 ? '' : 's') + '</b><span>' + c.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) + '</span>'
+      const cx = Math.min(Math.max(LW + c.w * STEP + CELL / 2, 90), width - 90)
+      tipEl.style.left = cx + 'px'
+      tipEl.style.top = TOP + c.wd * STEP - 6 + 'px'
+      tipEl.hidden = false
+    })
+    hmEl.querySelector('svg').addEventListener('pointerleave', () => (tipEl.hidden = true))
+  })
+
+  // ---------------- difficulty ----------------
+  const diff = [[800, 61], [900, 48], [1000, 52], [1100, 44], [1200, 47], [1300, 39], [1400, 41], [1500, 34], [1600, 30], [1700, 25], [1800, 22], [1900, 14], [2000, 9], [2100, 5], [2200, 2]]
+  const diffEl = document.getElementById('diff')
+  onWidth(diffEl, (width) => {
+    const h = 170
+    const mt = 20
+    const mb = 24
+    const n = diff.length
+    const gap = 3
+    const bw = (width - gap * (n - 1)) / n
+    const max = Math.max(...diff.map((d) => d[1]))
+    let s = '<svg width="' + width + '" height="' + h + '" role="img" aria-label="Solved problems by difficulty, 800 to 2200">'
+    s += '<line x1="0" x2="' + width + '" y1="' + (h - mb) + '" y2="' + (h - mb) + '" stroke="#ECE8E1" stroke-opacity="0.12"/>'
+    diff.forEach(([rating, count], i) => {
+      const bh = ((h - mt - mb) * count) / max
+      const x = i * (bw + gap)
+      const y = h - mb - bh
+      const c = Math.min(4, bw / 3)
+      const color = rankFor(rating).color
+      s += '<path d="M' + x + ' ' + (h - mb) + 'V' + y + 'H' + (x + bw - c) + 'L' + (x + bw) + ' ' + (y + c) + 'V' + (h - mb) + 'Z" fill="' + color + '" fill-opacity="0.85"><title>' + rating + ': ' + count + ' solved</title></path>'
+      if (rating % 200 === 0) s += '<text x="' + (x + bw / 2) + '" y="' + (h - 7) + '" text-anchor="middle" style="font-variant-numeric:tabular-nums">' + rating + '</text>'
+      if (count === max) s += '<text x="' + (x + bw / 2) + '" y="' + (y - 6) + '" text-anchor="middle" style="fill:var(--ink);font-size:12px;font-weight:700">' + count + '</text>'
+    })
+    diffEl.innerHTML = s + '</svg>'
+  })
+
+  // ---------------- match history ----------------
+  const contests = [
+    { outcome: 'pending', date: new Date(2026, 9, 14), dur: '2h 30m', name: 'Codeforces Global Round', type: 'global', before: 1874, after: null, problems: [['A', 1, 0], ['B', 1, 1], ['C', 1, 0], ['D', 0, 1], ['E', 0, 0]] },
+    { outcome: 'gain', date: new Date(2026, 9, 12), dur: '2h 15m', name: 'Codeforces Round (Div. 2)', type: 'div2', before: 1812, after: 1874, place: 1631, problems: [['A', 1, 0], ['B', 1, 0], ['C', 1, 1], ['D', 0, 0]] },
+    { outcome: 'loss', date: new Date(2026, 9, 3), dur: '2h', name: 'Educational Codeforces Round (Rated for Div. 2)', type: 'edu', before: 1845, after: 1812, place: 4210, problems: [['A', 1, 0], ['B', 1, 2], ['C', 0, 1]] },
+    { outcome: 'unrated', date: new Date(2026, 8, 27), dur: '2h 15m', name: 'Codeforces Round (Div. 3)', type: 'div3', before: 1845, after: 1845, problems: [['A', 1, 0], ['B', 1, 0], ['C', 1, 0], ['D', 1, 1], ['E', 1, 0], ['F', 0, 2]] },
+  ]
+  function describe([idx, solved, failed]) {
+    const tries = failed + ' failed attempt' + (failed === 1 ? '' : 's')
+    return idx + '. ' + (solved ? (failed ? 'Solved after ' + tries : 'Solved first try') : 'Not solved, ' + tries)
+  }
+  function rowHTML(c) {
+    const o = OUTCOME[c.outcome]
+    const failed = c.problems.reduce((t, p) => t + p[2], 0)
+    const startRank = c.before > 0 ? rankFor(c.before) : UNRATED
+    const delta = c.outcome === 'pending' ? '—' : fmtDelta(c.after - c.before)
+    const tagColor = c.outcome === 'gain' ? 'var(--win)' : c.outcome === 'loss' ? 'var(--loss)' : 'var(--ink-muted)'
+    const tag = '<span class="tag" style="color:' + tagColor + '">' + o.icon + o.label + '</span>'
+    const chips = c.problems
+      .map((p) => '<span class="pchip ' + (p[1] ? 'solved' : 'missed') + '" title="' + describe(p) + '">' + p[0] + '<span class="sr-only">' + (p[1] ? ' solved' : ' not solved') + '</span></span>')
+      .join('')
+    const after = c.after === null ? '<span class="muted">?</span>' : '<span style="color:' + rankFor(c.after).color + '">' + c.after + '</span>'
+    return (
+      '<li class="row ' + (c.outcome === 'gain' ? 'gain' : c.outcome === 'loss' ? 'loss' : '') + '">' +
+      '<svg class="r-pattern" aria-hidden="true"><rect width="100%" height="100%" fill="url(#p-' + c.type + ')"/></svg>' +
+      '<div class="r-date">' + fmtDate(c.date) + '<span class="sep">·</span><span class="dur">' + ICON.clock + c.dur + '</span></div>' +
+      '<div class="r-emblem" title="' + startRank.name + ' going in">' + emblemSVG(startRank, 44, startRank.name + ' rank emblem, held going in') + '</div>' +
+      '<a class="r-name" href="https://codeforces.com/contests" target="_blank" rel="noopener noreferrer" title="' + c.name + '">' + c.name + '</a>' +
+      '<div class="r-detail"><span class="chips">' + chips + '</span><span>' + (failed === 0 ? 'No failed attempts' : failed + ' failed attempt' + (failed === 1 ? '' : 's')) + '</span>' +
+      (c.place ? '<span>Place #' + fmtNum(c.place) + '</span>' : '') + '<span class="mtag">' + tag + '</span></div>' +
+      '<div class="r-ratings"><span style="color:' + rankFor(c.before).color + '">' + c.before + '</span><span class="arrow"> → </span>' + after + '<small class="label" style="font-size:11px">Rating</small></div>' +
+      '<div class="r-delta"><span class="d">' + delta + '</span>' + tag + '</div>' +
+      '<a class="r-link" href="https://codeforces.com/contests" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true">' + ICON.out + '</a>' +
+      '</li>'
+    )
+  }
+  document.getElementById('history').innerHTML = contests.map(rowHTML).join('')
+  document.getElementById('history-phone').innerHTML = contests.slice(0, 3).map(rowHTML).join('')
+
+  // ---------------- search validation ----------------
+  const form = document.getElementById('search-form')
+  const input = document.getElementById('search-sample')
+  const hint = document.getElementById('search-hint')
+  const VALID = /^[A-Za-z0-9_.-]{3,24}$/
+  const check = () => {
+    const v = input.value.trim()
+    const ok = v === '' || VALID.test(v)
+    hint.classList.toggle('error', !ok)
+    hint.textContent = ok ? '3–24 characters: letters, digits, _ . or -' : 'Handles use 3–24 letters, digits, _ . or -. Check "' + v + '".'
+    input.setAttribute('aria-invalid', String(!ok))
+    return ok
+  }
+  input.addEventListener('input', check)
+  form.addEventListener('submit', (e) => {
+    e.preventDefault()
+    if (check()) hint.textContent = 'Would open ?handle=' + input.value.trim()
+  })
+})()
+</script>
+
+</html>
