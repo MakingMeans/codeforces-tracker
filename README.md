@@ -18,7 +18,8 @@ match history, styled like a game tracker. Think tracker.gg for Valorant, but fo
 ## Features
 
 - **Search any handle.** The handle is checked in the browser (3–24 letters, digits, `_`, `.` or `-`)
-  before Codeforces is asked. Recent searches are remembered on your device and can be removed one by one.
+  before Codeforces is asked. A handle that does not exist can be corrected right where it failed. Recent
+  searches are remembered on your device and can be removed one by one.
 - **Profile header.** Photo, handle in its rank colour, organisation and location, rank emblem, current
   and peak rating, contribution, friends, registration date and last visit, plus a link to the profile
   on Codeforces.

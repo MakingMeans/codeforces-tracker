@@ -4,12 +4,14 @@ import { CompareChart, type Series } from '../components/compare/compare-chart'
 import { HeadToHead } from '../components/compare/head-to-head'
 import { StatRows } from '../components/compare/stat-rows'
 import { VsHeader } from '../components/compare/vs-header'
+import { SearchBox } from '../components/search/search-box'
 import { Button } from '../components/ui/button'
 import { Panel } from '../components/ui/panel'
 import { ScanLoader } from '../components/ui/scan-loader'
 import { compareStats, headToHead } from '../lib/codeforces/compare'
 import { plural } from '../lib/codeforces/format'
 import type { Profile } from '../lib/codeforces/profile'
+import type { Route } from '../lib/route'
 import { useProfile, type ProfileState } from '../lib/use-profile'
 
 /** Series colours: the first two language slots (--color-lang-1 and -2), validated as a colour-blind-safe pair. */
@@ -20,16 +22,29 @@ function useComplete({ user, details, fetchedAt }: ProfileState): Profile | null
   return useMemo(() => (user && details && fetchedAt ? { user, details, fetchedAt } : null), [user, details, fetchedAt])
 }
 
-function SideStatus({ state, handle, onRetry }: { state: ProfileState; handle: string; onRetry: () => void }) {
+interface SideStatusProps {
+  state: ProfileState
+  handle: string
+  onRetry: () => void
+  /** Where a corrected handle leads, keeping the other side. */
+  to: (handle: string) => Partial<Route>
+  other: string
+}
+
+function SideStatus({ state, handle, onRetry, to, other }: SideStatusProps) {
   if (state.problem) {
+    const notFound = state.problem.kind === 'not-found'
     return (
       <div className="grid justify-items-start gap-2 text-sm">
         <p>
           <span className="font-semibold text-ink">
-            {state.problem.kind === 'not-found' ? `No account called “${handle}”` : state.problem.title}.
+            {notFound ? `No account called “${handle}”` : state.problem.title}.
           </span>{' '}
-          {state.problem.kind === 'not-found' ? null : state.problem.detail}
+          {notFound ? 'Check the spelling and try again.' : state.problem.detail}
         </p>
+        {notFound ? (
+          <SearchBox variant="fix" initial={handle} to={to} exclude={other} label="Correct the handle" />
+        ) : null}
         {state.problem.retry ? (
           <Button onClick={onRetry} className="px-3 py-1.5 text-[13px]">
             <RotateCw aria-hidden />
@@ -84,8 +99,24 @@ export function Compare({ a, b, onFetched }: CompareProps) {
         b={right.state.user}
         colors={COLORS}
         handles={handles}
-        aFallback={<SideStatus state={left.state} handle={a} onRetry={left.retry} />}
-        bFallback={<SideStatus state={right.state} handle={b} onRetry={right.retry} />}
+        aFallback={
+          <SideStatus
+            state={left.state}
+            handle={a}
+            onRetry={left.retry}
+            to={(fixed) => ({ handle: fixed, vs: handleB })}
+            other={handleB}
+          />
+        }
+        bFallback={
+          <SideStatus
+            state={right.state}
+            handle={b}
+            onRetry={right.retry}
+            to={(fixed) => ({ handle: handleA, vs: fixed })}
+            other={handleA}
+          />
+        }
       />
       <div className="mx-auto grid max-w-[1240px] grid-cols-[minmax(0,1fr)] gap-4 px-4 py-6 sm:px-6">
         {both && duel ? (

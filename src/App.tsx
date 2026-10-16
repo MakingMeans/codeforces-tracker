@@ -32,12 +32,37 @@ export default function App() {
 
   function page() {
     if (!route.handle || !handle) return <Home />
-    if (problem) return <InvalidHandle handle={route.handle} problem={problem} />
-    if (route.vs && vsProblem) return <InvalidHandle handle={route.vs} problem={vsProblem} />
+    if (problem) {
+      const other = route.vs
+      return (
+        <InvalidHandle
+          handle={route.handle}
+          problem={problem}
+          to={other ? (fixed) => ({ handle: fixed, vs: other }) : undefined}
+          exclude={vs ?? undefined}
+        />
+      )
+    }
+    if (route.vs && vsProblem) {
+      return (
+        <InvalidHandle handle={route.vs} problem={vsProblem} to={(fixed) => ({ handle, vs: fixed })} exclude={handle} />
+      )
+    }
     if (vs && sameTwice) {
       return (
-        <StateMessage icon={Users} title="Pick two different players">
-          <p>Comparing {handle} with themselves would be a tie on every line.</p>
+        <StateMessage
+          icon={Users}
+          title="Pick two different players"
+          actions={
+            <SearchBox
+              variant="fix"
+              to={(fixed) => ({ handle, vs: fixed })}
+              exclude={handle}
+              label={`Compare ${handle} with`}
+            />
+          }
+        >
+          <p>Comparing {handle} with themselves would be a tie on every line. Who should they face?</p>
         </StateMessage>
       )
     }

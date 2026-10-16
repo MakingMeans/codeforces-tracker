@@ -26,7 +26,7 @@ export function StateMessage({ icon: Icon, title, children, actions, tone = 'neu
       </span>
       <h1 className="font-display text-[clamp(32px,6vw,52px)] leading-none text-balance uppercase">{title}</h1>
       {children ? <div className="grid max-w-[56ch] gap-2 text-ink-muted">{children}</div> : null}
-      {actions ? <div className="flex flex-wrap justify-center gap-3">{actions}</div> : null}
+      {actions ? <div className="flex w-full flex-wrap justify-center gap-3">{actions}</div> : null}
     </div>
   )
 }
