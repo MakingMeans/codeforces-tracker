@@ -34,11 +34,11 @@ Ranks are drawn as original angular emblems, one per rank. Codeforces has no ran
 
 ## Usage
 
-| What | How |
-|---|---|
-| Look up a handle | Type it in the search box, or open `?handle=<handle>` |
-| Compare two handles | `?handle=<a>&vs=<b>` |
-| Jump to the search box | Press `/` |
+| What                   | How                                                   |
+| ---------------------- | ----------------------------------------------------- |
+| Look up a handle       | Type it in the search box, or open `?handle=<handle>` |
+| Compare two handles    | `?handle=<a>&vs=<b>`                                  |
+| Jump to the search box | Press `/`                                             |
 
 Every view is a plain URL, so it can be bookmarked or shared, and the browser's back and forward buttons
 work. Paths like `/u/tourist` are not used because GitHub Pages cannot route them.
@@ -48,12 +48,12 @@ work. Paths like `/u/tourist` are not used because GitHub Pages cannot route the
 There is no backend. Your browser calls the public [Codeforces API](https://codeforces.com/apiHelp)
 directly; it answers with `Access-Control-Allow-Origin: *`, so no proxy or key is involved.
 
-| Endpoint | Used for |
-|---|---|
-| `user.info` | Profile header. Called first, so an unknown handle fails fast |
-| `user.rating` | Rating chart, rated contests, deltas and places |
-| `user.status` | Activity, solved problems, streaks, per-contest problems and attempts, languages, tags |
-| `contest.list` | Contest names, durations, phases and upcoming contests |
+| Endpoint       | Used for                                                                               |
+| -------------- | -------------------------------------------------------------------------------------- |
+| `user.info`    | Profile header. Called first, so an unknown handle fails fast                          |
+| `user.rating`  | Rating chart, rated contests, deltas and places                                        |
+| `user.status`  | Activity, solved problems, streaks, per-contest problems and attempts, languages, tags |
+| `contest.list` | Contest names, durations, phases and upcoming contests                                 |
 
 - **Rate limit.** Codeforces allows about one call every two seconds. When it answers HTTP 429 or
   `Call limit exceeded`, the request is retried after 2, 4 and 6 seconds. At most three requests are
@@ -87,14 +87,14 @@ Then open http://localhost:5173/codeforces-tracker/. The sub-path matches the on
 
 ### Scripts
 
-| Script | What it does |
-|---|---|
-| `npm run dev` | Development server with hot reload |
-| `npm run build` | Type-check and build the static site into `dist/` |
-| `npm run preview` | Serve the production build locally |
-| `npm run lint` | ESLint |
-| `npm test` | Vitest, for the data rules |
-| `npm run format` | Prettier |
+| Script            | What it does                                      |
+| ----------------- | ------------------------------------------------- |
+| `npm run dev`     | Development server with hot reload                |
+| `npm run build`   | Type-check and build the static site into `dist/` |
+| `npm run preview` | Serve the production build locally                |
+| `npm run lint`    | ESLint                                            |
+| `npm test`        | Vitest, for the data rules                        |
+| `npm run format`  | Prettier                                          |
 
 ## Project structure
 

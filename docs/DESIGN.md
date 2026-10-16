@@ -15,18 +15,18 @@ the profile page mocked with example data.
 
 All colours are tokens, defined once in `src/index.css` (`@theme`). The page is dark-only.
 
-| Token | Value | Use | Contrast |
-|---|---|---|---|
-| `bg` | `#0F1923` | Page background | — |
-| `surface` | `#16232F` | Panels, rows | — |
-| `surface-2` | `#1D2C3A` | Inputs, stat cards, hover | — |
-| `line` | `#ECE8E1` at 12 % | 1 px borders, corner ticks | — |
-| `ink` | `#ECE8E1` | Main text | 14.5:1 on `bg`, 11.7:1 on `surface-2` |
-| `ink-muted` | `#9AA5B1` | Secondary text | 7.1:1 on `bg`, 5.7:1 on `surface-2` |
-| `accent` | `#FF4655` | Primary actions, accent bars, rating losses | 5.3:1 on `bg`, 4.8:1 on `surface` |
-| `on-accent` | `#0F1923` | Text on red buttons | 5.3:1 on `accent` |
-| `win` | `#4FE0B6` | Rating gained | 9.6:1 on `surface` |
-| `neutral` | `#8B97A3` | No change, unrated, pending | 5.4:1 on `surface`, 4.8:1 on `surface-2` |
+| Token       | Value             | Use                                         | Contrast                                 |
+| ----------- | ----------------- | ------------------------------------------- | ---------------------------------------- |
+| `bg`        | `#0F1923`         | Page background                             | —                                        |
+| `surface`   | `#16232F`         | Panels, rows                                | —                                        |
+| `surface-2` | `#1D2C3A`         | Inputs, stat cards, hover                   | —                                        |
+| `line`      | `#ECE8E1` at 12 % | 1 px borders, corner ticks                  | —                                        |
+| `ink`       | `#ECE8E1`         | Main text                                   | 14.5:1 on `bg`, 11.7:1 on `surface-2`    |
+| `ink-muted` | `#9AA5B1`         | Secondary text                              | 7.1:1 on `bg`, 5.7:1 on `surface-2`      |
+| `accent`    | `#FF4655`         | Primary actions, accent bars, rating losses | 5.3:1 on `bg`, 4.8:1 on `surface`        |
+| `on-accent` | `#0F1923`         | Text on red buttons                         | 5.3:1 on `accent`                        |
+| `win`       | `#4FE0B6`         | Rating gained                               | 9.6:1 on `surface`                       |
+| `neutral`   | `#8B97A3`         | No change, unrated, pending                 | 5.4:1 on `surface`, 4.8:1 on `surface-2` |
 
 Rules:
 
@@ -40,14 +40,14 @@ Rules:
 Codeforces' own hues, lifted to read on a dark background. They are the ranks' identity and never
 change.
 
-| Rank | From | Colour |
-|---|---|---|
-| Newbie | — | `#A3A3A3` |
-| Pupil | 1200 | `#4ADE80` |
-| Specialist | 1400 | `#2DD4BF` |
-| Expert | 1600 | `#60A5FA` |
-| Candidate Master | 1900 | `#E879F9` |
-| Master, International Master | 2100, 2300 | `#FB923C` |
+| Rank                                        | From             | Colour    |
+| ------------------------------------------- | ---------------- | --------- |
+| Newbie                                      | —                | `#A3A3A3` |
+| Pupil                                       | 1200             | `#4ADE80` |
+| Specialist                                  | 1400             | `#2DD4BF` |
+| Expert                                      | 1600             | `#60A5FA` |
+| Candidate Master                            | 1900             | `#E879F9` |
+| Master, International Master                | 2100, 2300       | `#FB923C` |
 | Grandmaster, International GM, Legendary GM | 2400, 2600, 3000 | `#F87171` |
 
 In Legendary Grandmaster the first letter of the handle takes `ink`, as on Codeforces. A user
@@ -73,11 +73,11 @@ Validated with the `dataviz` palette validator against `surface`.
 
 All from Google Fonts with `display=swap`.
 
-| Face | Use |
-|---|---|
-| **Anton** | Wordmark, section titles, big standalone numbers (current rating, deltas, stat values) |
-| **Barlow Condensed** 500–700 | Labels, buttons, chips, table headers, uppercase with `letter-spacing: 0.12–0.18em` |
-| **Barlow** 400–600 | Running text |
+| Face                         | Use                                                                                    |
+| ---------------------------- | -------------------------------------------------------------------------------------- |
+| **Anton**                    | Wordmark, section titles, big standalone numbers (current rating, deltas, stat values) |
+| **Barlow Condensed** 500–700 | Labels, buttons, chips, table headers, uppercase with `letter-spacing: 0.12–0.18em`    |
+| **Barlow** 400–600           | Running text                                                                           |
 
 - **Handles are never uppercased.** Codeforces handles are case-sensitive (`Benq`, `jiangly`),
   which is why Anton (it has lowercase) was chosen over Bebas Neue.
@@ -144,19 +144,19 @@ Every emblem is a 64 × 64 SVG with three parts:
 3. **Stars.** 1 to 7 faceted stars on a ring concentric with the hex, **one per rank colour**.
    Ranks that share a colour share a star count, and the frame tells them apart.
 
-| Tier | Rank | Frame | Figure | Stars |
-|---|---|---|---|---|
-| — | Unrated | Dashed hex | A dash | 0 |
-| 0 | Newbie | Plain hex | Pawn | 1 |
-| 1 | Pupil | Plain hex | Knight (stepped mane) | 2 |
-| 2 | Specialist | Plain hex | Bishop | 3 |
-| 3 | Expert | Plain hex | Rook | 4 |
-| 4 | Candidate Master | + side plates | Queen (coronet and orb) | 5 |
-| 5 | Master | + top cap | King (crown and cross) | 6 |
-| 6 | International Master | + outer ring | King | 6 |
-| 7 | Grandmaster | + wings and glow, no ring | King, crown with two points | 7 |
-| 8 | International Grandmaster | + outer ring | King, five-point crown, jewel and mantle | 7 |
-| 9 | Legendary Grandmaster | Filled hex, halo, ring | King, imperial crown | 7 |
+| Tier | Rank                      | Frame                     | Figure                                   | Stars |
+| ---- | ------------------------- | ------------------------- | ---------------------------------------- | ----- |
+| —    | Unrated                   | Dashed hex                | A dash                                   | 0     |
+| 0    | Newbie                    | Plain hex                 | Pawn                                     | 1     |
+| 1    | Pupil                     | Plain hex                 | Knight (stepped mane)                    | 2     |
+| 2    | Specialist                | Plain hex                 | Bishop                                   | 3     |
+| 3    | Expert                    | Plain hex                 | Rook                                     | 4     |
+| 4    | Candidate Master          | + side plates             | Queen (coronet and orb)                  | 5     |
+| 5    | Master                    | + top cap                 | King (crown and cross)                   | 6     |
+| 6    | International Master      | + outer ring              | King                                     | 6     |
+| 7    | Grandmaster               | + wings and glow, no ring | King, crown with two points              | 7     |
+| 8    | International Grandmaster | + outer ring              | King, five-point crown, jewel and mantle | 7     |
+| 9    | Legendary Grandmaster     | Filled hex, halo, ring    | King, imperial crown                     | 7     |
 
 ### Rules for the figures
 
