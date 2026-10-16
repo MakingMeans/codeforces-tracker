@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+<title>CF/TRACKER Rank Emblems</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: the final reference sheet. The ladder large, every size the app uses, the emblem in
+   real rows, then one card per rank with its rule and a button to copy its SVG. */
+:root {
+  color-scheme: dark;
+  --bg: #0F1923;
+  --surface: #16232F;
+  --surface-2: #1D2C3A;
+  --surface-3: #243545;
+  --line: rgba(236, 232, 225, 0.12);
+  --line-strong: rgba(236, 232, 225, 0.28);
+  --ink: #ECE8E1;
+  --ink-muted: #9AA5B1;
+  --accent: #FF4655;
+  --on-accent: #0F1923;
+  --win: #4FE0B6;
+  --loss: #FF4655;
+  --font-display: "Anton", Impact, "Arial Narrow", sans-serif;
+  --font-label: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.num { font-variant-numeric: tabular-nums; }
+
+.page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 72px;
+  display: grid;
+  gap: 48px;
+}
+.cut { --cut: 12px; --cut-fill: var(--surface); --cut-line: var(--line); position: relative; isolation: isolate; }
+.cut::before, .cut::after { content: ""; position: absolute; z-index: -1; transition: background-color 150ms var(--ease); }
+.cut::before { inset: 0; background: var(--cut-line); clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut)); }
+.cut::after { inset: 1px; background: var(--cut-fill); clip-path: polygon(calc(var(--cut) - 0.4px) 0, 100% 0, 100% calc(100% - var(--cut) + 0.4px), calc(100% - var(--cut) + 0.4px) 100%, 0 100%, 0 calc(var(--cut) - 0.4px)); }
+.label { font-family: var(--font-label); font-weight: 600; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-muted); }
+
+.masthead { padding-block: 40px 28px; display: grid; gap: 14px; border-bottom: 1px solid var(--line); }
+.wordmark { font-family: var(--font-display); font-size: 26px; letter-spacing: 0.02em; line-height: 1; display: inline-flex; align-items: center; gap: 10px; }
+.wordmark::before { content: ""; width: 4px; height: 1em; background: var(--accent); }
+.wordmark .slash { color: var(--accent); display: inline-block; transform: skewX(-8deg); margin-inline: 1px; }
+.masthead h1 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(40px, 7vw, 76px); line-height: 0.95; text-transform: uppercase; letter-spacing: 0.01em; }
+.masthead p { margin: 0; max-width: 74ch; color: var(--ink-muted); }
+.masthead p b { color: var(--ink); font-weight: 600; }
+.masthead code { font-size: 13px; color: var(--ink); background: var(--surface-2); padding: 1px 6px; }
+
+.plate { display: grid; gap: 18px; min-width: 0; }
+.plate-head { display: grid; gap: 6px; }
+.plate-head h2 { margin: 0; display: flex; align-items: center; gap: 12px; font-family: var(--font-display); font-weight: 400; font-size: 30px; line-height: 1; text-transform: uppercase; letter-spacing: 0.02em; }
+.plate-head h2::before { content: ""; width: 4px; height: 0.9em; background: var(--accent); }
+.plate-head p { margin: 0; max-width: 76ch; color: var(--ink-muted); }
+
+.hero { --cut: 16px; padding: 24px 18px 18px; display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 6px; align-items: end; overflow-x: auto; }
+.hero div { display: grid; justify-items: center; gap: 6px; text-align: center; min-width: 64px; }
+.hero svg { display: block; width: 100%; max-width: 104px; height: auto; }
+.hero span { font-family: var(--font-label); font-weight: 700; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.15; }
+
+.sizes { --cut: 14px; padding: 16px 18px; display: grid; gap: 14px; overflow-x: auto; }
+.sizes .row { display: grid; grid-template-columns: 70px 1fr; gap: 12px; align-items: center; }
+.sizes .strip { display: flex; gap: 8px; align-items: center; flex-wrap: nowrap; }
+.sizes svg { display: block; flex: none; }
+
+.ctx { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
+.pv-card { --cut: 14px; padding: 16px 18px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.pv-head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: center; }
+.pv-head .rk { font-family: var(--font-label); font-weight: 700; font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; }
+.pv-head .rt { font-family: var(--font-display); font-size: 44px; line-height: 0.95; }
+.pv-rows { display: grid; gap: 6px; }
+.pv-row {
+  --tint: rgba(139, 151, 163, 0.14);
+  --bar: #8B97A3;
+  position: relative;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px 10px 18px;
+  background: linear-gradient(90deg, var(--tint), transparent 72%), var(--surface-2);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%);
+}
+.pv-row::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--bar); }
+.pv-row.gain { --tint: rgba(79, 224, 182, 0.16); --bar: var(--win); }
+.pv-row.loss { --tint: rgba(255, 70, 85, 0.16); --bar: var(--loss); }
+.pv-row .nm { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pv-row .sub { font-size: 12px; color: var(--ink-muted); }
+.pv-row .d { font-family: var(--font-display); font-size: 26px; line-height: 1; }
+.pv-row.gain .d { color: var(--win); }
+.pv-row.loss .d { color: var(--loss); }
+.pv-row svg, .pv-head svg { display: block; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 10px; }
+.card { --cut: 14px; padding: 16px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; align-items: center; }
+.card svg { display: block; grid-row: span 3; }
+.card .nm { font-family: var(--font-label); font-weight: 700; font-size: 15px; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.15; }
+.card .rule { font-size: 13.5px; color: var(--ink-muted); }
+.copy {
+  --cut: 6px;
+  --cut-fill: var(--surface-2);
+  --cut-line: var(--line-strong);
+  border: 0;
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  justify-self: start;
+}
+.copy:hover { --cut-fill: var(--surface-3); }
+.copy.done { --cut-fill: var(--win); --cut-line: var(--win); color: var(--on-accent); }
+.fallback { grid-column: 1 / -1; width: 100%; min-height: 80px; font: 11px/1.4 ui-monospace, Consolas, monospace; background: var(--bg); color: var(--ink); border: 1px solid var(--line-strong); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<main class="page">
+  <header class="masthead">
+    <span class="wordmark" aria-label="CF/TRACKER">CF<span class="slash">/</span>TRACKER</span>
+    <h1>Rank emblems</h1>
+    <p>The approved set. <b>Hex frame</b> that grows with the rank, <b>chess figure</b> inside (pawn up to the imperial king), and <b>1–7 faceted stars</b> in a ring, one per rank colour. Each emblem is a vector SVG drawn by <code>docs/design/rank-emblems.js</code>; the buttons below copy any of them as a standalone SVG.</p>
+  </header>
+
+  <section class="plate" aria-labelledby="ladder-title">
+    <div class="plate-head"><h2 id="ladder-title">The ladder</h2></div>
+    <div class="hero cut" id="hero"></div>
+  </section>
+
+  <section class="plate" aria-labelledby="sizes-title">
+    <div class="plate-head">
+      <h2 id="sizes-title">Sizes</h2>
+      <p>88 px in the profile header, 44 px in the match history, 28 and 20 px next to text.</p>
+    </div>
+    <div class="sizes cut" id="sizes"></div>
+  </section>
+
+  <section class="plate" aria-labelledby="ctx-title">
+    <div class="plate-head"><h2 id="ctx-title">In context</h2></div>
+    <div class="ctx">
+      <div class="pv-card cut"><span class="label">Profile header</span><div id="heads" style="display:grid;gap:12px"></div></div>
+      <div class="pv-card cut"><span class="label">Match history</span><div class="pv-rows" id="rows"></div></div>
+    </div>
+  </section>
+
+  <section class="plate" aria-labelledby="cards-title">
+    <div class="plate-head">
+      <h2 id="cards-title">Every rank</h2>
+      <p>What each emblem adds, and its SVG ready to paste.</p>
+    </div>
+    <div class="cards" id="cards"></div>
+  </section>
+</main>
+
+<script src="rank-emblems.js"></script>
+<script>
+(function () {
+  'use strict'
+  const E = window.CFRankEmblems
+  const ALL = E.RANKS.concat([E.UNRATED])
+  const svg = (tier, size) => E.emblemSVG(tier, { size })
+  const RULES = [
+    'Plain hex · pawn · 1 star',
+    'Plain hex · knight · 2 stars',
+    'Plain hex · bishop · 3 stars',
+    'Plain hex · rook · 4 stars',
+    'Side plates · queen · 5 stars',
+    'Plates and top cap · king · 6 stars',
+    'Adds the outer ring · king · 6 stars',
+    'Adds wings and glow · crowned king · 7 stars',
+    'Wings and ring · king with mantle · 7 stars',
+    'Filled hex and halo · imperial king · 7 stars',
+    'Dashed hex · no rating yet',
+  ]
+
+  document.getElementById('hero').innerHTML = ALL.map((r) => '<div>' + svg(r.tier, 104) + '<span style="color:' + r.color + '">' + r.name + '</span></div>').join('')
+
+  document.getElementById('sizes').innerHTML = [88, 64, 44, 28, 20]
+    .map((s) => '<div class="row"><span class="label">' + s + ' px</span><div class="strip">' + ALL.map((r) => svg(r.tier, s)).join('') + '</div></div>')
+    .join('')
+
+  document.getElementById('heads').innerHTML = [1287, 1987, 2462, 3786]
+    .map((rating) => {
+      const r = E.rankFor(rating)
+      return '<div class="pv-head">' + svg(r.tier, 88) + '<div><div class="rk" style="color:' + r.color + '">' + r.name + '</div><div class="rt num">' + rating + '</div></div></div>'
+    })
+    .join('')
+
+  const MINUS = '−'
+  document.getElementById('rows').innerHTML = [
+    ['gain', 1052, 'Codeforces Round (Div. 4)', 'Oct 14, 2026 · Place #3,104', '+88'],
+    ['loss', 1452, 'Educational Codeforces Round', 'Oct 3, 2026 · Place #4,210', MINUS + '33'],
+    ['gain', 1987, 'Codeforces Round (Div. 2)', 'Sep 27, 2026 · Place #188', '+24'],
+    ['loss', 2341, 'Codeforces Round (Div. 1)', 'Sep 14, 2026 · Place #96', MINUS + '18'],
+    ['gain', 3104, 'Codeforces Global Round', 'Sep 2, 2026 · Place #3', '+41'],
+  ]
+    .map(([cls, before, name, sub, d]) => '<div class="pv-row ' + cls + '">' + svg(E.rankFor(before).tier, 44) + '<div style="min-width:0"><div class="nm">' + name + '</div><div class="sub num">' + sub + '</div></div><span class="d num">' + d + '</span></div>')
+    .join('')
+
+  const cards = document.getElementById('cards')
+  ALL.forEach((r, i) => {
+    const el = document.createElement('div')
+    el.className = 'card cut'
+    el.innerHTML = svg(r.tier, 72) + '<span class="nm" style="color:' + r.color + '">' + r.name + '</span><span class="rule">' + RULES[i] + '</span><button class="copy cut" type="button">Copy SVG</button>'
+    const btn = el.querySelector('.copy')
+    btn.addEventListener('click', () => {
+      const code = E.emblemSVG(r.tier, { size: 128 })
+      const done = () => {
+        btn.textContent = 'Copied'
+        btn.classList.add('done')
+        setTimeout(() => {
+          btn.textContent = 'Copy SVG'
+          btn.classList.remove('done')
+        }, 1600)
+      }
+      const fallback = () => {
+        let ta = el.querySelector('.fallback')
+        if (!ta) {
+          ta = document.createElement('textarea')
+          ta.className = 'fallback'
+          ta.readOnly = true
+          ta.setAttribute('aria-label', r.name + ' SVG code')
+          el.appendChild(ta)
+        }
+        ta.value = code
+        ta.focus()
+        ta.select()
+        btn.textContent = 'Select and copy'
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(done, fallback)
+      else fallback()
+    })
+    cards.appendChild(el)
+  })
+})()
+</script>
+
+</html>
