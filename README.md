@@ -107,6 +107,7 @@ src/
   pages/          home, profile, compare
 tests/fixtures/   small hand-written API responses used by the tests
 docs/DESIGN.md    design system: colours, type, shapes, charts, emblems
+docs/design/      rank emblems: source (rank-emblems.js), reference sheet, exported SVGs
 public/           static files, resolved through import.meta.env.BASE_URL
 ```
 
@@ -133,7 +134,7 @@ Issues and pull requests are welcome.
 ## Roadmap
 
 - [x] Plan and README
-- [ ] Design system and visual sample (`docs/DESIGN.md`)
+- [x] Design system and rank emblems (`docs/DESIGN.md`, `docs/design/`)
 - [ ] Project scaffold, CI and GitHub Pages deploy
 - [ ] Data layer ported from the reference, with tests
 - [ ] Home page: search, recent searches, examples, rank ladder, upcoming contests
