@@ -49,7 +49,7 @@ export function ProfileHeader({ user }: { user: ProfileUser }) {
         </div>
 
         <div className="flex items-center gap-4 sm:col-span-2 lg:col-span-1">
-          <RankEmblem rank={rank} size={88} />
+          <RankEmblem rank={rank} size={112} />
           <div className="grid gap-0.5">
             <span
               className="font-label text-[17px] leading-tight font-bold tracking-[0.12em] uppercase"

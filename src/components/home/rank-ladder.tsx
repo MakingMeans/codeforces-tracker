@@ -12,7 +12,7 @@ export function RankLadder() {
             key={rank.name}
             className="cut grid content-start justify-items-center gap-1 px-1 pt-3 pb-2.5 text-center [--cut:9px] [--cut-fill:var(--color-bg)]"
           >
-            <RankEmblem rank={rank} size={60} />
+            <RankEmblem rank={rank} size={76} />
             <span
               className="font-label text-xs leading-tight font-bold tracking-[0.06em] uppercase"
               style={{ color: rank.color }}
