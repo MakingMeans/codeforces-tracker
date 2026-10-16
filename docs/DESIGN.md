@@ -9,7 +9,9 @@ DIN Next). Everything here is original or from Google Fonts.
 
 To see it rather than read it, open [`docs/design/visual-sample.html`](design/visual-sample.html)
 in a browser. It is the approved sample: palette with contrast ratios, type, controls, emblems, and
-the profile page mocked with example data.
+the profile page mocked with example data. Two things changed after it: the match history rows no
+longer carry a texture per contest kind on their right edge (the kind is already in the contest's
+name), and the emblems are about 30 % larger than drawn there.
 
 ## Colour
 
@@ -184,7 +186,8 @@ All figures are flat blocks (trapezoids, bars, diamonds and octagons), with no c
 
 ### Using the emblems
 
-- **Sizes.** 88 px in the profile header, 44 px in the match history, 28 and 20 px next to text.
+- **Sizes.** 112 px in the profile header, 76 px on the home page's rank ladder, 72 px on the
+  rating card, 56 px in the match history and the comparison header (48 px in rows on phones).
   Stars are countable from 44 px up; at 28 px they read as a row of dots.
 - **Accessibility.** Every emblem has `role="img"`, an `aria-label` and a `<title>` with the rank
   name and star count. Next to text, the rank name is always written out too.
