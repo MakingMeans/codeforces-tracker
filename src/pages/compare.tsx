@@ -90,7 +90,7 @@ export function Compare({ a, b, onFetched }: CompareProps) {
       <div className="mx-auto grid max-w-[1240px] grid-cols-[minmax(0,1fr)] gap-4 px-4 py-6 sm:px-6">
         {both && duel ? (
           <>
-            <Panel title="Rating">
+            <Panel title="Rating history">
               <CompareChart series={series} />
             </Panel>
             <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
