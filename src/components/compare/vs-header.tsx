@@ -65,6 +65,9 @@ interface VsHeaderProps {
 export function VsHeader({ a, b, colors, aFallback, bFallback, handles }: VsHeaderProps) {
   return (
     <section aria-label="Comparison" className="ticks border-b border-line">
+      <h1 className="sr-only">
+        {handles[0]} vs {handles[1]}
+      </h1>
       <div className="mx-auto grid max-w-[1240px] grid-cols-[minmax(0,1fr)] items-center gap-5 px-4 py-7 sm:px-6 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
         {a ? <Side user={a} color={colors[0]} align="start" /> : <Placeholder>{aFallback}</Placeholder>}
         <div className="grid justify-items-center gap-2">

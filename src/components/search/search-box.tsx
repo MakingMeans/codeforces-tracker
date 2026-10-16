@@ -55,7 +55,8 @@ export function SearchBox({ variant }: SearchBoxProps) {
     >
       <div
         className={cn(
-          'cut flex items-stretch [--cut-fill:var(--color-surface)] [--cut-line:var(--color-line-strong)] focus-within:[--cut-line:var(--color-ink)]',
+          // The field's focus ring sits on the whole box, like every other focus outline on the page.
+          'cut flex items-stretch [--cut-fill:var(--color-surface)] [--cut-line:var(--color-line-strong)] has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-3 has-[input:focus-visible]:outline-ink has-[input:focus-visible]:[--cut-line:var(--color-ink)]',
           hero ? '[--cut:14px]' : '[--cut:10px]',
           problem && '[--cut-line:var(--color-accent)]',
         )}
@@ -101,7 +102,8 @@ export function SearchBox({ variant }: SearchBoxProps) {
             >
               /
             </kbd>
-            <button type="submit" className="sr-only">
+            {/* Lets Enter submit; out of the tab order since it is never visible. */}
+            <button type="submit" tabIndex={-1} className="sr-only">
               Search
             </button>
           </>

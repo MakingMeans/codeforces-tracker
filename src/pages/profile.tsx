@@ -81,7 +81,7 @@ function ProfileBody({ user, details, fetchedAt }: { user: ProfileUser; details:
         <TopTagsCard tags={details.tags} />
       </aside>
       <div className="grid min-w-0 content-start gap-4">
-        <Panel title="Rating" aside={plural(details.ratingHistory.length, 'rated contest')}>
+        <Panel title="Rating history" aside={plural(details.ratingHistory.length, 'rated contest')}>
           <RatingChart history={details.ratingHistory} />
         </Panel>
         <Panel
