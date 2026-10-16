@@ -7,6 +7,8 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   base: '/codeforces-tracker/',
   plugins: [react(), tailwindcss()],
+  // The details worker is a module worker that imports the shared data code.
+  worker: { format: 'es' },
   test: {
     include: ['src/**/*.test.{ts,tsx}'],
     // A zone with daylight saving, so the day and streak rules are tested across a DST change.

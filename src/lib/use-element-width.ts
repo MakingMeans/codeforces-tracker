@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { startTransition, useLayoutEffect, useRef, useState } from 'react'
 
 /** Tracks an element's content width, for charts drawn at real pixel size. */
 export function useElementWidth<T extends HTMLElement>() {
@@ -8,7 +8,10 @@ export function useElementWidth<T extends HTMLElement>() {
   useLayoutEffect(() => {
     const element = ref.current
     if (!element) return
-    const observer = new ResizeObserver(([entry]) => setWidth(Math.floor(entry.contentRect.width)))
+    // Redrawing a chart can wait for a moment; typing and scrolling should not.
+    const observer = new ResizeObserver(([entry]) =>
+      startTransition(() => setWidth(Math.floor(entry.contentRect.width))),
+    )
     observer.observe(element)
     return () => observer.disconnect()
   }, [])

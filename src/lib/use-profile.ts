@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { startTransition, useCallback, useEffect, useState } from 'react'
 import { isAbortError } from './api/client'
 import { loadDetails, loadUser, type Profile, type ProfileDetails } from './codeforces/profile'
 import type { ProfileUser } from './codeforces/user'
@@ -59,7 +59,9 @@ export function useProfile(handle: string) {
 
         const details = await loadDetails(user.handle, signal)
         const fetchedAt = Date.now()
-        update({ details, fetchedAt })
+        // Rendering every section at once is the heaviest step on slow phones; a transition lets
+        // React split it and keep the page responsive.
+        startTransition(() => update({ details, fetchedAt }))
         cacheProfile({ user, details, fetchedAt }, fetchedAt)
       } catch (error) {
         if (!isAbortError(error)) update({ problem: describeLoadError(error), previous: null })

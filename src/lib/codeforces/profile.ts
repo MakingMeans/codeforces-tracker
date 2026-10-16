@@ -1,32 +1,18 @@
 /**
  * A profile loads in two steps: `user.info` first (fast, and it fails cleanly
  * for an unknown handle before megabytes of submissions are downloaded), then
- * the rating history, every submission and the contest list together.
+ * the rating history, every submission and the contest list together. The
+ * second step runs in a worker when the browser has them.
  */
-import { call } from '../api/client'
-import type { ApiContest, ApiRatingChange, ApiSubmission, ApiUser } from '../api/types'
-import { buildActivity, type Activity } from './activity'
+import { call, CodeforcesError } from '../api/client'
+import type { ApiContest, ApiUser } from '../api/types'
+import type { DetailsRequest, DetailsResponse } from '../details-protocol'
 import { getContestList } from './contest-list'
-import { buildContests, type ContestEntry } from './contests'
-import {
-  languageShares,
-  solvedByDifficulty,
-  topTags,
-  type DifficultyBucket,
-  type LanguageShare,
-  type TagCount,
-} from './insights'
-import { toProfileUser, toRatingHistory, type ProfileUser, type RatingPoint } from './user'
+import { fetchDetails, type ProfileDetails } from './details'
+import { toProfileUser, type ProfileUser } from './user'
 
-export interface ProfileDetails {
-  ratingHistory: RatingPoint[]
-  /** Most recent first. */
-  contests: ContestEntry[]
-  activity: Activity
-  difficulty: { buckets: DifficultyBucket[]; withoutRating: number }
-  tags: TagCount[]
-  languages: LanguageShare[]
-}
+export type { ProfileDetails } from './details'
+export { deriveDetails } from './details'
 
 export interface Profile {
   user: ProfileUser
@@ -40,28 +26,64 @@ export async function loadUser(handle: string, signal: AbortSignal, now = Date.n
   return toProfileUser(user, now)
 }
 
-/** Everything below the header, computed once from the raw responses. */
-export function deriveDetails(
-  ratings: ApiRatingChange[],
-  submissions: ApiSubmission[],
-  contests: ApiContest[],
-  now: number,
-): ProfileDetails {
-  return {
-    ratingHistory: toRatingHistory(ratings),
-    contests: buildContests(ratings, submissions, contests, now),
-    activity: buildActivity(submissions, now),
-    difficulty: solvedByDifficulty(submissions),
-    tags: topTags(submissions),
-    languages: languageShares(submissions),
+// ---------- the details worker ----------
+
+let worker: Worker | null = null
+let nextId = 1
+const pending = new Map<number, { resolve: (details: ProfileDetails) => void; reject: (error: unknown) => void }>()
+
+function getWorker() {
+  if (worker) return worker
+  worker = new Worker(new URL('../../workers/details.worker.ts', import.meta.url), { type: 'module' })
+  worker.onmessage = ({ data }: MessageEvent<DetailsResponse>) => {
+    const job = pending.get(data.id)
+    if (!job) return
+    pending.delete(data.id)
+    if (data.type === 'done') job.resolve(data.details)
+    else job.reject(new CodeforcesError(data.kind, data.message))
   }
+  worker.onerror = () => {
+    // The worker itself failed to start or crashed: fail what is waiting and start a new one next time.
+    pending.forEach((job) => job.reject(new CodeforcesError('api', 'The page could not process the data.')))
+    pending.clear()
+    worker?.terminate()
+    worker = null
+  }
+  return worker
 }
 
-export async function loadDetails(handle: string, signal: AbortSignal): Promise<ProfileDetails> {
-  const [ratings, submissions, contests] = await Promise.all([
-    call<ApiRatingChange[]>('user.rating', { handle }, signal),
-    call<ApiSubmission[]>('user.status', { handle }, signal),
-    getContestList(signal),
-  ])
-  return deriveDetails(ratings, submissions, contests, Date.now())
+const send = (message: DetailsRequest) => getWorker().postMessage(message)
+
+function loadInWorker(handle: string, contests: Promise<ApiContest[]>, signal: AbortSignal) {
+  return new Promise<ProfileDetails>((resolve, reject) => {
+    const id = nextId++
+    pending.set(id, { resolve, reject })
+    send({ type: 'load', id, handle })
+    contests.then(
+      (list) => pending.has(id) && send({ type: 'contests', id, contests: list }),
+      (error: unknown) => {
+        if (!pending.has(id)) return
+        pending.delete(id)
+        send({ type: 'cancel', id })
+        reject(error)
+      },
+    )
+    signal.addEventListener(
+      'abort',
+      () => {
+        if (!pending.has(id)) return
+        pending.delete(id)
+        send({ type: 'cancel', id })
+        reject(signal.reason ?? new DOMException('The request was cancelled', 'AbortError'))
+      },
+      { once: true },
+    )
+  })
+}
+
+export function loadDetails(handle: string, signal: AbortSignal): Promise<ProfileDetails> {
+  // The contest list stays on this thread: its cache lives in localStorage, which workers cannot reach.
+  const contests = getContestList(signal)
+  if (typeof Worker === 'undefined') return fetchDetails(handle, contests, signal)
+  return loadInWorker(handle, contests, signal)
 }

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { contests, NOW, ratings, submissions, user } from '../../tests/fixtures'
-import { deriveDetails, type Profile } from './codeforces/profile'
+import { deriveDetails } from './codeforces/details'
+import type { Profile } from './codeforces/profile'
 import { toProfileUser } from './codeforces/user'
 import {
   cacheProfile,
