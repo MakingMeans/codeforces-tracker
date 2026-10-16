@@ -190,7 +190,7 @@ All figures are flat blocks (trapezoids, bars, diamonds and octagons), with no c
 ### Using the emblems
 
 - **Sizes.** 112 px in the profile header, 76 px on the home page's rank ladder, 72 px on the
-  rating card, 56 px in the match history and the comparison header (48 px in rows on phones).
+  rating card and in the match history (56 px in rows on phones), 56 px in the comparison header.
   Stars are countable from 44 px up; at 28 px they read as a row of dots.
 - **Accessibility.** Every emblem has `role="img"`, an `aria-label` and a `<title>` with the rank
   name and star count. Next to text, the rank name is always written out too.

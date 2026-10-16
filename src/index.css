@@ -194,7 +194,7 @@
     --bar: var(--color-neutral);
     position: relative;
     display: grid;
-    grid-template-columns: 6.8rem 56px minmax(0, 1fr) 8.8rem 5.8rem 28px;
+    grid-template-columns: 6.8rem 72px minmax(0, 1fr) 8.8rem 5.8rem 28px;
     grid-template-areas:
       'date emblem name ratings delta link'
       'date emblem detail ratings delta link';
@@ -204,7 +204,7 @@
     background: linear-gradient(90deg, var(--tint), transparent 72%), var(--color-surface-2);
     clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
     content-visibility: auto;
-    contain-intrinsic-size: auto 84px;
+    contain-intrinsic-size: auto 73px;
   }
   .contest-row::before {
     content: '';
@@ -257,7 +257,7 @@
 
 @container (max-width: 640px) {
   .contest-row {
-    grid-template-columns: 48px minmax(0, 1fr) auto;
+    grid-template-columns: 56px minmax(0, 1fr) auto;
     grid-template-areas:
       'emblem name delta'
       'emblem date ratings'
@@ -266,8 +266,8 @@
     padding: 10px 12px 12px 18px;
   }
   .contest-row .cr-emblem svg {
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
   }
   .cr-date {
     display: flex;
