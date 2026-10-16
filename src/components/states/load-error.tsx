@@ -1,6 +1,7 @@
 import { CloudOff, RotateCw, ServerCrash, UserX, WifiOff } from 'lucide-react'
 import type { LoadProblem } from '../../lib/errors'
 import { linkHandler, routeHref } from '../../lib/route'
+import { SearchBox } from '../search/search-box'
 import { Button, ButtonLink } from '../ui/button'
 import { StateMessage } from './state-message'
 
@@ -22,23 +23,27 @@ export function LoadError({ problem, handle, onRetry }: { problem: LoadProblem; 
       tone="error"
       title={problem.title}
       actions={
-        <>
-          {problem.retry ? (
-            <Button variant="primary" onClick={onRetry}>
-              <RotateCw aria-hidden />
-              Try again
-            </Button>
-          ) : null}
-          <ButtonLink href={routeHref({})} onClick={linkHandler({})} variant="secondary">
-            Back to search
-          </ButtonLink>
-        </>
+        notFound ? (
+          <SearchBox variant="fix" initial={handle} label="Correct the handle" />
+        ) : (
+          <>
+            {problem.retry ? (
+              <Button variant="primary" onClick={onRetry}>
+                <RotateCw aria-hidden />
+                Try again
+              </Button>
+            ) : null}
+            <ButtonLink href={routeHref({})} onClick={linkHandler({})} variant="secondary">
+              Back to search
+            </ButtonLink>
+          </>
+        )
       }
     >
       {notFound ? (
         <p>
           No Codeforces account is called <span className="font-semibold break-all text-ink">“{handle}”</span>. Check
-          the spelling; handles are 3 to 24 characters.
+          the spelling and try again.
         </p>
       ) : (
         <p>{problem.detail}</p>

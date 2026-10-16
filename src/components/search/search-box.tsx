@@ -2,12 +2,23 @@ import { Search } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { cn } from '../../lib/cn'
 import { cleanHandle, handleProblem } from '../../lib/handle'
-import { navigate } from '../../lib/route'
+import { navigate, type Route } from '../../lib/route'
 import { buttonClass } from '../ui/button-class'
 
 interface SearchBoxProps {
-  /** `hero` on the home page, `compact` in the top bar. */
-  variant: 'hero' | 'compact'
+  /**
+   * `hero` on the home page, `compact` in the top bar, `fix` where a handle was
+   * not found: compact, with a visible button and no `/` shortcut.
+   */
+  variant: 'hero' | 'compact' | 'fix'
+  /** The handle to start from, focused with the cursor at the end so it can be corrected. */
+  initial?: string
+  /** Where a valid handle leads; its profile by default. */
+  to?: (handle: string) => Partial<Route>
+  /** A handle that cannot be picked here, such as the other side of a comparison. */
+  exclude?: string
+  /** Accessible name of the field. */
+  label?: string
 }
 
 const isTyping = (target: EventTarget | null) =>
@@ -15,14 +26,23 @@ const isTyping = (target: EventTarget | null) =>
   (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
 
 /** Handle search. Checks the handle before anything is sent to Codeforces; `/` focuses it from anywhere. */
-export function SearchBox({ variant }: SearchBoxProps) {
-  const [value, setValue] = useState('')
+export function SearchBox({ variant, initial = '', to, exclude, label = 'Codeforces handle' }: SearchBoxProps) {
+  const [value, setValue] = useState(initial)
   const [problem, setProblem] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const id = useId()
   const hero = variant === 'hero'
+  const fix = variant === 'fix'
 
   useEffect(() => {
+    if (!fix) return
+    const input = inputRef.current
+    input?.focus()
+    input?.setSelectionRange(input.value.length, input.value.length)
+  }, [fix])
+
+  useEffect(() => {
+    if (fix) return
     function onKeyDown(event: KeyboardEvent) {
       if (event.key !== '/' || event.metaKey || event.ctrlKey || event.altKey || isTyping(event.target)) return
       event.preventDefault()
@@ -31,19 +51,22 @@ export function SearchBox({ variant }: SearchBoxProps) {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
+  }, [fix])
 
   function submit(event: FormEvent) {
     event.preventDefault()
-    const found = handleProblem(value)
+    const handle = cleanHandle(value)
+    const found =
+      handleProblem(value) ??
+      (exclude && handle.toLowerCase() === exclude.toLowerCase() ? 'Pick someone else to compare with.' : null)
     setProblem(found)
     if (found) {
       inputRef.current?.focus()
       return
     }
-    setValue('')
+    if (!fix) setValue('')
     inputRef.current?.blur()
-    navigate({ handle: cleanHandle(value) })
+    navigate(to ? to(handle) : { handle })
   }
 
   return (
@@ -51,7 +74,7 @@ export function SearchBox({ variant }: SearchBoxProps) {
       role="search"
       onSubmit={submit}
       noValidate
-      className={cn('grid gap-2', hero ? 'max-w-[640px]' : 'w-full max-w-[420px]')}
+      className={cn('grid gap-2', hero ? 'max-w-[640px]' : 'w-full max-w-[420px]', fix && 'justify-self-stretch')}
     >
       <div
         className={cn(
@@ -62,7 +85,7 @@ export function SearchBox({ variant }: SearchBoxProps) {
         )}
       >
         <label htmlFor={`${id}-handle`} className="sr-only">
-          Codeforces handle
+          {label}
         </label>
         <Search
           aria-hidden
@@ -94,6 +117,10 @@ export function SearchBox({ variant }: SearchBoxProps) {
           <button type="submit" className={buttonClass('primary', 'm-1.5 px-6')}>
             Search
           </button>
+        ) : fix ? (
+          <button type="submit" className={buttonClass('primary', 'm-1 px-4 py-1.5 text-[13px]')}>
+            Search
+          </button>
         ) : (
           <>
             <kbd
@@ -114,7 +141,10 @@ export function SearchBox({ variant }: SearchBoxProps) {
         aria-live="polite"
         className={cn('text-sm', problem ? 'text-accent' : 'text-ink-muted', !hero && !problem && 'sr-only')}
       >
-        {problem ?? '3–24 letters, digits, _ . or -. A profile link works too. Press / to search from anywhere.'}
+        {problem ??
+          (fix
+            ? '3–24 letters, digits, _ . or -.'
+            : '3–24 letters, digits, _ . or -. A profile link works too. Press / to search from anywhere.')}
       </p>
     </form>
   )
