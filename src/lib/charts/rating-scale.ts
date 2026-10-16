@@ -84,6 +84,25 @@ export function monthTicks(from: number, to: number, plotWidth: number) {
     })
 }
 
+/**
+ * SVG path of the rating a player held over time: flat while it does not change,
+ * a vertical step at each contest, and flat again from the last contest to `until`.
+ * Any date on the line reads the rating held on that date, which is what the
+ * comparison cursor shows.
+ */
+export function heldPath(
+  points: { time: number; rating: number }[],
+  until: number,
+  x: (time: number) => number,
+  y: (rating: number) => number,
+) {
+  if (points.length === 0) return ''
+  const px = (time: number) => x(time).toFixed(1)
+  const steps = points.slice(1).map((point) => `H${px(point.time)}V${y(point.rating).toFixed(1)}`)
+  const end = Math.max(until, points[points.length - 1].time)
+  return `M${px(points[0].time)} ${y(points[0].rating).toFixed(1)}${steps.join('')}H${px(end)}`
+}
+
 /** Index of the point closest to `target` in a list sorted ascending. */
 export function nearestIndex(sorted: number[], target: number) {
   let lo = 0

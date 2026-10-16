@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { monthTicks, nearestIndex, ratingDomain, ratingTicks, timeDomain, DAY_MS } from './rating-scale'
+import { heldPath, monthTicks, nearestIndex, ratingDomain, ratingTicks, timeDomain, DAY_MS } from './rating-scale'
 
 describe('ratingDomain', () => {
   it('starts 100 below the lowest point and leaves the next band in view', () => {
@@ -91,5 +91,27 @@ describe('nearestIndex', () => {
     [100, 3],
   ])('nearest to %i is index %i', (target, index) => {
     expect(nearestIndex(sorted, target)).toBe(index)
+  })
+})
+
+describe('heldPath', () => {
+  const x = (time: number) => time
+  const y = (rating: number) => 2000 - rating
+
+  it('stays flat between contests and steps at each one', () => {
+    const points = [
+      { time: 0, rating: 400 },
+      { time: 10, rating: 700 },
+      { time: 30, rating: 650 },
+    ]
+    expect(heldPath(points, 30, x, y)).toBe('M0.0 1600.0H10.0V1300.0H30.0V1350.0H30.0')
+  })
+
+  it('carries the last rating on to the end of the chart', () => {
+    expect(heldPath([{ time: 5, rating: 1171 }], 90, x, y)).toBe('M5.0 829.0H90.0')
+  })
+
+  it('draws nothing without points', () => {
+    expect(heldPath([], 90, x, y)).toBe('')
   })
 })
