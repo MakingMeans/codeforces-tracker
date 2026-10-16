@@ -2,7 +2,10 @@ import { RotateCw } from 'lucide-react'
 import { useEffect } from 'react'
 import { ActivityHeatmap } from '../components/charts/activity-heatmap'
 import { RatingChart } from '../components/charts/rating-chart'
+import { DifficultyChart } from '../components/charts/difficulty-chart'
 import { MatchHistory } from '../components/history/match-history'
+import { LanguagesCard } from '../components/profile/languages-card'
+import { TopTagsCard } from '../components/profile/top-tags-card'
 import { ActivityCards } from '../components/profile/activity-cards'
 import { ContestSummaryCard } from '../components/profile/contest-summary-card'
 import { ProfileHeader } from '../components/profile/profile-header'
@@ -12,7 +15,7 @@ import { Button } from '../components/ui/button'
 import { Panel } from '../components/ui/panel'
 import { ScanLoader } from '../components/ui/scan-loader'
 import { submissionsLastYear } from '../lib/codeforces/activity'
-import { plural } from '../lib/codeforces/format'
+import { formatNumber, plural } from '../lib/codeforces/format'
 import type { ProfileDetails } from '../lib/codeforces/profile'
 import type { ProfileUser } from '../lib/codeforces/user'
 import type { LoadProblem } from '../lib/errors'
@@ -74,6 +77,8 @@ function ProfileBody({ user, details, fetchedAt }: { user: ProfileUser; details:
       <aside className="grid min-w-0 content-start gap-4">
         <RatingCard user={user} />
         <ContestSummaryCard contests={details.contests} />
+        <LanguagesCard languages={details.languages} />
+        <TopTagsCard tags={details.tags} />
       </aside>
       <div className="grid min-w-0 content-start gap-4">
         <Panel title="Rating" aside={plural(details.ratingHistory.length, 'rated contest')}>
@@ -85,6 +90,15 @@ function ProfileBody({ user, details, fetchedAt }: { user: ProfileUser; details:
         >
           <ActivityHeatmap perDay={details.activity.perDay} />
           <ActivityCards activity={details.activity} />
+        </Panel>
+        <Panel
+          title="Solved by difficulty"
+          aside={`${plural(
+            details.difficulty.buckets.reduce((sum, bucket) => sum + bucket.count, 0),
+            'rated problem',
+          )}${details.difficulty.withoutRating ? ` · ${formatNumber(details.difficulty.withoutRating)} without a rating` : ''}`}
+        >
+          <DifficultyChart buckets={details.difficulty.buckets} />
         </Panel>
         <MatchHistory contests={details.contests} />
       </div>

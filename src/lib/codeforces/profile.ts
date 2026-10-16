@@ -8,6 +8,14 @@ import type { ApiContest, ApiRatingChange, ApiSubmission, ApiUser } from '../api
 import { buildActivity, type Activity } from './activity'
 import { getContestList } from './contest-list'
 import { buildContests, type ContestEntry } from './contests'
+import {
+  languageShares,
+  solvedByDifficulty,
+  topTags,
+  type DifficultyBucket,
+  type LanguageShare,
+  type TagCount,
+} from './insights'
 import { toProfileUser, toRatingHistory, type ProfileUser, type RatingPoint } from './user'
 
 export interface ProfileDetails {
@@ -15,6 +23,9 @@ export interface ProfileDetails {
   /** Most recent first. */
   contests: ContestEntry[]
   activity: Activity
+  difficulty: { buckets: DifficultyBucket[]; withoutRating: number }
+  tags: TagCount[]
+  languages: LanguageShare[]
 }
 
 export interface Profile {
@@ -40,6 +51,9 @@ export function deriveDetails(
     ratingHistory: toRatingHistory(ratings),
     contests: buildContests(ratings, submissions, contests, now),
     activity: buildActivity(submissions, now),
+    difficulty: solvedByDifficulty(submissions),
+    tags: topTags(submissions),
+    languages: languageShares(submissions),
   }
 }
 
