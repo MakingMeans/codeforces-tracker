@@ -9,5 +9,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   test: {
     include: ['src/**/*.test.{ts,tsx}'],
+    // A zone with daylight saving, so the day and streak rules are tested across a DST change.
+    env: { TZ: 'America/New_York' },
   },
 })

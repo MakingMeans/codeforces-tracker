@@ -1,0 +1,65 @@
+[
+  {
+    "id": 2008,
+    "name": "Codeforces Round 1011 (Div. 2)",
+    "phase": "BEFORE",
+    "durationSeconds": 7200,
+    "startTimeSeconds": 1792506900
+  },
+  {
+    "id": 2004,
+    "name": "Codeforces Round 1010 (Div. 1 + Div. 2)",
+    "phase": "FINISHED",
+    "durationSeconds": 9000,
+    "startTimeSeconds": 1791988500
+  },
+  {
+    "id": 2005,
+    "name": "Testing Round 30 (Unrated)",
+    "phase": "FINISHED",
+    "durationSeconds": 7200,
+    "startTimeSeconds": 1791902100
+  },
+  {
+    "id": 2007,
+    "name": "Codeforces Round 1009 (Div. 4)",
+    "phase": "FINISHED",
+    "durationSeconds": 8100,
+    "startTimeSeconds": 1790260500
+  },
+  {
+    "id": 2006,
+    "name": "Codeforces Round 1008 (Div. 2)",
+    "phase": "FINISHED",
+    "durationSeconds": 7200,
+    "startTimeSeconds": 1789914900
+  },
+  {
+    "id": 2003,
+    "name": "Codeforces Round 1005 (Div. 3)",
+    "phase": "FINISHED",
+    "durationSeconds": 8100,
+    "startTimeSeconds": 1788618900
+  },
+  {
+    "id": 2002,
+    "name": "Educational Codeforces Round 190 (Rated for Div. 2)",
+    "phase": "FINISHED",
+    "durationSeconds": 7200,
+    "startTimeSeconds": 1787236500
+  },
+  {
+    "id": 2001,
+    "name": "Codeforces Round 1001 (Div. 2)",
+    "phase": "FINISHED",
+    "durationSeconds": 7200,
+    "startTimeSeconds": 1785594900
+  },
+  {
+    "id": 2009,
+    "name": "Codeforces Round 999 (Div. 2)",
+    "phase": "FINISHED",
+    "durationSeconds": 7200,
+    "startTimeSeconds": 1782916500
+  }
+]
