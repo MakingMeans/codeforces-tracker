@@ -75,7 +75,10 @@ Validated with the `dataviz` palette validator against `surface`.
   colour nor dash is the only cue. `ink` with `accent` was rejected: `ink` fails the lightness and
   chroma checks for a series colour. Lines join contest to contest, as on Codeforces, and run on
   flat from each player's last contest to today, since a rating holds until the next one. Someone
-  who stopped competing still has a line to compare against.
+  who stopped competing still has a line to compare against. Small diamonds in each player's
+  colour mark their contests. The cursor snaps to a contest of either player and lights up only
+  the diamond that is there, so a marker never floats off a line. The other player's rating at
+  that moment is in the tooltip, muted, as "Held since" their last contest.
 
 ## Type
 

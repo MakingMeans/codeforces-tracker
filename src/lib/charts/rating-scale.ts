@@ -84,6 +84,13 @@ export function monthTicks(from: number, to: number, plotWidth: number) {
     })
 }
 
+/** Diamond markers on contests: smaller as contests pile up, and only on hover past 300. */
+export const markerSize = (count: number) => (count >= 300 ? 0 : count >= 120 ? 2.5 : 3.5)
+
+/** SVG `points` of a diamond centred on (cx, cy). */
+export const diamond = (cx: number, cy: number, r: number) =>
+  `${cx},${cy - r} ${cx + r},${cy} ${cx},${cy + r} ${cx - r},${cy}`
+
 /**
  * SVG path of a rating history: straight segments from contest to contest, then
  * flat from the last contest to `until`, since the rating holds until the next one.
