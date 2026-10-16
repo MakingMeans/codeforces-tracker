@@ -2,6 +2,7 @@ import { RotateCw } from 'lucide-react'
 import { useEffect } from 'react'
 import { ActivityHeatmap } from '../components/charts/activity-heatmap'
 import { RatingChart } from '../components/charts/rating-chart'
+import { MatchHistory } from '../components/history/match-history'
 import { ActivityCards } from '../components/profile/activity-cards'
 import { ContestSummaryCard } from '../components/profile/contest-summary-card'
 import { ProfileHeader } from '../components/profile/profile-header'
@@ -85,6 +86,7 @@ function ProfileBody({ user, details, fetchedAt }: { user: ProfileUser; details:
           <ActivityHeatmap perDay={details.activity.perDay} />
           <ActivityCards activity={details.activity} />
         </Panel>
+        <MatchHistory contests={details.contests} />
       </div>
     </>
   )
