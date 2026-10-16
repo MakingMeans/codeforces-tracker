@@ -1,5 +1,12 @@
 import { useMemo, useState, type KeyboardEvent, type PointerEvent } from 'react'
-import { monthTicks, nearestIndex, ratingDomain, ratingTicks, timeDomain } from '../../lib/charts/rating-scale'
+import {
+  heldPath,
+  monthTicks,
+  nearestIndex,
+  ratingDomain,
+  ratingTicks,
+  timeDomain,
+} from '../../lib/charts/rating-scale'
 import { formatMonthYear } from '../../lib/codeforces/format'
 import { rankFor, RANKS } from '../../lib/codeforces/ranks'
 import type { RatingPoint } from '../../lib/codeforces/user'
@@ -44,8 +51,9 @@ function Swatch({ series }: { series: Series }) {
 }
 
 /**
- * Both ratings over time on the rank bands. The cursor reads what each one
- * held at that moment; arrow keys step through every contest of either.
+ * Both ratings over time on the rank bands, drawn as the rating each one held:
+ * flat between contests, so the cursor's dots always sit on the lines. Arrow
+ * keys step through every contest of either.
  */
 export function CompareChart({ series }: { series: Series[] }) {
   const [ref, width] = useElementWidth<HTMLDivElement>()
@@ -69,21 +77,13 @@ export function CompareChart({ series }: { series: Series[] }) {
       const to = Math.min(hi, RANKS[i + 1]?.min ?? Infinity)
       return to > from ? [{ rank, top: y(to), height: y(from) - y(to) }] : []
     })
-    const paths = plotted.map((entry) =>
-      entry.history
-        .map((point, i) => `${i ? 'L' : 'M'}${x(point.time).toFixed(1)} ${y(point.rating).toFixed(1)}`)
-        .join(''),
-    )
-    // End labels, nudged apart when the two lines finish close together.
-    const ends = plotted.map((entry) => {
-      const last = entry.history[entry.history.length - 1]
-      return { x: x(last.time), y: y(last.rating) }
-    })
-    if (ends.length === 2 && Math.abs(ends[0].y - ends[1].y) < 16) {
-      const [upper, lower] = ends[0].y <= ends[1].y ? [ends[0], ends[1]] : [ends[1], ends[0]]
-      upper.y -= 8
-      lower.y += 8
-    }
+    // Both lines run to the latest contest of either, so one who stopped early still shows what they hold.
+    const until = times[times.length - 1]
+    const paths = plotted.map((entry) => heldPath(entry.history, until, x, y))
+    // End labels: above the higher line and below the lower one, so neither sits on the other line.
+    const lastY = plotted.map((entry) => y(entry.history[entry.history.length - 1].rating))
+    const below = lastY.length === 2 ? (lastY[1] >= lastY[0] ? 1 : 0) : -1
+    const ends = lastY.map((endY, i) => ({ x: x(until), y: i === below ? endY + 20 : endY - 10 }))
     return {
       plotWidth,
       plotHeight,
@@ -237,7 +237,7 @@ export function CompareChart({ series }: { series: Series[] }) {
                   <text
                     key={entry.handle}
                     x={chart.ends[i].x - 8}
-                    y={chart.ends[i].y - 10}
+                    y={chart.ends[i].y}
                     textAnchor="end"
                     className="fill-ink stroke-surface font-label text-[13px] font-bold [paint-order:stroke] [stroke-width:4px]"
                   >
