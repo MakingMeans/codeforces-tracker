@@ -1,0 +1,174 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens. docs/DESIGN.md explains each one; src/styles/contrast.test.ts
+ * checks that the text pairs keep their contrast, so change values with care.
+ */
+@theme {
+  --color-bg: #0f1923;
+  --color-surface: #16232f;
+  --color-surface-2: #1d2c3a;
+  --color-surface-3: #243545;
+  --color-line: rgb(236 232 225 / 0.12);
+  --color-line-strong: rgb(236 232 225 / 0.28);
+  --color-ink: #ece8e1;
+  --color-ink-muted: #9aa5b1;
+  --color-accent: #ff4655;
+  --color-on-accent: #0f1923;
+  --color-win: #4fe0b6;
+  --color-loss: #ff4655;
+  --color-neutral: #8b97a3;
+
+  /* Activity heatmap: one teal hue, from no submissions to 7+. */
+  --color-heat-0: #1d2c3a;
+  --color-heat-1: #1f634f;
+  --color-heat-2: #2b8d71;
+  --color-heat-3: #36ba96;
+  --color-heat-4: #4fe0b6;
+
+  /* Languages: six categorical slots in a fixed order, then "Other". */
+  --color-lang-1: #3987e5;
+  --color-lang-2: #d95926;
+  --color-lang-3: #199e70;
+  --color-lang-4: #c98500;
+  --color-lang-5: #d55181;
+  --color-lang-6: #9085e9;
+  --color-lang-other: #5c6875;
+
+  --font-display: 'Anton', Impact, 'Arial Narrow', sans-serif;
+  --font-label: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --font-sans: 'Barlow', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --ease-snap: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html,
+  body {
+    background-color: var(--color-bg);
+  }
+
+  body {
+    min-width: 320px;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+  }
+
+  ::selection {
+    background-color: rgb(255 70 85 / 0.35);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  /*
+   * Corners cut at 45° (top-left and bottom-right). The line and the fill are
+   * painted on two pseudo-elements, so the element's own focus outline is never
+   * clipped. Tune with --cut, --cut-fill and --cut-line, e.g.
+   * class="cut [--cut-fill:var(--color-accent)] hover:[--cut-fill:var(--color-ink)]".
+   */
+  .cut {
+    --cut: 12px;
+    --cut-fill: var(--color-surface);
+    --cut-line: var(--color-line);
+    position: relative;
+    isolation: isolate;
+  }
+
+  .cut::before,
+  .cut::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+    transition: background-color 150ms var(--ease-snap);
+  }
+
+  .cut::before {
+    inset: 0;
+    background: var(--cut-line);
+    clip-path: polygon(
+      var(--cut) 0,
+      100% 0,
+      100% calc(100% - var(--cut)),
+      calc(100% - var(--cut)) 100%,
+      0 100%,
+      0 var(--cut)
+    );
+  }
+
+  .cut::after {
+    inset: 1px;
+    background: var(--cut-fill);
+    clip-path: polygon(
+      calc(var(--cut) - 0.4px) 0,
+      100% 0,
+      100% calc(100% - var(--cut) + 0.4px),
+      calc(100% - var(--cut) + 0.4px) 100%,
+      0 100%,
+      0 calc(var(--cut) - 0.4px)
+    );
+  }
+
+  /* Subtle diagonal hatching behind hero areas and headers. */
+  .stripes {
+    background-image: repeating-linear-gradient(-45deg, rgb(236 232 225 / 0.035) 0 1px, transparent 1px 9px);
+  }
+
+  /* L-shaped marks in each corner, over the stripes. */
+  .ticks {
+    --tick: var(--color-line-strong);
+    background-image:
+      linear-gradient(var(--tick), var(--tick)), linear-gradient(var(--tick), var(--tick)),
+      linear-gradient(var(--tick), var(--tick)), linear-gradient(var(--tick), var(--tick)),
+      linear-gradient(var(--tick), var(--tick)), linear-gradient(var(--tick), var(--tick)),
+      linear-gradient(var(--tick), var(--tick)), linear-gradient(var(--tick), var(--tick)),
+      repeating-linear-gradient(-45deg, rgb(236 232 225 / 0.035) 0 1px, transparent 1px 9px);
+    background-size:
+      14px 1px,
+      1px 14px,
+      14px 1px,
+      1px 14px,
+      14px 1px,
+      1px 14px,
+      14px 1px,
+      1px 14px,
+      auto;
+    background-position:
+      top left,
+      top left,
+      top right,
+      top right,
+      bottom left,
+      bottom left,
+      bottom right,
+      bottom right,
+      0 0;
+    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}

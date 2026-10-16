@@ -1,0 +1,5 @@
+dist
+coverage
+package-lock.json
+# Hand-written design references, kept exactly as approved.
+docs/design
