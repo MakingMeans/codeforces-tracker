@@ -114,8 +114,13 @@ All motion is CSS; there is no animation library.
 
 - Transitions take 120–180 ms with easing `cubic-bezier(0.2, 0, 0, 1)` (`--ease-snap`).
 - Panels enter with a 180 ms fade and an 8 px rise (`animate-enter`).
-- `prefers-reduced-motion` turns every transition and animation off, through one rule in
-  `index.css`.
+- The home page comes in once, top to bottom: eyebrow, title, intro, search, chips and the two
+  panels, 80 ms apart, each with a 520 ms fade and a 14 px rise (`animate-fade-up`). The rank
+  ladder's ranks follow, 45 ms apart, from Newbie up.
+- Match history rows lift under the pointer or keyboard focus: `scale(1.012)` and a touch
+  brighter, over 160 ms. The row grows in place and its neighbours do not move.
+- `prefers-reduced-motion` turns every transition and animation off, delays included, through one
+  rule in `index.css`. The row lift is off too.
 - No layout animations on long lists, such as the match history.
 - The loading indicator is a diagonal scanning bar (`animate-scan`), which stays still with reduced
   motion.
