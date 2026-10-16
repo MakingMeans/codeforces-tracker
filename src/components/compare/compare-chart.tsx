@@ -1,5 +1,7 @@
 import { useMemo, useState, type KeyboardEvent, type PointerEvent } from 'react'
 import {
+  diamond,
+  markerSize,
   monthTicks,
   nearestIndex,
   ratingDomain,
@@ -7,7 +9,7 @@ import {
   ratingTicks,
   timeDomain,
 } from '../../lib/charts/rating-scale'
-import { formatMonthYear } from '../../lib/codeforces/format'
+import { formatDate } from '../../lib/codeforces/format'
 import { rankFor, RANKS } from '../../lib/codeforces/ranks'
 import type { RatingPoint } from '../../lib/codeforces/user'
 import { useElementWidth } from '../../lib/use-element-width'
@@ -23,16 +25,20 @@ export interface Series {
 
 const HEIGHT = 280
 const MARGIN = { top: 16, right: 18, bottom: 30, left: 46 }
-const TOOLTIP_WIDTH = 220
+const TOOLTIP_WIDTH = 240
 
-/** The rating a series held at `time`: its last point at or before it. */
-function ratingAt(history: RatingPoint[], time: number) {
-  let rating: number | null = null
+/**
+ * What a series reads at `time`: the rating it held, from its last contest at or
+ * before then. `live` when that contest is at `time` itself, so it has a point
+ * on the line there.
+ */
+function readingAt(history: RatingPoint[], time: number) {
+  let held: RatingPoint | null = null
   for (const point of history) {
     if (point.time > time) break
-    rating = point.rating
+    held = point
   }
-  return rating
+  return held ? { rating: held.rating, since: held.time, live: held.time === time } : null
 }
 
 function Swatch({ series }: { series: Series }) {
@@ -53,8 +59,10 @@ function Swatch({ series }: { series: Series }) {
 
 /**
  * Both ratings over time on the rank bands, each carried on flat to today
- * after its last contest. The cursor reads what each one held at that moment;
- * arrow keys step through every contest of either.
+ * after its last contest. Diamonds mark contests, and the cursor only lights
+ * up a diamond that is there: the other player's rating at that moment is in
+ * the tooltip, as the one held since their last contest. Arrow keys step
+ * through every contest of either.
  */
 export function CompareChart({ series }: { series: Series[] }) {
   const [ref, width] = useElementWidth<HTMLDivElement>()
@@ -82,6 +90,10 @@ export function CompareChart({ series }: { series: Series[] }) {
     // A rating holds until the next contest, so both lines run on flat to today.
     const until = Math.max(now, times[times.length - 1])
     const paths = plotted.map((entry) => ratingPath(entry.history, until, x, y))
+    const markers = plotted.map((entry) => ({
+      r: markerSize(entry.history.length),
+      points: entry.history.map((point) => ({ time: point.time, x: x(point.time), y: y(point.rating) })),
+    }))
     // End labels: above the higher line and below the lower one, so neither sits on the other line.
     const lastY = plotted.map((entry) => y(entry.history[entry.history.length - 1].rating))
     const below = lastY.length === 2 ? (lastY[1] >= lastY[0] ? 1 : 0) : -1
@@ -93,6 +105,7 @@ export function CompareChart({ series }: { series: Series[] }) {
       y,
       bands,
       paths,
+      markers,
       ends,
       xs: times.map(x),
       ratingTicks: ratingTicks(lo, hi, y),
@@ -108,7 +121,7 @@ export function CompareChart({ series }: { series: Series[] }) {
   const time = active === null ? null : times[active]
   const cursorX = chart && active !== null ? chart.xs[active] : 0
   const tooltipLeft = cursorX + 14 + TOOLTIP_WIDTH <= width ? cursorX + 14 : Math.max(0, cursorX - 14 - TOOLTIP_WIDTH)
-  const readings = time === null ? [] : series.map((entry) => ({ entry, rating: ratingAt(entry.history, time) }))
+  const readings = time === null ? [] : series.map((entry) => ({ entry, reading: readingAt(entry.history, time) }))
 
   function onPointer(event: PointerEvent<SVGRectElement>) {
     if (!chart) return
@@ -221,18 +234,28 @@ export function CompareChart({ series }: { series: Series[] }) {
                 strokeLinejoin="round"
               />
             ))}
-            {readings.map(({ entry, rating }) =>
-              rating === null ? null : (
-                <circle
+            {plotted.map((entry, i) =>
+              chart.markers[i].r > 0 ? (
+                <g key={entry.handle} fill={entry.color} strokeWidth={1.5} className="stroke-surface">
+                  {chart.markers[i].points.map((point) =>
+                    point.time === time ? null : (
+                      <polygon key={point.time} points={diamond(point.x, point.y, chart.markers[i].r)} />
+                    ),
+                  )}
+                </g>
+              ) : null,
+            )}
+            {/* Only a player with a contest at the cursor gets a marker: it is a point on their line. */}
+            {readings.map(({ entry, reading }) =>
+              reading?.live ? (
+                <polygon
                   key={entry.handle}
-                  cx={cursorX}
-                  cy={chart.y(rating)}
-                  r={4.5}
+                  points={diamond(cursorX, chart.y(reading.rating), 6)}
                   fill={entry.color}
                   strokeWidth={2}
                   className="stroke-surface"
                 />
-              ),
+              ) : null,
             )}
             {time === null
               ? plotted.map((entry, i) => (
@@ -265,7 +288,15 @@ export function CompareChart({ series }: { series: Series[] }) {
         <div aria-live="polite" className="sr-only">
           {time === null
             ? ''
-            : `${formatMonthYear(time)}: ${readings.map(({ entry, rating }) => `${entry.handle} ${rating ?? 'unrated'}`).join(', ')}`}
+            : `${formatDate(time)}: ${readings
+                .map(({ entry, reading }) =>
+                  reading === null
+                    ? `${entry.handle} unrated`
+                    : reading.live
+                      ? `${entry.handle} ${reading.rating} after a contest`
+                      : `${entry.handle} ${reading.rating}, held since ${formatDate(reading.since)}`,
+                )
+                .join(', ')}`}
         </div>
 
         {time !== null ? (
@@ -274,16 +305,24 @@ export function CompareChart({ series }: { series: Series[] }) {
             className="cut pointer-events-none absolute z-10 grid gap-1.5 px-3 py-2.5 [--cut:10px] [--cut-fill:var(--color-surface-3)] [--cut-line:var(--color-line-strong)]"
             style={{ left: tooltipLeft, top: MARGIN.top, width: TOOLTIP_WIDTH }}
           >
-            <span className="text-xs text-ink-muted">{formatMonthYear(time)}</span>
-            {readings.map(({ entry, rating }) => (
+            <span className="text-xs text-ink-muted">{formatDate(time)}</span>
+            {readings.map(({ entry, reading }) => (
               <span key={entry.handle} className="flex items-center gap-2">
                 <Swatch series={entry} />
-                <span className="min-w-0 flex-1 truncate text-[13px] font-semibold">{entry.handle}</span>
-                {rating === null ? (
+                <span className="grid min-w-0 flex-1">
+                  <span className="truncate text-[13px] font-semibold">{entry.handle}</span>
+                  {reading && !reading.live ? (
+                    <span className="truncate text-xs text-ink-muted">Held since {formatDate(reading.since)}</span>
+                  ) : null}
+                </span>
+                {reading === null ? (
                   <span className="text-[13px] text-ink-muted">Unrated</span>
                 ) : (
-                  <span className="font-display text-lg leading-none" style={{ color: rankFor(rating).color }}>
-                    {rating}
+                  <span
+                    className="font-display text-lg leading-none"
+                    style={{ color: reading.live ? rankFor(reading.rating).color : 'var(--color-ink-muted)' }}
+                  >
+                    {reading.rating}
                   </span>
                 )}
               </span>

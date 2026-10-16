@@ -1,5 +1,13 @@
 import { useMemo, useState, type KeyboardEvent, type PointerEvent } from 'react'
-import { monthTicks, nearestIndex, ratingDomain, ratingTicks, timeDomain } from '../../lib/charts/rating-scale'
+import {
+  diamond,
+  markerSize,
+  monthTicks,
+  nearestIndex,
+  ratingDomain,
+  ratingTicks,
+  timeDomain,
+} from '../../lib/charts/rating-scale'
 import { cn } from '../../lib/cn'
 import { formatDate, formatDelta, formatNumber } from '../../lib/codeforces/format'
 import { rankFor, RANKS } from '../../lib/codeforces/ranks'
@@ -9,10 +17,6 @@ import { useElementWidth } from '../../lib/use-element-width'
 const HEIGHT = 260
 const MARGIN = { top: 16, right: 18, bottom: 30, left: 46 }
 const TOOLTIP_WIDTH = 248
-
-/** Diamond markers: smaller as contests pile up, and only on hover past 300. */
-const markerSize = (count: number) => (count >= 300 ? 0 : count >= 120 ? 2.5 : 3.5)
-const diamond = (cx: number, cy: number, r: number) => `${cx},${cy - r} ${cx + r},${cy} ${cx},${cy + r} ${cx - r},${cy}`
 
 /**
  * Rating over time on the rank bands. The cursor snaps to the nearest contest;
