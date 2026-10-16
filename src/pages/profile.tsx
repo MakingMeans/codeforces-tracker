@@ -1,5 +1,6 @@
 import { RotateCw } from 'lucide-react'
 import { useEffect } from 'react'
+import { RatingChart } from '../components/charts/rating-chart'
 import { ContestSummaryCard } from '../components/profile/contest-summary-card'
 import { ProfileHeader } from '../components/profile/profile-header'
 import { RatingCard } from '../components/profile/rating-card'
@@ -72,7 +73,7 @@ function ProfileBody({ user, details }: { user: ProfileUser; details: ProfileDet
       </aside>
       <div className="grid min-w-0 content-start gap-4">
         <Panel title="Rating" aside={plural(details.ratingHistory.length, 'rated contest')}>
-          <p className="text-sm text-ink-muted">The rating chart is the next piece being built.</p>
+          <RatingChart history={details.ratingHistory} />
         </Panel>
       </div>
     </>
