@@ -221,21 +221,6 @@
     --tint: rgb(255 70 85 / 0.16);
     --bar: var(--color-loss);
   }
-  .contest-row > * {
-    position: relative;
-    z-index: 1;
-  }
-  .contest-row .cr-pattern {
-    position: absolute;
-    z-index: 0;
-    inset: 0 0 0 auto;
-    width: 240px;
-    height: 100%;
-    opacity: 0.38;
-    color: var(--bar);
-    pointer-events: none;
-    mask-image: linear-gradient(90deg, transparent, #000 75%);
-  }
   .cr-date {
     grid-area: date;
   }
@@ -296,8 +281,7 @@
   .cr-date .cr-clock,
   .cr-ratings .cr-ratings-label,
   .cr-delta .cr-tag,
-  .contest-row .cr-link,
-  .contest-row .cr-pattern {
+  .contest-row .cr-link {
     display: none;
   }
   .cr-detail {
