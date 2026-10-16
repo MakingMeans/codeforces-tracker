@@ -36,6 +36,13 @@ export function navigate(route: Partial<Route>, { replace = false } = {}) {
   if (!replace) window.scrollTo({ top: 0 })
 }
 
+export type RouteParam = keyof Route
+
+/** Rewrites one parameter of the current URL in place, keeping the others. */
+export function replaceRouteParam(param: RouteParam, value: string) {
+  navigate({ ...readRoute(location.search), [param]: value }, { replace: true })
+}
+
 function subscribe(onChange: () => void) {
   window.addEventListener('popstate', onChange)
   window.addEventListener(NAVIGATE, onChange)

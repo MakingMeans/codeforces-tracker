@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { formatAgo, formatDelta, formatMonthYear, formatNumber } from '../../lib/codeforces/format'
 import type { ProfileUser } from '../../lib/codeforces/user'
 import { useNow } from '../../lib/use-now'
+import { CompareForm } from '../compare/compare-form'
 import { RankEmblem } from '../rank-emblem'
 import { ButtonLink } from '../ui/button'
 import { HandleName } from './handle-name'
@@ -70,7 +71,7 @@ export function ProfileHeader({ user }: { user: ProfileUser }) {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-3 sm:col-span-2 lg:col-span-3">
+        <div className="flex flex-wrap items-start gap-3 sm:col-span-2 lg:col-span-3">
           <ButtonLink
             variant="primary"
             href={`https://codeforces.com/profile/${encodeURIComponent(user.handle)}`}
@@ -80,6 +81,7 @@ export function ProfileHeader({ user }: { user: ProfileUser }) {
             Open on Codeforces
             <ArrowUpRight aria-hidden />
           </ButtonLink>
+          <CompareForm handle={user.handle} />
         </div>
       </div>
     </section>

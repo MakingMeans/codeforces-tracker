@@ -5,7 +5,7 @@ import type { ProfileUser } from './codeforces/user'
 import { describeLoadError, type LoadProblem } from './errors'
 import { cacheProfile, getCachedProfile } from './profile-cache'
 import { addRecentSearch } from './recent-searches'
-import { navigate } from './route'
+import { replaceRouteParam, type RouteParam } from './route'
 
 export interface ProfileState {
   /** Lower-cased handle this state belongs to. */
@@ -32,7 +32,7 @@ function start(key: string, before: ProfileState | null): ProfileState {
  * Loads a profile: the header first, then everything else. Changing the handle
  * cancels whatever is still in flight, so two users' data never mix.
  */
-export function useProfile(handle: string) {
+export function useProfile(handle: string, param: RouteParam = 'handle') {
   const key = handle.toLowerCase()
   const [state, setState] = useState<ProfileState>(() => start(key, null))
   const [attempt, setAttempt] = useState(0)
@@ -41,7 +41,15 @@ export function useProfile(handle: string) {
   if (state.key !== key) setState(start(key, state))
 
   useEffect(() => {
-    if (getCachedProfile(key)) return
+    // Show Codeforces' own capitalisation in the address bar.
+    const canonical = (name: string) => {
+      if (new URLSearchParams(location.search).get(param) !== name) replaceRouteParam(param, name)
+    }
+    const cached = getCachedProfile(key)
+    if (cached) {
+      canonical(cached.user.handle)
+      return
+    }
     const controller = new AbortController()
     const { signal } = controller
     const update = (patch: Partial<ProfileState>) =>
@@ -52,10 +60,7 @@ export function useProfile(handle: string) {
         const user = await loadUser(key, signal)
         update({ user, previous: null })
         addRecentSearch(user.handle)
-        // Show Codeforces' own capitalisation in the address bar.
-        if (new URLSearchParams(location.search).get('handle') !== user.handle) {
-          navigate({ handle: user.handle }, { replace: true })
-        }
+        canonical(user.handle)
 
         const details = await loadDetails(user.handle, signal)
         const fetchedAt = Date.now()
@@ -69,7 +74,7 @@ export function useProfile(handle: string) {
     })()
 
     return () => controller.abort()
-  }, [key, attempt])
+  }, [key, attempt, param])
 
   const retry = useCallback(() => {
     setState((current) => ({ ...current, problem: null }))
