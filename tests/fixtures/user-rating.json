@@ -1,0 +1,38 @@
+[
+  {
+    "contestId": 1990,
+    "contestName": "Codeforces Round 990 (Div. 2)",
+    "handle": "Sample_Handle",
+    "rank": 8000,
+    "ratingUpdateTimeSeconds": 1780333200,
+    "oldRating": 0,
+    "newRating": 1400
+  },
+  {
+    "contestId": 2009,
+    "contestName": "Codeforces Round 999 (Div. 2)",
+    "handle": "Sample_Handle",
+    "rank": 5000,
+    "ratingUpdateTimeSeconds": 1782928800,
+    "oldRating": 1400,
+    "newRating": 1400
+  },
+  {
+    "contestId": 2001,
+    "contestName": "Codeforces Round 1001 (Div. 2)",
+    "handle": "Sample_Handle",
+    "rank": 1631,
+    "ratingUpdateTimeSeconds": 1785607200,
+    "oldRating": 1400,
+    "newRating": 1462
+  },
+  {
+    "contestId": 2002,
+    "contestName": "Educational Codeforces Round 190 (Rated for Div. 2)",
+    "handle": "Sample_Handle",
+    "rank": 4210,
+    "ratingUpdateTimeSeconds": 1787306400,
+    "oldRating": 1462,
+    "newRating": 1429
+  }
+]

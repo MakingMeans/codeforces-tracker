@@ -1,0 +1,16 @@
+{
+  "handle": "Sample_Handle",
+  "rating": 1429,
+  "maxRating": 1462,
+  "rank": "specialist",
+  "maxRank": "specialist",
+  "titlePhoto": "//userpic.codeforces.org/1/title/abc.jpg",
+  "avatar": "//userpic.codeforces.org/1/avatar/abc.jpg",
+  "organization": "Example University",
+  "city": "Bogotá",
+  "country": "Colombia",
+  "contribution": 12,
+  "friendOfCount": 48,
+  "registrationTimeSeconds": 1678449600,
+  "lastOnlineTimeSeconds": 1792058400
+}
