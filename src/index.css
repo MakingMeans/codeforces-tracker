@@ -48,6 +48,15 @@
       background-position: 28px 0;
     }
   }
+
+  /* Sections arriving: a quick fade and an 8 px rise (instant under reduced motion). */
+  --animate-enter: enter 180ms var(--ease-snap) both;
+  @keyframes enter {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
 }
 
 @layer base {
