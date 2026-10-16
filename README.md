@@ -8,8 +8,12 @@ match history, styled like a game tracker. Think tracker.gg for Valorant, but fo
 **Live:** https://makingmeans.github.io/codeforces-tracker/
 **Example:** https://makingmeans.github.io/codeforces-tracker/?handle=tourist
 
-> **Status: under construction.** The feature list below describes the target; the [roadmap](#roadmap)
-> shows what has landed so far.
+![A profile on CF/TRACKER: header with rank emblem, rating chart, activity heatmap, solved by difficulty and the match history](docs/screenshots/profile.jpg)
+
+<p>
+  <img src="docs/screenshots/home.jpg" alt="Home page with the handle search, upcoming contests and the rank ladder" width="68%">
+  <img src="docs/screenshots/mobile.jpg" alt="A profile header on a phone" width="28%">
+</p>
 
 ## Features
 
@@ -61,8 +65,10 @@ directly; it answers with `Access-Control-Allow-Origin: *`, so no proxy or key i
 - **Caching.** `contest.list` is the same for everyone and is kept in `localStorage` for an hour. Each
   profile is kept in memory and in `sessionStorage` for five minutes, so going back is instant. Only
   the processed profile is stored: raw submissions can exceed 6 MB.
-- **Big accounts.** `user.status` returns every submission ever made (over 11,000 for some users). It is
-  processed once and the results are memoised.
+- **Big accounts.** `user.status` returns every submission ever made (over 11,000 for some users, about
+  6 MB of JSON). It is downloaded, parsed and processed once, in a Web Worker, so the page never freezes;
+  the results then render in a React transition. Measured on the production build with `jiangly`, no
+  main-thread task reaches 50 ms on a desktop CPU.
 - **Photos.** `userpic.codeforces.org` sometimes fails, and its CDN can cache the error for days. The
   photo is tried as given, then with a cache-busting query, then the small avatar, then a neutral local
   image.
@@ -96,18 +102,25 @@ Then open http://localhost:5173/codeforces-tracker/. The sub-path matches the on
 | `npm test`        | Vitest, for the data rules                        |
 | `npm run format`  | Prettier                                          |
 
+The tests run in the America/New_York time zone on purpose, so the day and streak rules are checked
+across a daylight-saving change.
+
 ## Project structure
 
 ```
 src/
   lib/
     api/          Codeforces client: retries, rate limiting, cancellation, typed errors
-    codeforces/   pure data rules: ranks, contests, activity, insights (tested)
-  components/     layout/ · ui/ · search/ · profile/ · charts/ · history/ · states/
+    codeforces/   pure data rules: ranks, contests, activity, insights, comparison (tested)
+    charts/       scales and grids behind the charts (tested)
+    emblem.ts     the rank emblems as SVG markup (tested against docs/design)
+  workers/        the details worker: downloads and processes user.status off the main thread
+  components/     layout · ui · search · home · profile · charts · history · compare · states
   pages/          home, profile, compare
+  index.css       design tokens and the few component styles written as CSS
 tests/fixtures/   small hand-written API responses used by the tests
 docs/DESIGN.md    design system: colours, type, shapes, charts, emblems
-docs/design/      rank emblems: source (rank-emblems.js), reference sheet, exported SVGs
+docs/design/      approved visual sample, rank emblem source, reference sheet and SVG exports
 public/           static files, resolved through import.meta.env.BASE_URL
 ```
 
@@ -135,17 +148,18 @@ Issues and pull requests are welcome.
 
 - [x] Plan and README
 - [x] Design system and rank emblems (`docs/DESIGN.md`, `docs/design/`)
-- [ ] Project scaffold, CI and GitHub Pages deploy
-- [ ] Data layer ported from the reference, with tests
-- [ ] Home page: search, recent searches, examples, rank ladder, upcoming contests
-- [ ] Profile header, rank emblems, loading and error states
-- [ ] Rating chart
-- [ ] Activity heatmap, solved and streak cards
-- [ ] Match history
-- [ ] Difficulty, tags, languages and contest summary
-- [ ] Performance pass for very large accounts
-- [ ] Compare two handles
-- [ ] Contest-type patterns, accessibility pass, screenshots
+- [x] Project scaffold and CI
+- [x] Data layer ported from the reference, with tests
+- [x] Home page: search, recent searches, examples, rank ladder, upcoming contests
+- [x] Profile header, rank emblems, loading and error states
+- [x] Rating chart
+- [x] Activity heatmap, solved and streak cards
+- [x] Match history
+- [x] Difficulty, tags, languages and contest summary
+- [x] Performance pass for very large accounts (Web Worker)
+- [x] Compare two handles
+- [x] Contest-type patterns, accessibility pass, screenshots
+- [ ] First deployment to GitHub Pages
 
 ## Credits
 

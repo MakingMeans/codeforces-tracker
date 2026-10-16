@@ -66,8 +66,12 @@ Validated with the `dataviz` palette validator against `surface`.
 - **Difficulty bars.** Each bar wears the rank colour of its difficulty, as Codeforces colours
   problems. The axis labels carry the value, so colour is never the only cue.
 - **Rating chart.** The line is `ink`, the one colour that stays clear of every rank band behind
-  it. The comparison view's second series is still to be chosen with the validator: `ink` and
-  `accent` fail its lightness and chroma checks.
+  it.
+- **Comparison chart.** The first player is blue `#3987E5` with a solid line, the second orange
+  `#D95926` with a dashed line: the first two language slots, which pass every check as a pair,
+  even with all pairs compared. A legend and a label at the end of each line name them, so neither
+  colour nor dash is the only cue. `ink` with `accent` was rejected: `ink` fails the lightness and
+  chroma checks for a series colour.
 
 ## Type
 
@@ -99,11 +103,15 @@ All from Google Fonts with `display=swap`.
 
 ## Motion
 
-- Transitions take 120–180 ms with easing `cubic-bezier(0.2, 0, 0, 1)`.
-- Entrances fade in and move up 8 px.
-- `prefers-reduced-motion` turns transitions off. Motion runs with `MotionConfig reducedMotion="user"`.
+All motion is CSS; there is no animation library.
+
+- Transitions take 120–180 ms with easing `cubic-bezier(0.2, 0, 0, 1)` (`--ease-snap`).
+- Panels enter with a 180 ms fade and an 8 px rise (`animate-enter`).
+- `prefers-reduced-motion` turns every transition and animation off, through one rule in
+  `index.css`.
 - No layout animations on long lists, such as the match history.
-- The loading indicator is a diagonal scanning bar, which stays still with reduced motion.
+- The loading indicator is a diagonal scanning bar (`animate-scan`), which stays still with reduced
+  motion.
 
 ## Match history rows
 
