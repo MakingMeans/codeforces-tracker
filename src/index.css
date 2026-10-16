@@ -40,6 +40,14 @@
   --font-sans: 'Barlow', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   --ease-snap: cubic-bezier(0.2, 0, 0, 1);
+
+  /* The loading bar: diagonal stripes sliding sideways (still under reduced motion). */
+  --animate-scan: scan 0.9s linear infinite;
+  @keyframes scan {
+    to {
+      background-position: 28px 0;
+    }
+  }
 }
 
 @layer base {
