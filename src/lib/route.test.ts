@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { readRoute, routeHref } from './route'
+import { readRoute, routeHref, sectionOf } from './route'
 
 const BASE = import.meta.env.BASE_URL
 
@@ -42,5 +42,22 @@ describe('readRoute', () => {
   it('reads flags and trims values', () => {
     expect(readRoute('?rankings')).toMatchObject({ rankings: true, groups: false, handle: null })
     expect(readRoute('?handle=%20tourist%20')).toMatchObject({ handle: 'tourist' })
+  })
+})
+
+describe('compare and sections', () => {
+  it('writes the compare page, with a first player', () => {
+    expect(routeHref({ compare: true })).toBe(`${BASE}?compare`)
+    expect(routeHref({ compare: true, handle: 'tourist' })).toBe(`${BASE}?compare&handle=tourist`)
+    expect(readRoute('?compare&handle=tourist')).toMatchObject({ compare: true, handle: 'tourist' })
+  })
+
+  it('puts each page in its section', () => {
+    expect(sectionOf(readRoute(''))).toBe('players')
+    expect(sectionOf(readRoute('?handle=tourist'))).toBe('players')
+    expect(sectionOf(readRoute('?compare'))).toBe('compare')
+    expect(sectionOf(readRoute('?handle=tourist&vs=Benq'))).toBe('compare')
+    expect(sectionOf(readRoute('?country=Colombia'))).toBe('rankings')
+    expect(sectionOf(readRoute('?group=abc123'))).toBe('groups')
   })
 })
