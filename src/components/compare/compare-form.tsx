@@ -3,6 +3,7 @@ import { useId, useRef, useState, type FormEvent } from 'react'
 import { cleanHandle, handleProblem } from '../../lib/handle'
 import { navigate } from '../../lib/route'
 import { Button } from '../ui/button'
+import { HandleField } from '../search/handle-field'
 import { fieldClass } from '../ui/field-class'
 
 /** "Compare" on a profile: opens a small field for the second handle. */
@@ -29,12 +30,16 @@ export function CompareForm({ handle }: { handle: string }) {
 
   function submit(event: FormEvent) {
     event.preventDefault()
+    go(value)
+  }
+
+  function go(typed: string) {
     const found =
-      handleProblem(value) ??
-      (cleanHandle(value).toLowerCase() === handle.toLowerCase() ? 'Pick someone else to compare with.' : null)
+      handleProblem(typed) ??
+      (cleanHandle(typed).toLowerCase() === handle.toLowerCase() ? 'Pick someone else to compare with.' : null)
     setProblem(found)
     if (found) return
-    navigate({ handle, vs: cleanHandle(value) })
+    navigate({ handle, vs: cleanHandle(typed) })
   }
 
   return (
@@ -46,25 +51,32 @@ export function CompareForm({ handle }: { handle: string }) {
         >
           Compare with
         </label>
-        <input
-          ref={inputRef}
-          id={`${id}-vs`}
-          value={value}
-          onChange={(event) => {
-            setValue(event.target.value)
-            if (problem) setProblem(null)
-          }}
-          onKeyDown={(event) => {
-            if (event.key === 'Escape') setOpen(false)
-          }}
-          placeholder="Another handle"
-          autoComplete="off"
-          autoCapitalize="none"
-          spellCheck={false}
-          aria-invalid={problem ? true : undefined}
-          aria-describedby={`${id}-problem`}
-          className={fieldClass('w-48 py-2')}
-        />
+        <div className="relative z-20 w-48">
+          <HandleField
+            ref={inputRef}
+            id={`${id}-vs`}
+            value={value}
+            onValueChange={(next) => {
+              setValue(next)
+              if (problem) setProblem(null)
+            }}
+            onPick={(picked) => {
+              setValue(picked)
+              go(picked)
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') setOpen(false)
+            }}
+            placeholder="Another handle"
+            autoComplete="off"
+            autoCapitalize="none"
+            spellCheck={false}
+            aria-invalid={problem ? true : undefined}
+            aria-describedby={`${id}-problem`}
+            className={fieldClass('w-full py-2')}
+            listClassName="w-72"
+          />
+        </div>
         <Button type="submit" variant="primary" className="px-4 py-2">
           Go
         </Button>

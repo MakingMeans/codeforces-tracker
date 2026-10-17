@@ -48,6 +48,12 @@ export interface Suggestion {
   players: number
 }
 
+export interface HandleSuggestion {
+  handle: string
+  rating: number
+  country?: string
+}
+
 export interface CountrySummary {
   country: string
   players: number
@@ -225,6 +231,42 @@ export function createRankings(data: Rankings) {
     })
   }
 
+  let lowerHandles: string[] | null = null
+  /**
+   * Handles for what is being typed: those that start with it first, then those
+   * that contain it, each best rated first (the snapshot's own order).
+   */
+  function suggestHandles(query: string, limit = 8): HandleSuggestion[] {
+    const q = query.trim().toLowerCase()
+    if (!q) return []
+    lowerHandles ??= data.handles.map((handle) => handle.toLowerCase())
+    const starts: number[] = []
+    const contains: number[] = []
+    for (let row = 0; row < lowerHandles.length && starts.length < limit; row++) {
+      const at = lowerHandles[row].indexOf(q)
+      if (at === 0) starts.push(row)
+      else if (at > 0 && contains.length < limit) contains.push(row)
+    }
+    return [...starts, ...contains].slice(0, limit).map((row) => player(row))
+  }
+
+  /** One snapshot row as a suggestion. */
+  const player = (row: number): HandleSuggestion => ({
+    handle: data.handles[row],
+    rating: data.rating[row],
+    country: data.country[row] >= 0 ? data.countries[data.country[row]] : undefined,
+  })
+
+  /** A player's row in the snapshot, by handle in any case, if they are in it. */
+  function find(handle: string): HandleSuggestion | null {
+    let row = data.handles.indexOf(handle)
+    if (row < 0) {
+      lowerHandles ??= data.handles.map((item) => item.toLowerCase())
+      row = lowerHandles.indexOf(handle.toLowerCase())
+    }
+    return row < 0 ? null : player(row)
+  }
+
   let summaries: CountrySummary[] | null = null
   /** Every country, most players first, with its average and best rating. */
   function countries(): CountrySummary[] {
@@ -252,6 +294,8 @@ export function createRankings(data: Rankings) {
     stats,
     standing,
     suggest,
+    suggestHandles,
+    find,
     countries,
   }
 }

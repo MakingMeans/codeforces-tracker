@@ -102,7 +102,9 @@ export function RankingsHome() {
               a day.
             </p>
           </div>
-          <ScopedSearch scopes={['country', 'city', 'org']} />
+          <div className="relative z-20">
+            <ScopedSearch scopes={['country', 'city', 'org']} />
+          </div>
         </div>
       </section>
       <div className="mx-auto grid max-w-[1240px] grid-cols-[minmax(0,1fr)] gap-4 px-4 py-8 sm:px-6">
