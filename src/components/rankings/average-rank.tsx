@@ -3,7 +3,7 @@ import { RankEmblem } from '../rank-emblem'
 
 const nameOf = (average: number) => [rankFor(average).name, romanFor(divisionFor(average))].filter(Boolean).join(' ')
 
-/** A big emblem of the rank and division an average rating falls in, next to a ranking's or group's title. */
+/** A big emblem of the rank and division an average rating falls in, next to a ranking's title. */
 export function AverageRankEmblem({ average }: { average: number | null }) {
   if (average === null) return null
   return (

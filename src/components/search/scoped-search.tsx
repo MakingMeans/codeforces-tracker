@@ -10,10 +10,9 @@ const LABEL: Record<SearchScope, string> = {
   country: 'Country',
   city: 'City',
   org: 'Organization',
-  group: 'Group',
 }
 
-/** One search, several things to find: a player by handle, a place's ranking, or one of your groups. */
+/** One search, several things to find: a player by handle, or a country's, city's or organization's ranking. */
 export function ScopedSearch({ scopes }: { scopes: SearchScope[] }) {
   const [scope, setScope] = useState(scopes[0])
 

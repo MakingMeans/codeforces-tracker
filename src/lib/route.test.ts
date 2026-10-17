@@ -18,13 +18,6 @@ describe('routeHref', () => {
     expect(routeHref({ org: 'Universidad El Bosque' })).toBe(`${BASE}?org=Universidad+El+Bosque`)
   })
 
-  it('writes groups, with members as a comma list', () => {
-    expect(routeHref({ groups: true })).toBe(`${BASE}?groups`)
-    expect(routeHref({ group: 'abc123', name: 'Mi equipo', members: 'tourist,Benq' })).toBe(
-      `${BASE}?group=abc123&name=Mi+equipo&members=tourist,Benq`,
-    )
-  })
-
   it('leaves out a second handle without a first, and a city without a country', () => {
     expect(routeHref({ vs: 'Benq' })).toBe(BASE)
     expect(routeHref({ city: 'Bogotá' })).toBe(BASE)
@@ -35,12 +28,12 @@ describe('readRoute', () => {
   it('reads back what routeHref writes', () => {
     const route = { country: 'Colombia', city: 'Bogotá', focus: 'MakingMeans' }
     expect(readRoute(routeHref(route).slice(BASE.length))).toMatchObject(route)
-    const group = { group: 'abc123', name: 'Mi equipo', members: 'tourist,Benq' }
-    expect(readRoute(routeHref(group).slice(BASE.length))).toMatchObject(group)
+    const org = { org: 'Universidad El Bosque' }
+    expect(readRoute(routeHref(org).slice(BASE.length))).toMatchObject(org)
   })
 
   it('reads flags and trims values', () => {
-    expect(readRoute('?rankings')).toMatchObject({ rankings: true, groups: false, handle: null })
+    expect(readRoute('?rankings')).toMatchObject({ rankings: true, compare: false, handle: null })
     expect(readRoute('?handle=%20tourist%20')).toMatchObject({ handle: 'tourist' })
   })
 })
@@ -58,6 +51,6 @@ describe('compare and sections', () => {
     expect(sectionOf(readRoute('?compare'))).toBe('compare')
     expect(sectionOf(readRoute('?handle=tourist&vs=Benq'))).toBe('compare')
     expect(sectionOf(readRoute('?country=Colombia'))).toBe('rankings')
-    expect(sectionOf(readRoute('?group=abc123'))).toBe('groups')
+    expect(sectionOf(readRoute('?org=ITMO+University'))).toBe('rankings')
   })
 })

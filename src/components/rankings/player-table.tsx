@@ -15,8 +15,6 @@ export interface PlayerRow {
   active?: boolean
   /** One cell per extra column. */
   extra?: ReactNode[]
-  /** A control at the end of the row, such as Remove. */
-  action?: ReactNode
   /** The player the visitor came from, marked in the list (and found by `tr[data-focus]`). */
   highlight?: boolean
 }
@@ -28,14 +26,13 @@ interface PlayerTableProps {
   rows: PlayerRow[]
   /** Rows after this index come after a "…" gap (a far-down player shown out of order). */
   gapAfter?: number
-  hasAction?: boolean
 }
 
 const cell = 'bg-surface-2 px-3 py-2'
 const extraCell = 'hidden sm:table-cell'
 
 /** Players in order: place, emblem and handle, rating and best rating, and any extra columns. */
-export function PlayerTable({ caption, extraColumns = [], rows, gapAfter, hasAction }: PlayerTableProps) {
+export function PlayerTable({ caption, extraColumns = [], rows, gapAfter }: PlayerTableProps) {
   return (
     <div className="min-w-0">
       {/* Fixed layout: the player column takes what the numbers leave, and long handles are cut, not overflowing. */}
@@ -60,17 +57,12 @@ export function PlayerTable({ caption, extraColumns = [], rows, gapAfter, hasAct
                 {column}
               </th>
             ))}
-            {hasAction ? (
-              <th scope="col" className="w-14 px-3 py-1">
-                <span className="sr-only">Actions</span>
-              </th>
-            ) : null}
           </tr>
         </thead>
         <tbody>
           {rows.map((row, i) => {
             const rank = rankFor(row.rating)
-            const columns = 4 + extraColumns.length + (hasAction ? 1 : 0)
+            const columns = 4 + extraColumns.length
             return [
               gapAfter !== undefined && i === gapAfter + 1 ? (
                 <tr key="gap" aria-hidden>
@@ -127,7 +119,6 @@ export function PlayerTable({ caption, extraColumns = [], rows, gapAfter, hasAct
                     </span>
                   </td>
                 ))}
-                {hasAction ? <td className={cn(cell, 'text-right')}>{row.action}</td> : null}
               </tr>,
             ]
           })}

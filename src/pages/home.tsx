@@ -27,7 +27,7 @@ export function Home() {
             </p>
           </div>
           <div className={`${FADE} relative z-20 [animation-delay:240ms]`}>
-            <ScopedSearch scopes={['player', 'country', 'city', 'org', 'group']} />
+            <ScopedSearch scopes={['player', 'country', 'city', 'org']} />
           </div>
           <div className={`${FADE} grid gap-3 [animation-delay:320ms]`}>
             <RecentSearches />

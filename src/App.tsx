@@ -6,15 +6,12 @@ import { TopBar } from './components/layout/top-bar'
 import { SearchBox } from './components/search/search-box'
 import { InvalidHandle } from './components/states/invalid-handle'
 import { StateMessage } from './components/states/state-message'
-import { useGroups } from './lib/groups'
 import { cleanHandle, handleProblem } from './lib/handle'
 import { scopeFromRoute, scopeName } from './lib/rankings/rankings'
 import { sectionOf, useRoute } from './lib/route'
 import { site } from './lib/site'
 import { Compare } from './pages/compare'
 import { CompareStart } from './pages/compare-start'
-import { GroupPage } from './pages/group'
-import { GroupsHome } from './pages/groups'
 import { Home } from './pages/home'
 import { Profile } from './pages/profile'
 import { RankingPage } from './pages/ranking'
@@ -28,30 +25,24 @@ export default function App() {
   const vsProblem = route.handle && route.vs ? handleProblem(route.vs) : null
   const sameTwice = handle && vs ? handle.toLowerCase() === vs.toLowerCase() : false
   const [fetchedAt, setFetchedAt] = useState<number | null>(null)
-  const groups = useGroups()
   const section = sectionOf(route)
   const { country, city, org } = route
   const scope = useMemo(() => scopeFromRoute({ country, city, org }), [country, city, org])
-  const groupName = route.group ? (groups.find((group) => group.id === route.group)?.name ?? route.name) : null
 
   useEffect(() => {
     const title = route.compare
       ? 'Compare'
-      : route.group
-        ? (groupName ?? 'Group')
-        : route.groups
-          ? 'Groups'
-          : scope
-            ? `${scopeName(scope)} ranking`
-            : route.rankings
-              ? 'Rankings'
-              : handle && !problem
-                ? vs && !vsProblem
-                  ? `${handle} vs ${vs}`
-                  : handle
-                : null
+      : scope
+        ? `${scopeName(scope)} ranking`
+        : route.rankings
+          ? 'Rankings'
+          : handle && !problem
+            ? vs && !vsProblem
+              ? `${handle} vs ${vs}`
+              : handle
+            : null
     document.title = title ? `${title} · ${site.name}` : site.name
-  }, [route.compare, route.group, route.groups, route.rankings, groupName, scope, handle, vs, problem, vsProblem])
+  }, [route.compare, route.rankings, scope, handle, vs, problem, vsProblem])
 
   function players() {
     if (!route.handle || !handle) return <Home />
@@ -95,16 +86,13 @@ export default function App() {
 
   function page() {
     if (route.compare) return <CompareStart key={handle ?? ''} initial={handle && !problem ? handle : null} />
-    if (route.group) return <GroupPage id={route.group} sharedName={route.name} sharedMembers={route.members} />
-    if (route.groups) return <GroupsHome />
     if (scope) return <RankingPage scope={scope} focus={route.focus} />
     if (route.rankings) return <RankingsHome />
     return players()
   }
 
   const home = section === 'players' && !route.handle
-  const onProfile =
-    Boolean(route.handle) && !problem && !route.compare && section !== 'rankings' && section !== 'groups'
+  const onProfile = Boolean(route.handle) && !problem && !route.compare && section !== 'rankings'
   /** The profile on screen, which Compare in the navigation starts from. */
   const profileHandle = section === 'players' && handle && !problem ? handle : null
 

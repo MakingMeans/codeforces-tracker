@@ -7,7 +7,7 @@ export interface StatTile {
   color?: string
 }
 
-/** The figures at the top of a ranking or a group: big number, small label. */
+/** The figures at the top of a ranking: big number, small label. */
 export function StatTiles({ items }: { items: StatTile[] }) {
   return (
     <dl className="flex flex-wrap gap-2">

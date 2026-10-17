@@ -1,8 +1,8 @@
 /**
  * The page state lives in the query string (`?handle=tourist`, `?handle=a&vs=b`,
- * `?country=Colombia&city=Bogotá`, `?group=…`): GitHub Pages cannot serve paths
- * like /u/tourist, but every query-string URL reaches index.html, so any view can
- * be bookmarked and shared.
+ * `?country=Colombia&city=Bogotá`): GitHub Pages cannot serve paths like
+ * /u/tourist, but every query-string URL reaches index.html, so any view can be
+ * bookmarked and shared.
  */
 import { useCallback, useMemo, useSyncExternalStore, type MouseEvent } from 'react'
 
@@ -19,30 +19,11 @@ export interface Route {
   org: string | null
   /** A player to point out in a ranking. */
   focus: string | null
-  /** The groups page (`?groups`). */
-  groups: boolean
-  /** A group by id; a shared link also carries its name and members. */
-  group: string | null
-  name: string | null
-  members: string | null
 }
 
 const NAVIGATE = 'cf-tracker:navigate'
 /** Parameters in the order they are written, so equal routes give equal URLs. */
-const ORDER = [
-  'compare',
-  'handle',
-  'vs',
-  'rankings',
-  'country',
-  'city',
-  'org',
-  'focus',
-  'groups',
-  'group',
-  'name',
-  'members',
-] as const
+const ORDER = ['compare', 'handle', 'vs', 'rankings', 'country', 'city', 'org', 'focus'] as const
 
 export function readRoute(search: string): Route {
   const params = new URLSearchParams(search)
@@ -56,10 +37,6 @@ export function readRoute(search: string): Route {
     city: text('city'),
     org: text('org'),
     focus: text('focus'),
-    groups: params.has('groups'),
-    group: text('group'),
-    name: text('name'),
-    members: text('members'),
   }
 }
 
@@ -88,11 +65,10 @@ export function navigate(route: Partial<Route>, { replace = false } = {}) {
   if (!replace) window.scrollTo({ top: 0 })
 }
 
-export type Section = 'players' | 'compare' | 'rankings' | 'groups'
+export type Section = 'players' | 'compare' | 'rankings'
 
 /** Which section a page belongs to: search and profiles under Players, comparisons under Compare. */
 export function sectionOf(route: Route): Section {
-  if (route.groups || route.group) return 'groups'
   if (route.compare || (route.handle && route.vs)) return 'compare'
   if (route.rankings || route.country || route.org) return 'rankings'
   return 'players'
