@@ -102,6 +102,9 @@ All from Google Fonts with `display=swap`.
 - **Cut corners.** Top-left and bottom-right corners are cut at 45° with `clip-path`. The cut is
   painted on two pseudo-element layers, `::before` for the 1 px line and `::after` for the fill,
   never on the element itself. That way the element's focus outline is never clipped.
+- **Text fields are not cut.** Inputs cannot have pseudo-elements, so they get a plain 1 px
+  `line-strong` border on `surface-2` instead (`fieldClass`). A field that needs the cut, like the
+  big search, is wrapped in a cut box.
 - **Corner ticks.** 14 px L-shaped marks in `line`, drawn with background gradients.
 - **Stripes.** A `repeating-linear-gradient(-45deg, …)` at 3.5 % opacity behind hero areas and
   headers.
@@ -124,6 +127,40 @@ All motion is CSS; there is no animation library.
 - No layout animations on long lists, such as the match history.
 - The loading indicator is a diagonal scanning bar (`animate-scan`), which stays still with reduced
   motion.
+
+## Navigation
+
+Three sections, the same everywhere: **Players** (search, profiles, comparisons), **Rankings** and
+**Groups**.
+
+- **Desktop.** A 76 px rail on the left, under the top bar, that stays in view. Each section is an
+  icon over an 11 px uppercase label: icons alone read worse. The current one is in `ink` with a 3 px
+  red bar on its left and `aria-current="page"`.
+- **Phones** (under 768 px). The same sections as a tab bar fixed to the bottom edge, the current one
+  marked by a red bar on top. Pages leave 64 px plus the safe-area inset free at the bottom.
+- **Top bar.** The wordmark, the handle search on every page but the home page, and the GitHub link.
+
+## Rankings and groups
+
+- **Search with a scope.** Above the field, chips pick what to find: Player, Country, City,
+  Organization or Group. Places are suggested as you type from the daily snapshot, accents ignored;
+  names that start with the text come first, then the biggest. It is a WAI-ARIA combobox: arrow keys
+  move through the list, Enter opens, Escape closes.
+- **Stat tiles.** A big Anton number over a small label, ratings in their rank colour: players,
+  competed this month, average, and **Team rating · top 3**, Codeforces' team formula on the best
+  three (the rating of a player the team would beat half the time, the team winning if any member
+  wins).
+- **Player tables.** Fixed layout, so long handles are cut instead of widening the page. Place in
+  Anton; the emblem at 44 px with its division; the handle in its rank colour, linking to the profile;
+  rating in rank colour, best rating muted. City, organization or country columns are hidden on
+  phones. Equal ratings share a place (1, 2, 2, 4).
+- **Competed this month.** A 7 px `win` square after the handle, with the words for screen readers.
+- **The player you came from.** Arriving from a profile's chip, their row is tinted, outlined in
+  `win` with a 4 px bar, and scrolled into view. When they are far down, the list shows its first
+  page, a `···` gap, then the rows around them.
+- **Profile chips.** Under the location, which links to each ranking: one chip per place
+  (`#58 Colombia`, the number in Anton), one per group of yours the player is in, and **Add to
+  group**, a small panel with a checkbox per group and a field to start a new one.
 
 ## Match history rows
 
@@ -232,7 +269,7 @@ The table lives in `src/lib/codeforces/ranks.ts` (`DIVISIONS`, `divisionFor`) an
 
 - **Sizes.** 140 px in the profile header, up to 100 px on the home page's rank ladder (the
   emblem fills its cell), 92 px on the rating card, 84 px in the match history (64 px in rows on
-  phones), 80 px in the comparison header.
+  phones), 80 px in the comparison header, 44 px in ranking and group tables.
   Stars are countable from 44 px up; at 28 px they read as a row of dots.
 - **Accessibility.** Every emblem has `role="img"`, an `aria-label` and a `<title>` with the rank
   name and star count. Next to text, the rank name is always written out too.
