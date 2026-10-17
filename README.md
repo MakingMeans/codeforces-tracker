@@ -15,6 +15,8 @@ match history, styled like a game tracker. Think tracker.gg for Valorant, but fo
   <img src="docs/screenshots/mobile.jpg" alt="A profile header on a phone" width="28%">
 </p>
 
+![The ranking of Colombia: players, how many competed this month, average, team rating of the best three, and the list with emblems, ratings, cities and organizations](docs/screenshots/ranking.jpg)
+
 ## Features
 
 - **Search any handle.** The handle is checked in the browser (3–24 letters, digits, `_`, `.` or `-`)
@@ -34,17 +36,29 @@ match history, styled like a game tracker. Think tracker.gg for Valorant, but fo
   (best place, biggest gain, biggest loss).
 - **Upcoming contests** on the home page, with a countdown.
 - **Compare two handles** side by side, including the contests both of them entered.
+- **Rankings** by country, city and organization: every rated player who was on Codeforces in the last
+  month, in order, with the average rating and the team rating of the best three. A profile shows the
+  player's place in each (`#58 Colombia`), and its organization, city and country link to them.
+- **Groups** of your own (friends, a team, a class): members ranked live, with their average and their
+  best team of three. Groups stay in your browser and can be shared by link. Codeforces does not publish
+  anyone's friends or groups, so these are yours to make.
+- **Search by scope** on the home page: a player, a country, a city, an organization or one of your groups,
+  with suggestions as you type.
 
 Ranks are drawn as original angular emblems, one per rank, with a roman numeral for the division
 within the rank (Pupil II, Legendary Grandmaster IV…). Codeforces has no rank artwork of its own.
 
 ## Usage
 
-| What                   | How                                                   |
-| ---------------------- | ----------------------------------------------------- |
-| Look up a handle       | Type it in the search box, or open `?handle=<handle>` |
-| Compare two handles    | `?handle=<a>&vs=<b>`                                  |
-| Jump to the search box | Press `/`                                             |
+| What                      | How                                                   |
+| ------------------------- | ----------------------------------------------------- |
+| Look up a handle          | Type it in the search box, or open `?handle=<handle>` |
+| Compare two handles       | `?handle=<a>&vs=<b>`                                  |
+| Rankings                  | `?rankings`                                           |
+| A country's ranking       | `?country=<name>`, a city in it: `&city=<name>`       |
+| An organization's ranking | `?org=<name>`                                         |
+| Your groups               | `?groups`; a group's “Copy share link” gives its URL  |
+| Jump to the search box    | Press `/`                                             |
 
 Every view is a plain URL, so it can be bookmarked or shared, and the browser's back and forward buttons
 work. Paths like `/u/tourist` are not used because GitHub Pages cannot route them.
@@ -61,6 +75,10 @@ directly; it answers with `Access-Control-Allow-Origin: *`, so no proxy or key i
 | `user.status`  | Activity, solved problems, streaks, per-contest problems and attempts, languages, tags |
 | `contest.list` | Contest names, durations, phases and upcoming contests                                 |
 
+| Daily, at build time | Used for                                                             |
+| -------------------- | -------------------------------------------------------------------- |
+| `user.ratedList`     | Rankings by country, city and organization; a player's place in each |
+
 - **Rate limit.** Codeforces allows about one call every two seconds. When it answers HTTP 429 or
   `Call limit exceeded`, the request is retried after 2, 4 and 6 seconds. At most three requests are
   in flight at once.
@@ -71,6 +89,13 @@ directly; it answers with `Access-Control-Allow-Origin: *`, so no proxy or key i
   6 MB of JSON). It is downloaded, parsed and processed once, in a Web Worker, so the page never freezes;
   the results then render in a React transition. Measured on the production build with `jiangly`, no
   main-thread task reaches 50 ms on a desktop CPU.
+- **Rankings snapshot.** Codeforces serves its list of rated users without CORS headers, so the browser
+  cannot fetch it. The deploy workflow downloads it once a day (`npm run data`, in
+  `scripts/build-rankings.ts`) and publishes it with the site as `data/rankings.json`: about 136,000
+  players, 1.5 MB gzipped. A Web Worker parses it; the rankings are up to a day old, profiles stay live.
+  If Codeforces cannot be reached, the copy already published is kept.
+- **Groups** live in `localStorage`. A share link carries the group's name and members, and their
+  ratings come live from one `user.info` call.
 - **Photos.** `userpic.codeforces.org` sometimes fails, and its CDN can cache the error for days. The
   photo is tried as given, then with a cache-busting query, then the small avatar, then a neutral local
   image.
@@ -82,7 +107,7 @@ for up to three days after it ends.
 
 ## Run locally
 
-Requires Node.js 22.
+Requires Node.js 22.18 or newer (the data script runs TypeScript directly).
 
 ```bash
 git clone https://github.com/MakingMeans/codeforces-tracker.git
@@ -92,6 +117,8 @@ npm run dev
 ```
 
 Then open http://localhost:5173/codeforces-tracker/. The sub-path matches the one GitHub Pages serves.
+The rankings pages need the daily snapshot: run `npm run data` once (it writes the git-ignored
+`public/data/rankings.json`).
 
 ### Scripts
 
@@ -100,6 +127,7 @@ Then open http://localhost:5173/codeforces-tracker/. The sub-path matches the on
 | `npm run dev`     | Development server with hot reload                |
 | `npm run build`   | Type-check and build the static site into `dist/` |
 | `npm run preview` | Serve the production build locally                |
+| `npm run data`    | Download the rankings snapshot from Codeforces    |
 | `npm run lint`    | ESLint                                            |
 | `npm test`        | Vitest, for the data rules                        |
 | `npm run format`  | Prettier                                          |
@@ -113,13 +141,16 @@ across a daylight-saving change.
 src/
   lib/
     api/          Codeforces client: retries, rate limiting, cancellation, typed errors
-    codeforces/   pure data rules: ranks, contests, activity, insights, comparison (tested)
+    codeforces/   pure data rules: ranks, contests, activity, insights, comparison, team rating (tested)
+    rankings/     the daily snapshot: its format, reading it, and the rankings it answers (tested)
+    groups.ts     your own groups, kept in this browser (tested)
     charts/       scales and grids behind the charts (tested)
     emblem.ts     the rank emblems as SVG markup (tested against docs/design)
-  workers/        the details worker: downloads and processes user.status off the main thread
+  workers/        the details and rankings workers: big downloads parsed off the main thread
   components/     layout · ui · search · home · profile · charts · history · compare · states
-  pages/          home, profile, compare
+  pages/          home, profile, compare, rankings, ranking, groups, group
   index.css       design tokens and the few component styles written as CSS
+scripts/          build-rankings.ts: the daily rankings snapshot, run in the deploy workflow
 tests/fixtures/   small hand-written API responses used by the tests
 docs/DESIGN.md    design system: colours, type, shapes, charts, emblems
 docs/design/      approved visual sample, rank emblem source, reference sheet and SVG exports
@@ -128,8 +159,10 @@ public/           static files, resolved through import.meta.env.BASE_URL
 
 ## Deployment
 
-`.github/workflows/deploy.yml` builds the site and publishes it to GitHub Pages on every push to `main`.
-The repository uses **Settings → Pages → Source: GitHub Actions**.
+`.github/workflows/deploy.yml` builds the site and publishes it to GitHub Pages on every push to `main`,
+and once a day on a schedule to refresh the rankings snapshot. The repository uses **Settings → Pages →
+Source: GitHub Actions**. GitHub pauses scheduled workflows in repositories with no activity for 60 days;
+the workflow can also be run by hand from the Actions tab.
 
 The site lives under a repository sub-path, so `vite.config.ts` sets `base: '/codeforces-tracker/'` and
 files in `public/` are referenced through `import.meta.env.BASE_URL`.
@@ -163,6 +196,7 @@ Issues and pull requests are welcome.
 - [x] Accessibility pass, screenshots
 - [x] First deployment to GitHub Pages
 - [x] Rank divisions on the emblems
+- [x] Rankings by country, city and organization, and groups of your own
 
 ## Credits
 
