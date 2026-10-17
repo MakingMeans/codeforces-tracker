@@ -7,7 +7,9 @@ interface RankEmblemProps {
   /** Rendered width and height in px. */
   size?: number
   className?: string
-  /** Accessible name; defaults to the rank and its stars. */
+  /** The division within the rank, from `divisionFor`; drawn as a roman numeral when above 0. */
+  division?: number
+  /** Accessible name; defaults to the rank, its division and its stars. */
   label?: string
 }
 
@@ -15,9 +17,9 @@ interface RankEmblemProps {
  * The rank's emblem (see docs/DESIGN.md, "Rank emblems"). The markup comes from
  * lib/emblem, which only ever draws from fixed geometry, never from user input.
  */
-export function RankEmblem({ rank, size = 64, className, label }: RankEmblemProps) {
+export function RankEmblem({ rank, size = 64, className, division = 0, label }: RankEmblemProps) {
   const id = `cfe${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`
-  const inner = useMemo(() => emblemInner(rank.tier, { id }), [rank.tier, id])
+  const inner = useMemo(() => emblemInner(rank.tier, { id, division }), [rank.tier, id, division])
 
   return (
     <svg
@@ -25,7 +27,7 @@ export function RankEmblem({ rank, size = 64, className, label }: RankEmblemProp
       width={size}
       height={size}
       role="img"
-      aria-label={label ?? emblemLabel(rank.tier)}
+      aria-label={label ?? emblemLabel(rank.tier, division)}
       className={className}
       style={{ color: rank.color }}
       dangerouslySetInnerHTML={{ __html: inner }}

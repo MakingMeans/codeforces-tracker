@@ -1,6 +1,7 @@
 import { ArrowLeftRight } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { cn } from '../../lib/cn'
+import { divisionFor } from '../../lib/codeforces/ranks'
 import type { ProfileUser } from '../../lib/codeforces/user'
 import { linkHandler, routeHref } from '../../lib/route'
 import { HandleName } from '../profile/handle-name'
@@ -31,7 +32,7 @@ function Side({ user, color, align }: { user: ProfileUser; color: string; align:
           <HandleName handle={user.handle} rank={user.rank} />
         </a>
         <div className={cn('flex items-center gap-2', align === 'end' && 'md:flex-row-reverse')}>
-          <RankEmblem rank={user.rank} size={80} />
+          <RankEmblem rank={user.rank} division={divisionFor(user.rating)} size={80} />
           <div className="grid">
             <span
               className="font-label text-[13px] font-bold tracking-[0.1em] uppercase"

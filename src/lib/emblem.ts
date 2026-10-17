@@ -4,7 +4,7 @@
  * emblem.test.ts checks that both draw exactly the same thing. The rules behind
  * the shapes are in docs/DESIGN.md, "Rank emblems".
  */
-import { rankFor, RANKS, UNRATED, type Rank } from './codeforces/ranks'
+import { rankFor, RANKS, romanFor, UNRATED, type Rank } from './codeforces/ranks'
 
 /** One star per rank colour: grey 1, green 2, teal 3, blue 4, violet 5, orange 6, red 7. */
 export const STARS = [1, 2, 3, 4, 5, 6, 6, 7, 7, 7]
@@ -392,6 +392,53 @@ function stars(n: number, ink: string) {
   return s
 }
 
+// ---------- divisions: a roman numeral on a plate over the hex's bottom corner ----------
+// A dark plate with cut corners and a rank-colour border, like the page's own buttons.
+const PLATE: Point[] = [
+  [26.4, 40.4],
+  [39.8, 40.4],
+  [39.8, 48.4],
+  [37.6, 50.6],
+  [24.2, 50.6],
+  [24.2, 42.6],
+]
+/** The numeral in straight bars and a V, like the figures: no font needed. */
+function numeral(text: string, cx: number, top: number, h: number) {
+  const bw = h * 0.22
+  const gap = h * 0.16
+  const vw = h * 0.74
+  const width = [...text].reduce((w, c) => w + (c === 'V' ? vw : bw), 0) + gap * (text.length - 1)
+  const bottom = top + h
+  let x = cx - width / 2
+  let s = ''
+  for (const c of text) {
+    if (c === 'I') {
+      s += rect(x, top, x + bw, bottom)
+      x += bw + gap
+    } else {
+      const t = bw * 1.08
+      const xc = x + vw / 2
+      s += poly(
+        [
+          [x, top],
+          [x + t, top],
+          [xc, bottom - t * 1.55],
+          [x + vw - t, top],
+          [x + vw, top],
+          [xc + t * 0.55, bottom],
+          [xc - t * 0.55, bottom],
+        ],
+        FILL,
+      )
+      x += vw + gap
+    }
+  }
+  return s
+}
+const plate = (division: number, ink: string) =>
+  poly(PLATE, 'fill="' + ink + '" stroke="currentColor" stroke-width="1.1"') +
+  numeral(romanFor(division), 32, 42.6, 5.8)
+
 export const rankByTier = (tier: number): Rank => (tier < 0 ? UNRATED : RANKS[tier])
 
 export interface EmblemOptions {
@@ -399,16 +446,24 @@ export interface EmblemOptions {
   id: string
   /** Colour of cut-outs and of the Legendary inversion; the page navy by default. */
   ink?: string
+  /** The division within the rank, 1 (lowest) to 4, from `divisionFor`; 0 or absent draws none. */
+  division?: number
 }
 
-/** Default accessible name: rank and star count. */
-export function emblemLabel(tier: number) {
+/** Default accessible name: rank, division and star count. */
+export function emblemLabel(tier: number, division = 0) {
   const n = starsFor(tier)
-  return rankByTier(tier).name + ' rank emblem' + (n ? ', ' + n + ' star' + (n === 1 ? '' : 's') : '')
+  const roman = tier >= 0 ? romanFor(division) : ''
+  return (
+    rankByTier(tier).name +
+    (roman ? ' ' + roman : '') +
+    ' rank emblem' +
+    (n ? ', ' + n + ' star' + (n === 1 ? '' : 's') : '')
+  )
 }
 
 /** Everything inside the `<svg>` element, for a renderer that writes its own wrapper. */
-export function emblemInner(tier: number, { id, ink = NAVY }: EmblemOptions) {
+export function emblemInner(tier: number, { id, ink = NAVY, division = 0 }: EmblemOptions) {
   const rank = rankByTier(tier)
   const t = rank.tier
   const glow = t >= 7
@@ -449,13 +504,19 @@ export function emblemInner(tier: number, { id, ink = NAVY }: EmblemOptions) {
   }
   s += '</g>' + stars(starsFor(t), ink)
 
-  return '<defs>' + defs + '</defs>' + (glow ? '<g filter="url(#' + id + 'f)">' + s + '</g>' : s)
+  return (
+    '<defs>' +
+    defs +
+    '</defs>' +
+    (glow ? '<g filter="url(#' + id + 'f)">' + s + '</g>' : s) +
+    (t >= 0 && division ? plate(division, ink) : '')
+  )
 }
 
 /** A complete, standalone `<svg>` document for the rank. */
 export function emblemSVG(tier: number, options: EmblemOptions & { size?: number; title?: string }) {
   const { size = 64, title } = options
-  const label = title || emblemLabel(tier)
+  const label = title || emblemLabel(tier, options.division)
   return (
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="' +
     size +

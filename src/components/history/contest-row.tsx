@@ -3,7 +3,7 @@ import { memo } from 'react'
 import { cn } from '../../lib/cn'
 import type { ContestEntry, ContestOutcome } from '../../lib/codeforces/contests'
 import { formatDate, formatDelta, formatDuration, formatNumber } from '../../lib/codeforces/format'
-import { rankFor, UNRATED } from '../../lib/codeforces/ranks'
+import { divisionFor, rankFor, romanFor, UNRATED } from '../../lib/codeforces/ranks'
 import { RankEmblem } from '../rank-emblem'
 import { ProblemChips } from './problem-chips'
 
@@ -60,6 +60,7 @@ export const ContestRow = memo(function ContestRow({ contest }: { contest: Conte
   const duration = formatDuration(contest.duration)
   // The rank held going into the contest, not the one it led to.
   const rank = contest.before > 0 ? rankFor(contest.before) : UNRATED
+  const division = contest.before > 0 ? divisionFor(contest.before) : 0
   const delta = contest.outcome === 'pending' ? '—' : formatDelta(contest.after - contest.before)
   const failed =
     contest.failed === 0 ? 'No failed attempts' : `${contest.failed} failed attempt${contest.failed === 1 ? '' : 's'}`
@@ -85,7 +86,12 @@ export const ContestRow = memo(function ContestRow({ contest }: { contest: Conte
       </div>
 
       <div className="cr-emblem">
-        <RankEmblem rank={rank} size={84} label={`${rank.name} going in`} />
+        <RankEmblem
+          rank={rank}
+          division={division}
+          size={84}
+          label={`${[rank.name, romanFor(division)].filter(Boolean).join(' ')} going in`}
+        />
       </div>
 
       <a

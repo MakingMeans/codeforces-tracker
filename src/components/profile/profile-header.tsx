@@ -1,6 +1,7 @@
 import { ArrowUpRight } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { formatAgo, formatDelta, formatMonthYear, formatNumber } from '../../lib/codeforces/format'
+import { divisionFor } from '../../lib/codeforces/ranks'
 import type { ProfileUser } from '../../lib/codeforces/user'
 import { useNow } from '../../lib/use-now'
 import { CompareForm } from '../compare/compare-form'
@@ -49,7 +50,7 @@ export function ProfileHeader({ user }: { user: ProfileUser }) {
         </div>
 
         <div className="flex items-center gap-4 sm:col-span-2 lg:col-span-1">
-          <RankEmblem rank={rank} size={140} />
+          <RankEmblem rank={rank} division={divisionFor(user.rating)} size={140} />
           <div className="grid gap-0.5">
             <span
               className="font-label text-[17px] leading-tight font-bold tracking-[0.12em] uppercase"
