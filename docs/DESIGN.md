@@ -154,12 +154,14 @@ that player as the first one.
   was typed, so a handle missing from the snapshot (unrated, or away for a month) still works.
 - **Suggestion lists sit on top.** Cut boxes isolate their stacking, so a field with suggestions
   lifts its own container (`relative z-20`, the top bar `z-30`) above what follows on the page.
+- **Average rank.** Next to a ranking's or group's title, a 128 px emblem (96 px on phones) of the
+  rank and division the average rating falls in, with "Average rank · Newbie III" under the title.
 - **Stat tiles.** A big Anton number (36 px) over a small label, ratings in their rank colour: players,
   competed this month, average, and **Team rating · top 3**, Codeforces' team formula on the best
   three (the rating of a player the team would beat half the time, the team winning if any member
   wins).
 - **Player tables.** Fixed layout, so long handles are cut instead of widening the page. Text at
-  17 px; the place in 24 px Anton; the emblem at 60 px (52 px on phones) with its division; the
+  17 px; the place in 24 px Anton; the emblem at 84 px (64 px on phones) with its division; the
   handle at 18 px in its rank colour, linking to the profile; the rating at 18 px semibold in its rank
   colour, best rating muted. City, organization or country columns are hidden on
   phones. Equal ratings share a place (1, 2, 2, 4).
@@ -272,13 +274,14 @@ The table lives in `src/lib/codeforces/ranks.ts` (`DIVISIONS`, `divisionFor`) an
 - **Only on the emblem.** Text next to an emblem keeps the plain rank name ("Pupil"). The
   division is in the emblem's accessible name ("Pupil II rank emblem, 2 stars").
 - **Not on the rank ladder.** The home page's ladder shows ranks, not a rating, so its emblems
-  carry no plate. Unrated never has one.
+  carry no plate; each rank lists its divisions instead ("I–IV · 50 each", the ranges in a tooltip
+  and for screen readers), with a line explaining them. Unrated never has one.
 
 ### Using the emblems
 
 - **Sizes.** 140 px in the profile header, up to 100 px on the home page's rank ladder (the
   emblem fills its cell), 92 px on the rating card, 84 px in the match history (64 px in rows on
-  phones), 80 px in the comparison header, 60 px in ranking and group tables (52 px on phones),
+  phones), 80 px in the comparison header, 84 px in ranking and group tables (64 px on phones), 128 px for a ranking's average rank,
   32 px in handle suggestions.
   Stars are countable from 44 px up; at 28 px they read as a row of dots.
 - **Accessibility.** Every emblem has `role="img"`, an `aria-label` and a `<title>` with the rank
