@@ -1,29 +1,77 @@
 /**
- * The page state lives in the query string (`?handle=tourist`, `?handle=a&vs=b`):
- * GitHub Pages cannot serve paths like /u/tourist, but every query-string URL
- * reaches index.html, so any view can be bookmarked and shared.
+ * The page state lives in the query string (`?handle=tourist`, `?handle=a&vs=b`,
+ * `?country=Colombia&city=Bogotá`, `?group=…`): GitHub Pages cannot serve paths
+ * like /u/tourist, but every query-string URL reaches index.html, so any view can
+ * be bookmarked and shared.
  */
 import { useCallback, useMemo, useSyncExternalStore, type MouseEvent } from 'react'
 
 export interface Route {
   handle: string | null
   vs: string | null
+  /** The rankings page (`?rankings`). */
+  rankings: boolean
+  /** A ranking: a country, a city within it, or an organization. */
+  country: string | null
+  city: string | null
+  org: string | null
+  /** A player to point out in a ranking. */
+  focus: string | null
+  /** The groups page (`?groups`). */
+  groups: boolean
+  /** A group by id; a shared link also carries its name and members. */
+  group: string | null
+  name: string | null
+  members: string | null
 }
 
 const NAVIGATE = 'cf-tracker:navigate'
+/** Parameters in the order they are written, so equal routes give equal URLs. */
+const ORDER = [
+  'handle',
+  'vs',
+  'rankings',
+  'country',
+  'city',
+  'org',
+  'focus',
+  'groups',
+  'group',
+  'name',
+  'members',
+] as const
 
 export function readRoute(search: string): Route {
   const params = new URLSearchParams(search)
-  return { handle: params.get('handle')?.trim() || null, vs: params.get('vs')?.trim() || null }
+  const text = (key: string) => params.get(key)?.trim() || null
+  return {
+    handle: text('handle'),
+    vs: text('vs'),
+    rankings: params.has('rankings'),
+    country: text('country'),
+    city: text('city'),
+    org: text('org'),
+    focus: text('focus'),
+    groups: params.has('groups'),
+    group: text('group'),
+    name: text('name'),
+    members: text('members'),
+  }
 }
+
+/** Readable query values: spaces as "+", commas kept (handle lists). */
+const encode = (value: string) => encodeURIComponent(value).replace(/%20/g, '+').replace(/%2C/gi, ',')
 
 /** The page URL for a route, under the site's base path. */
 export function routeHref(route: Partial<Route>) {
-  const params = new URLSearchParams()
-  if (route.handle) params.set('handle', route.handle)
-  if (route.handle && route.vs) params.set('vs', route.vs)
-  const query = params.toString()
-  return `${import.meta.env.BASE_URL}${query ? `?${query}` : ''}`
+  const parts: string[] = []
+  for (const key of ORDER) {
+    const value = route[key]
+    if ((key === 'vs' && !route.handle) || (key === 'city' && !route.country)) continue
+    if (value === true) parts.push(key)
+    else if (typeof value === 'string' && value) parts.push(`${key}=${encode(value)}`)
+  }
+  return `${import.meta.env.BASE_URL}${parts.length ? `?${parts.join('&')}` : ''}`
 }
 
 /** Changes the URL; `replace` rewrites the current history entry instead of adding one. */
@@ -36,7 +84,17 @@ export function navigate(route: Partial<Route>, { replace = false } = {}) {
   if (!replace) window.scrollTo({ top: 0 })
 }
 
-export type RouteParam = keyof Route
+export type Section = 'players' | 'rankings' | 'groups'
+
+/** Which section a page belongs to: profiles and comparisons are under Players. */
+export function sectionOf(route: Route): Section {
+  if (route.groups || route.group) return 'groups'
+  if (route.rankings || route.country || route.org) return 'rankings'
+  return 'players'
+}
+
+/** The parameters a loaded profile rewrites with its canonical handle. */
+export type RouteParam = 'handle' | 'vs'
 
 /** Rewrites one parameter of the current URL in place, keeping the others. */
 export function replaceRouteParam(param: RouteParam, value: string) {
