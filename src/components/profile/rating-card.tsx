@@ -1,3 +1,4 @@
+import { divisionFor } from '../../lib/codeforces/ranks'
 import type { ProfileUser } from '../../lib/codeforces/user'
 import { RankEmblem } from '../rank-emblem'
 import { Panel } from '../ui/panel'
@@ -5,7 +6,7 @@ import { Panel } from '../ui/panel'
 function Row({ label, rating, rank }: { label: string; rating: number; rank: ProfileUser['rank'] }) {
   return (
     <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 border-t border-line pt-3 first:border-t-0 first:pt-0">
-      <RankEmblem rank={rank} size={92} />
+      <RankEmblem rank={rank} division={divisionFor(rating)} size={92} />
       <div className="grid">
         <span className="font-label text-[13px] font-semibold tracking-[0.16em] text-ink-muted uppercase">{label}</span>
         <span className="font-display text-[34px] leading-none">{rating}</span>

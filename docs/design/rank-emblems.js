@@ -8,12 +8,15 @@
  *     and finally a filled hex with a halo as the rank rises;
  *   - a chess figure inside (pawn → knight → bishop → rook → queen → king, then
  *     the king's crown grows for the three grandmaster ranks);
- *   - 1 to 7 faceted stars in a ring under the hex, one per rank colour.
+ *   - 1 to 7 faceted stars in a ring under the hex, one per rank colour;
+ *   - optionally, the division within the rank as a roman numeral on a plate
+ *     over the hex's bottom corner.
  *
- *   emblemSVG(tier, { size, title, ink })
- *     tier  -1 for Unrated, 0 (Newbie) … 9 (Legendary Grandmaster)
- *     size  rendered width and height in px (default 64)
- *     ink   colour of cut-outs and of the Legendary inversion (default page navy)
+ *   emblemSVG(tier, { size, title, ink, division })
+ *     tier      -1 for Unrated, 0 (Newbie) … 9 (Legendary Grandmaster)
+ *     size      rendered width and height in px (default 64)
+ *     ink       colour of cut-outs and of the Legendary inversion (default page navy)
+ *     division  1 (lowest) … 4, from divisionFor(rating); 0 or absent for none
  *
  * See docs/DESIGN.md, "Rank emblems", for the rules behind the shapes.
  */
@@ -150,14 +153,63 @@
     return s
   }
 
+  // ---------- divisions: a roman numeral on a plate over the hex's bottom corner ----------
+  /**
+   * By tier. A span that divides by three gets three divisions, the others four;
+   * International Master (100 points) gets two of 50, and Legendary Grandmaster,
+   * with no ceiling, four of 200 with the last one open from 3600.
+   */
+  const DIVISIONS = [
+    { from: 0, step: 400, count: 3 },
+    { from: 1200, step: 50, count: 4 },
+    { from: 1400, step: 50, count: 4 },
+    { from: 1600, step: 100, count: 3 },
+    { from: 1900, step: 50, count: 4 },
+    { from: 2100, step: 50, count: 4 },
+    { from: 2300, step: 50, count: 2 },
+    { from: 2400, step: 50, count: 4 },
+    { from: 2600, step: 100, count: 4 },
+    { from: 3000, step: 200, count: 4 },
+  ]
+  const ROMAN = ['I', 'II', 'III', 'IV']
+  const divisionFor = (rating) => {
+    if (rating == null) return 0
+    const d = DIVISIONS[rankFor(rating).tier]
+    return Math.min(d.count, Math.max(1, Math.floor((rating - d.from) / d.step) + 1))
+  }
+  // A dark plate with cut corners and a rank-colour border, like the page's own buttons.
+  const PLATE = [[26.4, 40.4], [39.8, 40.4], [39.8, 48.4], [37.6, 50.6], [24.2, 50.6], [24.2, 42.6]]
+  // The numeral in straight bars and a V, like the figures: no font needed.
+  function numeral(text, cx, top, h) {
+    const bw = h * 0.22, gap = h * 0.16, vw = h * 0.74
+    const width = [...text].reduce((w, c) => w + (c === 'V' ? vw : bw), 0) + gap * (text.length - 1)
+    const bottom = top + h
+    let x = cx - width / 2
+    let s = ''
+    for (const c of text) {
+      if (c === 'I') {
+        s += rect(x, top, x + bw, bottom)
+        x += bw + gap
+      } else {
+        const t = bw * 1.08, xc = x + vw / 2
+        s += poly([[x, top], [x + t, top], [xc, bottom - t * 1.55], [x + vw - t, top], [x + vw, top], [xc + t * 0.55, bottom], [xc - t * 0.55, bottom]], FILL)
+        x += vw + gap
+      }
+    }
+    return s
+  }
+  const plate = (division, ink) => poly(PLATE, 'fill="' + ink + '" stroke="currentColor" stroke-width="1.1"') + numeral(ROMAN[division - 1], 32, 42.6, 5.8)
+
   let counter = 0
   function emblemSVG(tier, options = {}) {
     const { size = 64, title, ink = NAVY } = options
     const rank = rankByTier(tier)
     const t = rank.tier
+    const division = t >= 0 && options.division ? options.division : 0
     const id = 'cfe' + (++counter).toString(36)
     const n = t < 0 ? 0 : STARS[t]
-    const label = title || rank.name + ' rank emblem' + (n ? ', ' + n + ' star' + (n === 1 ? '' : 's') : '')
+    const label =
+      title || rank.name + (division ? ' ' + ROMAN[division - 1] : '') + ' rank emblem' + (n ? ', ' + n + ' star' + (n === 1 ? '' : 's') : '')
     const glow = t >= 7
 
     let defs =
@@ -186,9 +238,10 @@
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="' + size + '" height="' + size + '" role="img" aria-label="' + label + '" style="color:' + rank.color + '">' +
       '<title>' + label + '</title><defs>' + defs + '</defs>' +
       (glow ? '<g filter="url(#' + id + 'f)">' + s + '</g>' : s) +
+      (division ? plate(division, ink) : '') +
       '</svg>'
     )
   }
 
-  return { RANKS, UNRATED, STARS, FIGURES, NAVY, rankFor, rankByTier, emblemSVG }
+  return { RANKS, UNRATED, STARS, FIGURES, NAVY, DIVISIONS, ROMAN, rankFor, rankByTier, divisionFor, emblemSVG }
 })
