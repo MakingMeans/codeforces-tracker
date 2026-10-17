@@ -20,23 +20,23 @@ function Countries({ rankings }: { rankings: RankingsIndex }) {
       title="Countries"
       aside={`${plural(countries.length, 'country', 'countries')} · updated ${formatDate(rankings.data.generatedAt)}`}
     >
-      <table className="w-full table-fixed border-separate border-spacing-x-0 border-spacing-y-1 text-[15px]">
+      <table className="w-full table-fixed border-separate border-spacing-x-0 border-spacing-y-1.5 text-[17px]">
         <caption className="sr-only">Countries by number of rated players</caption>
         <thead>
-          <tr className="font-label text-[11px] font-semibold tracking-[0.14em] text-ink-muted uppercase">
-            <th scope="col" className="w-14 px-3 py-1 text-right">
+          <tr className="font-label text-[12px] font-semibold tracking-[0.14em] text-ink-muted uppercase">
+            <th scope="col" className="w-16 px-3 py-1 text-right">
               #
             </th>
             <th scope="col" className="px-3 py-1 text-left">
               Country
             </th>
-            <th scope="col" className="w-24 px-3 py-1 text-right">
+            <th scope="col" className="w-28 px-3 py-1 text-right">
               Players
             </th>
-            <th scope="col" className="hidden w-24 px-3 py-1 text-right sm:table-cell">
+            <th scope="col" className="hidden w-28 px-3 py-1 text-right sm:table-cell">
               Average
             </th>
-            <th scope="col" className="hidden w-24 px-3 py-1 text-right sm:table-cell">
+            <th scope="col" className="hidden w-28 px-3 py-1 text-right sm:table-cell">
               Best
             </th>
           </tr>
@@ -44,10 +44,10 @@ function Countries({ rankings }: { rankings: RankingsIndex }) {
         <tbody>
           {countries.slice(0, shown).map((country, i) => (
             <tr key={country.country}>
-              <td className="bg-surface-2 px-3 py-2.5 text-right font-display text-lg leading-none tabular-nums">
+              <td className="bg-surface-2 px-3 py-3 text-right font-display text-2xl leading-none tabular-nums">
                 {i + 1}
               </td>
-              <td className="bg-surface-2 px-3 py-2.5">
+              <td className="bg-surface-2 px-3 py-3">
                 <a
                   href={routeHref({ country: country.country })}
                   onClick={linkHandler({ country: country.country })}
@@ -56,15 +56,15 @@ function Countries({ rankings }: { rankings: RankingsIndex }) {
                   {country.country}
                 </a>
               </td>
-              <td className="bg-surface-2 px-3 py-2.5 text-right tabular-nums">{formatNumber(country.players)}</td>
+              <td className="bg-surface-2 px-3 py-3 text-right tabular-nums">{formatNumber(country.players)}</td>
               <td
-                className="hidden bg-surface-2 px-3 py-2.5 text-right tabular-nums sm:table-cell"
+                className="hidden bg-surface-2 px-3 py-3 text-right tabular-nums sm:table-cell"
                 style={{ color: rankFor(country.average).color }}
               >
                 {country.average}
               </td>
               <td
-                className="hidden bg-surface-2 px-3 py-2.5 text-right tabular-nums sm:table-cell"
+                className="hidden bg-surface-2 px-3 py-3 text-right tabular-nums sm:table-cell"
                 style={{ color: rankFor(country.best).color }}
               >
                 {country.best}
