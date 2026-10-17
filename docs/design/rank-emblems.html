@@ -73,6 +73,8 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-body); 
 
 .sizes { --cut: 14px; padding: 16px 18px; display: grid; gap: 14px; overflow-x: auto; }
 .sizes .row { display: grid; grid-template-columns: 70px 1fr; gap: 12px; align-items: center; }
+#divisions .row { grid-template-columns: minmax(0, 15rem) 1fr; }
+@media (max-width: 600px) { #divisions .row { grid-template-columns: 1fr; } }
 .sizes .strip { display: flex; gap: 8px; align-items: center; flex-wrap: nowrap; }
 .sizes svg { display: block; flex: none; }
 
@@ -135,7 +137,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-body); 
   <header class="masthead">
     <span class="wordmark" aria-label="CF/TRACKER">CF<span class="slash">/</span>TRACKER</span>
     <h1>Rank emblems</h1>
-    <p>The approved set. <b>Hex frame</b> that grows with the rank, <b>chess figure</b> inside (pawn up to the imperial king), and <b>1–7 faceted stars</b> in a ring, one per rank colour. Each emblem is a vector SVG drawn by <code>docs/design/rank-emblems.js</code>; the buttons below copy any of them as a standalone SVG.</p>
+    <p>The approved set. <b>Hex frame</b> that grows with the rank, <b>chess figure</b> inside (pawn up to the imperial king), <b>1–7 faceted stars</b> in a ring, one per rank colour, and the <b>division</b> within the rank as a roman numeral on a plate. Each emblem is a vector SVG drawn by <code>docs/design/rank-emblems.js</code>; the buttons below copy any of them as a standalone SVG.</p>
   </header>
 
   <section class="plate" aria-labelledby="ladder-title">
@@ -149,6 +151,14 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-body); 
       <p>140 px in the profile header, up to 100 px on the rank ladder, 92 px on the rating card, 84 px in the match history (64 px on phones), 80 px in the comparison header.</p>
     </div>
     <div class="sizes cut" id="sizes"></div>
+  </section>
+
+  <section class="plate" aria-labelledby="div-title">
+    <div class="plate-head">
+      <h2 id="div-title">Divisions</h2>
+      <p>I is the lowest. Three divisions when the span divides by three, four otherwise; International Master has two of 50, and Legendary Grandmaster four of 200, the last open from 3600.</p>
+    </div>
+    <div class="sizes cut" id="divisions"></div>
   </section>
 
   <section class="plate" aria-labelledby="ctx-title">
@@ -174,7 +184,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-body); 
   'use strict'
   const E = window.CFRankEmblems
   const ALL = E.RANKS.concat([E.UNRATED])
-  const svg = (tier, size) => E.emblemSVG(tier, { size })
+  const svg = (tier, size, division) => E.emblemSVG(tier, { size, division })
   const RULES = [
     'Plain hex · pawn · 1 star',
     'Plain hex · knight · 2 stars',
@@ -195,10 +205,16 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-body); 
     .map((s) => '<div class="row"><span class="label">' + s + ' px</span><div class="strip">' + ALL.map((r) => svg(r.tier, s)).join('') + '</div></div>')
     .join('')
 
+  document.getElementById('divisions').innerHTML = E.RANKS.map((r) => {
+    const d = E.DIVISIONS[r.tier]
+    const span = r.tier === 0 ? 'below 1200' : r.tier === 9 ? '3000+' : d.from + '–' + (d.from + d.step * d.count - 1)
+    return '<div class="row"><span class="label" style="color:' + r.color + '">' + r.name + ' · ' + span + '</span><div class="strip">' + Array.from({ length: d.count }, (_, i) => svg(r.tier, 64, i + 1)).join('') + '</div></div>'
+  }).join('')
+
   document.getElementById('heads').innerHTML = [1287, 1987, 2462, 3786]
     .map((rating) => {
       const r = E.rankFor(rating)
-      return '<div class="pv-head">' + svg(r.tier, 140) + '<div><div class="rk" style="color:' + r.color + '">' + r.name + '</div><div class="rt num">' + rating + '</div></div></div>'
+      return '<div class="pv-head">' + svg(r.tier, 140, E.divisionFor(rating)) + '<div><div class="rk" style="color:' + r.color + '">' + r.name + '</div><div class="rt num">' + rating + '</div></div></div>'
     })
     .join('')
 
@@ -210,7 +226,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-body); 
     ['loss', 2341, 'Codeforces Round (Div. 1)', 'Sep 14, 2026 · Place #96', MINUS + '18'],
     ['gain', 3104, 'Codeforces Global Round', 'Sep 2, 2026 · Place #3', '+41'],
   ]
-    .map(([cls, before, name, sub, d]) => '<div class="pv-row ' + cls + '">' + svg(E.rankFor(before).tier, 84) + '<div style="min-width:0"><div class="nm">' + name + '</div><div class="sub num">' + sub + '</div></div><span class="d num">' + d + '</span></div>')
+    .map(([cls, before, name, sub, d]) => '<div class="pv-row ' + cls + '">' + svg(E.rankFor(before).tier, 84, E.divisionFor(before)) + '<div style="min-width:0"><div class="nm">' + name + '</div><div class="sub num">' + sub + '</div></div><span class="d num">' + d + '</span></div>')
     .join('')
 
   const cards = document.getElementById('cards')
