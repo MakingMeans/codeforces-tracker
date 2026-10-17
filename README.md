@@ -161,7 +161,8 @@ Issues and pull requests are welcome.
 - [x] Performance pass for very large accounts (Web Worker)
 - [x] Compare two handles
 - [x] Accessibility pass, screenshots
-- [ ] First deployment to GitHub Pages
+- [x] First deployment to GitHub Pages
+- [x] Rank divisions on the emblems
 
 ## Credits
 
