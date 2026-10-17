@@ -156,7 +156,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-body); 
   <section class="plate" aria-labelledby="div-title">
     <div class="plate-head">
       <h2 id="div-title">Divisions</h2>
-      <p>I is the lowest. Three divisions when the span divides by three, four otherwise; International Master has two of 50, and Legendary Grandmaster four of 200, the last open from 3600.</p>
+      <p>Every rank has three, I the lowest: its span cut in thirds, rounded to tens (a 200-point rank splits 70 / 60 / 70). Legendary Grandmaster's III has no ceiling.</p>
     </div>
     <div class="sizes cut" id="divisions"></div>
   </section>
@@ -206,9 +206,11 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-body); 
     .join('')
 
   document.getElementById('divisions').innerHTML = E.RANKS.map((r) => {
-    const d = E.DIVISIONS[r.tier]
-    const span = r.tier === 0 ? 'below 1200' : r.tier === 9 ? '3000+' : d.from + '–' + (d.from + d.step * d.count - 1)
-    return '<div class="row"><span class="label" style="color:' + r.color + '">' + r.name + ' · ' + span + '</span><div class="strip">' + Array.from({ length: d.count }, (_, i) => svg(r.tier, 64, i + 1)).join('') + '</div></div>'
+    const starts = E.DIVISIONS[r.tier].starts
+    const next = E.RANKS[r.tier + 1]
+    const ends = starts.map((start, i) => (i < starts.length - 1 ? starts[i + 1] - 1 : next ? next.min - 1 : null))
+    const span = starts.map((start, i) => E.ROMAN[i] + ' ' + (r.tier === 0 && i === 0 ? 'up to ' + ends[i] : start + (ends[i] === null ? '+' : '–' + ends[i]))).join(' · ')
+    return '<div class="row"><span class="label" style="color:' + r.color + '">' + r.name + ' · ' + span + '</span><div class="strip">' + starts.map((_, i) => svg(r.tier, 64, i + 1)).join('') + '</div></div>'
   }).join('')
 
   document.getElementById('heads').innerHTML = [1287, 1987, 2462, 3786]
