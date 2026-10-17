@@ -2,12 +2,11 @@ import { Search } from 'lucide-react'
 import { useId, useMemo, useState, type KeyboardEvent } from 'react'
 import { cn } from '../../lib/cn'
 import { plural } from '../../lib/codeforces/format'
-import { useGroups } from '../../lib/groups'
 import { useRankings } from '../../lib/rankings/load'
-import { fold, scopeRoute } from '../../lib/rankings/rankings'
+import { scopeRoute } from '../../lib/rankings/rankings'
 import { navigate, type Route } from '../../lib/route'
 
-export type PlaceKind = 'country' | 'city' | 'org' | 'group'
+export type PlaceKind = 'country' | 'city' | 'org'
 
 interface Option {
   id: string
@@ -21,35 +20,21 @@ const PLACEHOLDER: Record<PlaceKind, string> = {
   country: 'Country, e.g. Colombia',
   city: 'City, e.g. Bogotá',
   org: 'Organization, e.g. ITMO University',
-  group: 'One of your groups',
 }
-const NOUN: Record<PlaceKind, string> = { country: 'country', city: 'city', org: 'organization', group: 'group' }
+const NOUN: Record<PlaceKind, string> = { country: 'country', city: 'city', org: 'organization' }
 
 /**
- * A search box that suggests places from the daily rankings, or the visitor's own
- * groups, as they type. Arrow keys move through the suggestions, Enter opens one.
+ * A search box that suggests places from the daily rankings as they are typed.
+ * Arrow keys move through the suggestions, Enter opens one.
  */
 export function PlaceField({ kind }: { kind: PlaceKind }) {
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
   const [open, setOpen] = useState(false)
-  const { state } = useRankings(kind !== 'group')
-  const groups = useGroups()
+  const { state } = useRankings()
   const id = useId()
 
   const options = useMemo<Option[]>(() => {
-    if (kind === 'group') {
-      const q = fold(query)
-      return groups
-        .filter((group) => fold(group.name).includes(q))
-        .slice(0, 8)
-        .map((group) => ({
-          id: group.id,
-          label: group.name,
-          meta: plural(group.members.length, 'member'),
-          route: { group: group.id },
-        }))
-    }
     if (state.status !== 'ready') return []
     return state.rankings.suggest(kind, query).map((suggestion, i) => ({
       id: String(i),
@@ -58,26 +43,20 @@ export function PlaceField({ kind }: { kind: PlaceKind }) {
       meta: plural(suggestion.players, 'player'),
       route: scopeRoute(suggestion.scope),
     }))
-  }, [kind, query, groups, state])
+  }, [kind, query, state])
 
   const showList = open && options.length > 0
   const current = Math.min(active, options.length - 1)
   const status =
-    kind === 'group'
-      ? groups.length === 0
-        ? 'No groups yet. Create one in Groups.'
-        : query && options.length === 0
-          ? `None of your groups is called “${query}”.`
-          : ''
-      : state.status === 'loading'
-        ? 'Loading places…'
-        : state.status === 'missing'
-          ? 'The rankings are not available in this version of the site.'
-          : state.status === 'error'
-            ? 'Could not load the rankings. Reload the page to try again.'
-            : query.trim() && options.length === 0
-              ? `No ${NOUN[kind]} with rated players matches “${query.trim()}”.`
-              : ''
+    state.status === 'loading'
+      ? 'Loading places…'
+      : state.status === 'missing'
+        ? 'The rankings are not available in this version of the site.'
+        : state.status === 'error'
+          ? 'Could not load the rankings. Reload the page to try again.'
+          : query.trim() && options.length === 0
+            ? `No ${NOUN[kind]} with rated players matches “${query.trim()}”.`
+            : ''
 
   function go(option: Option | undefined) {
     if (!option) return

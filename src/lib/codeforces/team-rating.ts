@@ -20,5 +20,5 @@ export function teamRating(ratings: number[]): number | null {
   return Math.round((lo + hi) / 2)
 }
 
-/** The team rating of the best three: the strongest team a group could field. */
+/** The team rating of the best three: the strongest team of three a country, city or organization could field. */
 export const topThreeTeamRating = (ratings: number[]) => teamRating([...ratings].sort((a, b) => b - a).slice(0, 3))
