@@ -4,6 +4,7 @@ import { cn } from '../../lib/cn'
 import { cleanHandle, handleProblem } from '../../lib/handle'
 import { navigate, type Route } from '../../lib/route'
 import { buttonClass } from '../ui/button-class'
+import { HandleField } from './handle-field'
 
 interface SearchBoxProps {
   /**
@@ -55,9 +56,14 @@ export function SearchBox({ variant, initial = '', to, exclude, label = 'Codefor
 
   function submit(event: FormEvent) {
     event.preventDefault()
-    const handle = cleanHandle(value)
+    go(value)
+  }
+
+  /** Opens what was typed or picked, unless it cannot be a handle. */
+  function go(typed: string) {
+    const handle = cleanHandle(typed)
     const found =
-      handleProblem(value) ??
+      handleProblem(typed) ??
       (exclude && handle.toLowerCase() === exclude.toLowerCase() ? 'Pick someone else to compare with.' : null)
     setProblem(found)
     if (found) {
@@ -75,7 +81,12 @@ export function SearchBox({ variant, initial = '', to, exclude, label = 'Codefor
       aria-label={fix ? 'Search again' : 'Players'}
       onSubmit={submit}
       noValidate
-      className={cn('grid gap-2', hero ? 'max-w-[640px]' : 'w-full max-w-[420px]', fix && 'justify-self-stretch')}
+      // Above what follows on the page, so the suggestions are not drawn under it.
+      className={cn(
+        'relative z-20 grid gap-2',
+        hero ? 'max-w-[640px]' : 'w-full max-w-[420px]',
+        fix && 'justify-self-stretch',
+      )}
     >
       <div
         className={cn(
@@ -92,14 +103,18 @@ export function SearchBox({ variant, initial = '', to, exclude, label = 'Codefor
           aria-hidden
           className={cn('shrink-0 self-center text-ink-muted', hero ? 'ml-4 h-5 w-5' : 'ml-3 h-4 w-4')}
         />
-        <input
+        <HandleField
           ref={inputRef}
           id={`${id}-handle`}
           name="handle"
           value={value}
-          onChange={(event) => {
-            setValue(event.target.value)
+          onValueChange={(next) => {
+            setValue(next)
             if (problem) setProblem(null)
+          }}
+          onPick={(handle) => {
+            setValue(handle)
+            go(handle)
           }}
           placeholder={hero ? 'Codeforces handle, e.g. tourist' : 'Search a handle'}
           autoComplete="off"

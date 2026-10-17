@@ -26,7 +26,7 @@ export function Home() {
               API, right in your browser.
             </p>
           </div>
-          <div className={`${FADE} [animation-delay:240ms]`}>
+          <div className={`${FADE} relative z-20 [animation-delay:240ms]`}>
             <ScopedSearch scopes={['player', 'country', 'city', 'org', 'group']} />
           </div>
           <div className={`${FADE} grid gap-3 [animation-delay:320ms]`}>

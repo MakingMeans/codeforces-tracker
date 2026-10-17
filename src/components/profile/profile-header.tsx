@@ -54,7 +54,7 @@ export function ProfileHeader({ user }: { user: ProfileUser }) {
   const { rank, maxRank } = user
 
   return (
-    <section aria-label="Profile" className="ticks border-b border-line">
+    <section aria-label="Profile" className="ticks relative z-10 border-b border-line">
       <div className="mx-auto grid max-w-[1240px] grid-cols-[minmax(0,1fr)] items-center gap-6 px-4 py-7 sm:grid-cols-[auto_minmax(0,1fr)] sm:px-6 lg:grid-cols-[auto_minmax(0,1fr)_auto]">
         <ProfilePhoto
           sources={user.photos}

@@ -213,3 +213,32 @@ describe('fold', () => {
     expect(fold('São Paulo')).toBe('sao paulo')
   })
 })
+
+describe('handle suggestions', () => {
+  const rankings = load()
+
+  it('suggests handles that start with the text, best rated first', () => {
+    expect(rankings.suggestHandles('m').map((s) => s.handle)).toEqual(['mcqueencin', 'MakingMeans'])
+    expect(rankings.suggestHandles('MAKING')).toEqual([{ handle: 'MakingMeans', rating: 1267, country: 'Colombia' }])
+  })
+
+  it('adds handles that contain the text after those that start with it', () => {
+    expect(rankings.suggestHandles('o').map((s) => s.handle)).toEqual([
+      'osvarp',
+      'tourist',
+      '-osdajigu-',
+      'nowhere',
+      'bogota_us',
+    ])
+    expect(rankings.suggestHandles('o', 2).map((s) => s.handle)).toEqual(['osvarp', 'tourist'])
+  })
+
+  it('suggests nothing for nothing typed', () => {
+    expect(rankings.suggestHandles('  ')).toEqual([])
+  })
+
+  it('finds a player in any case', () => {
+    expect(rankings.find('makingmeans')).toEqual({ handle: 'MakingMeans', rating: 1267, country: 'Colombia' })
+    expect(rankings.find('nobody_here')).toBeNull()
+  })
+})

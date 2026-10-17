@@ -7,7 +7,8 @@ import { Wordmark } from './wordmark'
 /** The bar on every page: the wordmark home link, an optional slot (the search box) and the source link. */
 export function TopBar({ children }: { children?: ReactNode }) {
   return (
-    <header className="border-b border-line">
+    // Above the page, so the search suggestions open over it.
+    <header className="relative z-30 border-b border-line">
       <div className="mx-auto flex max-w-[1240px] flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3 sm:px-6">
         <a href={import.meta.env.BASE_URL} className="text-[26px] text-ink" aria-label={`${site.name} home`}>
           <Wordmark />

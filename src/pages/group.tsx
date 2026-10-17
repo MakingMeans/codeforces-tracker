@@ -2,6 +2,7 @@ import { Check, Link2, Pencil, Plus, RotateCw, Save, Trash2, UserMinus, Users } 
 import { useId, useMemo, useState, type FormEvent } from 'react'
 import { PlayerTable, type PlayerRow } from '../components/rankings/player-table'
 import { StatTiles } from '../components/rankings/stat-tiles'
+import { HandleField } from '../components/search/handle-field'
 import { StateMessage } from '../components/states/state-message'
 import { Button, ButtonLink } from '../components/ui/button'
 import { fieldClass } from '../components/ui/field-class'
@@ -48,10 +49,14 @@ function AddMember({ group }: { group: Group }) {
   const [busy, setBusy] = useState(false)
   const id = useId()
 
-  async function submit(event: FormEvent) {
+  function submit(event: FormEvent) {
     event.preventDefault()
-    const handle = cleanHandle(value)
-    const invalid = handleProblem(value)
+    add(value)
+  }
+
+  async function add(typed: string) {
+    const handle = cleanHandle(typed)
+    const invalid = handleProblem(typed)
     if (invalid) return setProblem(invalid)
     if (hasMember(group, handle)) return setProblem(`${handle} is already in this group.`)
     if (group.members.length >= MAX_MEMBERS) return setProblem(`A group holds up to ${MAX_MEMBERS} players.`)
@@ -74,26 +79,32 @@ function AddMember({ group }: { group: Group }) {
   }
 
   return (
-    <form onSubmit={submit} noValidate className="grid gap-1.5">
+    <form onSubmit={submit} noValidate className="relative z-20 grid max-w-[560px] gap-1.5">
       <div className="flex gap-2">
         <label htmlFor={`${id}-handle`} className="sr-only">
           Handle to add
         </label>
-        <input
-          id={`${id}-handle`}
-          value={value}
-          onChange={(event) => {
-            setValue(event.target.value)
-            setProblem(null)
-          }}
-          placeholder="Add a handle"
-          autoComplete="off"
-          autoCapitalize="none"
-          spellCheck={false}
-          aria-invalid={problem ? true : undefined}
-          aria-describedby={`${id}-problem`}
-          className={field}
-        />
+        <div className="relative min-w-0 flex-1">
+          <HandleField
+            id={`${id}-handle`}
+            value={value}
+            onValueChange={(next) => {
+              setValue(next)
+              setProblem(null)
+            }}
+            onPick={(handle) => {
+              setValue(handle)
+              add(handle)
+            }}
+            placeholder="Add a handle"
+            autoComplete="off"
+            autoCapitalize="none"
+            spellCheck={false}
+            aria-invalid={problem ? true : undefined}
+            aria-describedby={`${id}-problem`}
+            className={field}
+          />
+        </div>
         <Button type="submit" disabled={busy} className="shrink-0">
           <Plus aria-hidden />
           Add
