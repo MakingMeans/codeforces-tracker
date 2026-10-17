@@ -31,7 +31,7 @@ interface PlayerTableProps {
   hasAction?: boolean
 }
 
-const cell = 'bg-surface-2 px-3 py-2.5'
+const cell = 'bg-surface-2 px-3 py-2'
 const extraCell = 'hidden sm:table-cell'
 
 /** Players in order: place, emblem and handle, rating and best rating, and any extra columns. */
@@ -95,8 +95,8 @@ export function PlayerTable({ caption, extraColumns = [], rows, gapAfter, hasAct
                     <RankEmblem
                       rank={rank}
                       division={divisionFor(row.rating)}
-                      size={60}
-                      className="h-[52px] w-[52px] sm:h-[60px] sm:w-[60px]"
+                      size={84}
+                      className="h-16 w-16 sm:h-[84px] sm:w-[84px]"
                     />
                     <a
                       href={routeHref({ handle: row.handle })}
