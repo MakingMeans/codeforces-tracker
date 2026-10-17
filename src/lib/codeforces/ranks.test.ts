@@ -64,29 +64,36 @@ describe('divisionFor', () => {
     [800, 3],
     [1199, 3],
     [1200, 1],
-    [1249, 1],
-    [1250, 2],
-    [1399, 4],
-    [1450, 2],
-    [1600, 1],
-    [1799, 2],
+    [1267, 1],
+    [1269, 1],
+    [1270, 2],
+    [1329, 2],
+    [1330, 3],
+    [1399, 3],
+    [1530, 3],
+    [1699, 1],
+    [1700, 2],
     [1899, 3],
-    [2050, 4],
-    [2100, 1],
-    [2299, 4],
+    [2029, 2],
+    [2030, 3],
+    [2169, 1],
+    [2170, 2],
     [2300, 1],
-    [2349, 1],
-    [2350, 2],
-    [2399, 2],
-    [2400, 1],
-    [2599, 4],
+    [2330, 2],
+    [2369, 2],
+    [2370, 3],
+    [2399, 3],
+    [2470, 2],
     [2600, 1],
-    [2999, 4],
+    [2729, 1],
+    [2730, 2],
+    [2870, 3],
+    [2999, 3],
     [3000, 1],
     [3343, 2],
-    [3599, 3],
-    [3600, 4],
-    [4000, 4],
+    [3400, 3],
+    [3670, 3],
+    [4000, 3],
   ])('puts %i in division %i', (rating, division) => {
     expect(divisionFor(rating)).toBe(division)
   })
@@ -96,19 +103,26 @@ describe('divisionFor', () => {
     expect(divisionFor(undefined)).toBe(0)
   })
 
-  it('starts each split at its rank, and covers the rank without gaps', () => {
+  it('gives every rank three divisions inside it, the first at its start', () => {
     RANKS.forEach((rank, tier) => {
-      const split = DIVISIONS[tier]
-      if (tier > 0) expect(split.from).toBe(rank.min)
+      const { starts } = DIVISIONS[tier]
+      expect(starts).toHaveLength(3)
+      expect([...starts].sort((a, b) => a - b)).toEqual(starts)
+      if (tier > 0) expect(starts[0]).toBe(rank.min)
       const next = RANKS[tier + 1]
-      if (next) expect(split.from + split.step * split.count).toBe(next.min)
+      if (next) expect(starts[2]).toBeLessThan(next.min ?? Infinity)
     })
+  })
+
+  it('cuts 200-point ranks 70 / 60 / 70', () => {
+    expect(DIVISIONS[1].starts).toEqual([1200, 1270, 1330])
   })
 })
 
 describe('romanFor', () => {
   it('writes divisions as roman numerals', () => {
-    expect([1, 2, 3, 4].map(romanFor)).toEqual(['I', 'II', 'III', 'IV'])
+    expect([1, 2, 3].map(romanFor)).toEqual(['I', 'II', 'III'])
     expect(romanFor(0)).toBe('')
+    expect(romanFor(4)).toBe('')
   })
 })

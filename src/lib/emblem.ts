@@ -446,7 +446,7 @@ export interface EmblemOptions {
   id: string
   /** Colour of cut-outs and of the Legendary inversion; the page navy by default. */
   ink?: string
-  /** The division within the rank, 1 (lowest) to 4, from `divisionFor`; 0 or absent draws none. */
+  /** The division within the rank, 1 (lowest) to 3, from `divisionFor`; 0 or absent draws none. */
   division?: number
 }
 

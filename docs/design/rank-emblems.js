@@ -16,7 +16,7 @@
  *     tier      -1 for Unrated, 0 (Newbie) … 9 (Legendary Grandmaster)
  *     size      rendered width and height in px (default 64)
  *     ink       colour of cut-outs and of the Legendary inversion (default page navy)
- *     division  1 (lowest) … 4, from divisionFor(rating); 0 or absent for none
+ *     division  1 (lowest) … 3, from divisionFor(rating); 0 or absent for none
  *
  * See docs/DESIGN.md, "Rank emblems", for the rules behind the shapes.
  */
@@ -155,27 +155,27 @@
 
   // ---------- divisions: a roman numeral on a plate over the hex's bottom corner ----------
   /**
-   * By tier. A span that divides by three gets three divisions, the others four;
-   * International Master (100 points) gets two of 50, and Legendary Grandmaster,
-   * with no ceiling, four of 200 with the last one open from 3600.
+   * Where each rank's three divisions start, by tier: the span cut in thirds,
+   * rounded to tens (a 200-point rank splits 70 / 60 / 70). Newbie starts at 0,
+   * and Legendary Grandmaster's III has no ceiling.
    */
   const DIVISIONS = [
-    { from: 0, step: 400, count: 3 },
-    { from: 1200, step: 50, count: 4 },
-    { from: 1400, step: 50, count: 4 },
-    { from: 1600, step: 100, count: 3 },
-    { from: 1900, step: 50, count: 4 },
-    { from: 2100, step: 50, count: 4 },
-    { from: 2300, step: 50, count: 2 },
-    { from: 2400, step: 50, count: 4 },
-    { from: 2600, step: 100, count: 4 },
-    { from: 3000, step: 200, count: 4 },
+    { starts: [0, 400, 800] },
+    { starts: [1200, 1270, 1330] },
+    { starts: [1400, 1470, 1530] },
+    { starts: [1600, 1700, 1800] },
+    { starts: [1900, 1970, 2030] },
+    { starts: [2100, 2170, 2230] },
+    { starts: [2300, 2330, 2370] },
+    { starts: [2400, 2470, 2530] },
+    { starts: [2600, 2730, 2870] },
+    { starts: [3000, 3200, 3400] },
   ]
-  const ROMAN = ['I', 'II', 'III', 'IV']
+  const ROMAN = ['I', 'II', 'III']
   const divisionFor = (rating) => {
     if (rating == null) return 0
-    const d = DIVISIONS[rankFor(rating).tier]
-    return Math.min(d.count, Math.max(1, Math.floor((rating - d.from) / d.step) + 1))
+    const { starts } = DIVISIONS[rankFor(rating).tier]
+    return Math.max(1, starts.filter((start) => rating >= start).length)
   }
   // A dark plate with cut corners and a rank-colour border, like the page's own buttons.
   const PLATE = [[26.4, 40.4], [39.8, 40.4], [39.8, 48.4], [37.6, 50.6], [24.2, 50.6], [24.2, 42.6]]

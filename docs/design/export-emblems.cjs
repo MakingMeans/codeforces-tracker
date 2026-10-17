@@ -15,7 +15,7 @@ for (const rank of [...RANKS, UNRATED]) {
   fs.writeFileSync(path.join(outDir, `${slug}.svg`), emblemSVG(rank.tier, { size }) + '\n')
   console.log(`${slug}.svg`)
   if (!withDivisions || rank.tier < 0) continue
-  for (let division = 1; division <= DIVISIONS[rank.tier].count; division++) {
+  for (let division = 1; division <= DIVISIONS[rank.tier].starts.length; division++) {
     fs.writeFileSync(path.join(outDir, `${slug}-${division}.svg`), emblemSVG(rank.tier, { size, division }) + '\n')
     console.log(`${slug}-${division}.svg`)
   }

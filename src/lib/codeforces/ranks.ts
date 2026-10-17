@@ -31,33 +31,33 @@ export function rankFor(rating: number | null | undefined): Rank {
 }
 
 /**
- * How each rank splits into divisions, by tier; the emblem shows the division as
- * a roman numeral, I being the lowest. A span that divides by three gets three
- * divisions, the others four. The exceptions: International Master is only 100
- * points wide (two of 50), and Legendary Grandmaster has no ceiling (four of
- * 200, the last one open from 3600). Kept in step with docs/design/rank-emblems.js.
+ * Where each of a rank's three divisions starts, by tier; the emblem shows the
+ * division as a roman numeral, I the lowest. The span is cut in thirds, rounded
+ * to tens so the boundaries are easy to remember: a 200-point rank splits
+ * 70 / 60 / 70. Newbie starts at 0 (anything lower is I too), and Legendary
+ * Grandmaster's III has no ceiling. Kept in step with docs/design/rank-emblems.js.
  */
 export const DIVISIONS = [
-  { from: 0, step: 400, count: 3 },
-  { from: 1200, step: 50, count: 4 },
-  { from: 1400, step: 50, count: 4 },
-  { from: 1600, step: 100, count: 3 },
-  { from: 1900, step: 50, count: 4 },
-  { from: 2100, step: 50, count: 4 },
-  { from: 2300, step: 50, count: 2 },
-  { from: 2400, step: 50, count: 4 },
-  { from: 2600, step: 100, count: 4 },
-  { from: 3000, step: 200, count: 4 },
+  { starts: [0, 400, 800] },
+  { starts: [1200, 1270, 1330] },
+  { starts: [1400, 1470, 1530] },
+  { starts: [1600, 1700, 1800] },
+  { starts: [1900, 1970, 2030] },
+  { starts: [2100, 2170, 2230] },
+  { starts: [2300, 2330, 2370] },
+  { starts: [2400, 2470, 2530] },
+  { starts: [2600, 2730, 2870] },
+  { starts: [3000, 3200, 3400] },
 ]
 
 /** The division a rating sits in within its rank, 1 = lowest; 0 without a rating. */
 export function divisionFor(rating: number | null | undefined): number {
   if (rating == null) return 0
-  const { from, step, count } = DIVISIONS[rankFor(rating).tier]
-  return Math.min(count, Math.max(1, Math.floor((rating - from) / step) + 1))
+  const { starts } = DIVISIONS[rankFor(rating).tier]
+  return Math.max(1, starts.filter((start) => rating >= start).length)
 }
 
-const ROMAN = ['I', 'II', 'III', 'IV']
+const ROMAN = ['I', 'II', 'III']
 
 /** "II" for division 2; empty for none. */
 export const romanFor = (division: number) => ROMAN[division - 1] ?? ''

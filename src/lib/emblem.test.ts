@@ -19,7 +19,7 @@ describe('rank emblems', () => {
     expect(normalize(emblemSVG(tier, { id: 'cfe0', size: 64 }))).toBe(normalize(design.emblemSVG(tier, { size: 64 })))
   })
 
-  it.each(DIVISIONS.flatMap((split, tier) => Array.from({ length: split.count }, (_, i) => [tier, i + 1])))(
+  it.each(DIVISIONS.flatMap((split, tier) => split.starts.map((_, i) => [tier, i + 1])))(
     'tier %i, division %i, matches the approved design exactly',
     (tier, division) => {
       expect(normalize(emblemSVG(tier, { id: 'cfe0', size: 64, division }))).toBe(
@@ -45,6 +45,6 @@ describe('rank emblems', () => {
     expect(emblemLabel(0)).toBe('Newbie rank emblem, 1 star')
     expect(emblemLabel(-1)).toBe('Unrated rank emblem')
     expect(emblemLabel(1, 2)).toBe('Pupil II rank emblem, 2 stars')
-    expect(emblemLabel(9, 4)).toBe('Legendary Grandmaster IV rank emblem, 7 stars')
+    expect(emblemLabel(9, 3)).toBe('Legendary Grandmaster III rank emblem, 7 stars')
   })
 })
