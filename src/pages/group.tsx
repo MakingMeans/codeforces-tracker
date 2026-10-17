@@ -1,6 +1,7 @@
 import { Check, Link2, Pencil, Plus, RotateCw, Save, Trash2, UserMinus, Users } from 'lucide-react'
 import { useId, useMemo, useState, type FormEvent } from 'react'
 import { PlayerTable, type PlayerRow } from '../components/rankings/player-table'
+import { AverageRankEmblem, AverageRankLabel } from '../components/rankings/average-rank'
 import { StatTiles } from '../components/rankings/stat-tiles'
 import { HandleField } from '../components/search/handle-field'
 import { StateMessage } from '../components/states/state-message'
@@ -205,29 +206,33 @@ function GroupView({ group, saved }: { group: Group; saved: boolean }) {
   return (
     <>
       <section aria-labelledby="group-title" className="ticks border-b border-line">
-        <div className="mx-auto flex max-w-[1240px] flex-wrap items-end justify-between gap-6 px-4 py-8 sm:px-6">
-          <div className="grid min-w-0 gap-2">
-            <p className="flex flex-wrap gap-x-2 text-sm text-ink-muted">
-              <a
-                href={routeHref({ groups: true })}
-                onClick={linkHandler({ groups: true })}
-                className="underline underline-offset-3 hover:text-ink"
-              >
-                Groups
-              </a>
-              <span aria-hidden>›</span>
-              <span>{saved ? 'Yours · saved in this browser' : 'Shared with you'}</span>
-            </p>
-            {renaming ? (
-              <Rename group={group} onDone={() => setRenaming(false)} />
-            ) : (
-              <h1
-                id="group-title"
-                className="font-display text-[clamp(34px,5.5vw,56px)] leading-none break-words uppercase"
-              >
-                {group.name}
-              </h1>
-            )}
+        <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-6 px-4 py-8 sm:px-6">
+          <div className="flex min-w-0 items-center gap-5">
+            <AverageRankEmblem average={average} />
+            <div className="grid min-w-0 gap-2">
+              <p className="flex flex-wrap gap-x-2 text-sm text-ink-muted">
+                <a
+                  href={routeHref({ groups: true })}
+                  onClick={linkHandler({ groups: true })}
+                  className="underline underline-offset-3 hover:text-ink"
+                >
+                  Groups
+                </a>
+                <span aria-hidden>›</span>
+                <span>{saved ? 'Yours · saved in this browser' : 'Shared with you'}</span>
+              </p>
+              {renaming ? (
+                <Rename group={group} onDone={() => setRenaming(false)} />
+              ) : (
+                <h1
+                  id="group-title"
+                  className="font-display text-[clamp(34px,5.5vw,56px)] leading-none break-words uppercase"
+                >
+                  {group.name}
+                </h1>
+              )}
+              <AverageRankLabel average={average} />
+            </div>
           </div>
           <StatTiles
             items={[

@@ -1,6 +1,7 @@
 import { MapPinOff } from 'lucide-react'
 import { startTransition, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { PlayerTable, type PlayerRow } from '../components/rankings/player-table'
+import { AverageRankEmblem, AverageRankLabel } from '../components/rankings/average-rank'
 import { RankingsStatus } from '../components/rankings/rankings-status'
 import { StatTiles } from '../components/rankings/stat-tiles'
 import { StateMessage } from '../components/states/state-message'
@@ -105,25 +106,29 @@ function Ranking({ rankings, scope, focus }: { rankings: RankingsIndex; scope: S
   return (
     <>
       <section aria-labelledby="ranking-title" className="ticks border-b border-line">
-        <div className="mx-auto flex max-w-[1240px] flex-wrap items-end justify-between gap-6 px-4 py-8 sm:px-6">
-          <div className="grid min-w-0 gap-2">
-            <p className="flex flex-wrap gap-x-2 text-sm text-ink-muted">
-              <Crumb route={{ rankings: true }}>Rankings</Crumb>
-              <span aria-hidden>›</span>
-              {found.kind === 'city' ? (
-                <>
-                  <Crumb route={{ country: found.country }}>{found.country}</Crumb>
-                  <span aria-hidden>›</span>
-                </>
-              ) : null}
-              <span>{KIND[found.kind]}</span>
-            </p>
-            <h1
-              id="ranking-title"
-              className="font-display text-[clamp(34px,5.5vw,56px)] leading-none break-words uppercase"
-            >
-              {scopeName(found)}
-            </h1>
+        <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-6 px-4 py-8 sm:px-6">
+          <div className="flex min-w-0 items-center gap-5">
+            <AverageRankEmblem average={current.average} />
+            <div className="grid min-w-0 gap-2">
+              <p className="flex flex-wrap gap-x-2 text-sm text-ink-muted">
+                <Crumb route={{ rankings: true }}>Rankings</Crumb>
+                <span aria-hidden>›</span>
+                {found.kind === 'city' ? (
+                  <>
+                    <Crumb route={{ country: found.country }}>{found.country}</Crumb>
+                    <span aria-hidden>›</span>
+                  </>
+                ) : null}
+                <span>{KIND[found.kind]}</span>
+              </p>
+              <h1
+                id="ranking-title"
+                className="font-display text-[clamp(34px,5.5vw,56px)] leading-none break-words uppercase"
+              >
+                {scopeName(found)}
+              </h1>
+              <AverageRankLabel average={current.average} />
+            </div>
           </div>
           <StatTiles
             items={[
