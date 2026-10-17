@@ -3,6 +3,9 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # Once a day, to refresh the rankings snapshot (Codeforces regenerates its list around midnight UTC).
+  schedule:
+    - cron: '40 1 * * *'
   workflow_dispatch:
 
 permissions:
@@ -24,6 +27,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Downloads Codeforces' rated list into public/data/rankings.json (keeps the published copy if it fails).
+      - run: npm run data
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
