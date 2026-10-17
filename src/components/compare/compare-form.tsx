@@ -3,6 +3,7 @@ import { useId, useRef, useState, type FormEvent } from 'react'
 import { cleanHandle, handleProblem } from '../../lib/handle'
 import { navigate } from '../../lib/route'
 import { Button } from '../ui/button'
+import { fieldClass } from '../ui/field-class'
 
 /** "Compare" on a profile: opens a small field for the second handle. */
 export function CompareForm({ handle }: { handle: string }) {
@@ -62,7 +63,7 @@ export function CompareForm({ handle }: { handle: string }) {
           spellCheck={false}
           aria-invalid={problem ? true : undefined}
           aria-describedby={`${id}-problem`}
-          className="cut w-48 bg-transparent px-3 py-2 text-[15px] text-ink placeholder:text-ink-muted [--cut:8px] [--cut-fill:var(--color-surface)] [--cut-line:var(--color-line-strong)] focus-visible:outline-none focus-visible:[--cut-line:var(--color-ink)]"
+          className={fieldClass('w-48 py-2')}
         />
         <Button type="submit" variant="primary" className="px-4 py-2">
           Go

@@ -7,7 +7,7 @@ import type { Profile } from './codeforces/profile'
 import { rankFor } from './codeforces/ranks'
 
 export const PROFILE_TTL_MS = 5 * 60 * 1000
-const PREFIX = 'cf-tracker:profile:v2:'
+const PREFIX = 'cf-tracker:profile:v3:'
 
 /** The JSON form of a profile: the per-day Map becomes a list of pairs. */
 interface Stored {

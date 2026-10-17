@@ -1,7 +1,7 @@
 import { RankLadder } from '../components/home/rank-ladder'
 import { UpcomingContests } from '../components/home/upcoming-contests'
 import { ExampleHandles, RecentSearches } from '../components/search/handle-chips'
-import { SearchBox } from '../components/search/search-box'
+import { ScopedSearch } from '../components/search/scoped-search'
 
 /** The home page fades in piece by piece, top to bottom; reduced motion shows it all at once. */
 const FADE = 'animate-fade-up'
@@ -27,7 +27,7 @@ export function Home() {
             </p>
           </div>
           <div className={`${FADE} [animation-delay:240ms]`}>
-            <SearchBox variant="hero" />
+            <ScopedSearch scopes={['player', 'country', 'city', 'org', 'group']} />
           </div>
           <div className={`${FADE} grid gap-3 [animation-delay:320ms]`}>
             <RecentSearches />

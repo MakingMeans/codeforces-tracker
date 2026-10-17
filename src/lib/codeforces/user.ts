@@ -12,6 +12,8 @@ export interface ProfileUser {
   rank: Rank
   maxRank: Rank
   organization?: string
+  city?: string
+  country?: string
   /** "City, Country" with whichever parts are known. */
   location?: string
   contribution: number
@@ -55,6 +57,8 @@ export function toProfileUser(user: ApiUser, now: number): ProfileUser {
     rank: rankFor(rating),
     maxRank: rankFor(maxRating),
     organization: user.organization?.trim() || undefined,
+    city: user.city?.trim() || undefined,
+    country: user.country?.trim() || undefined,
     location:
       [user.city, user.country]
         .map((part) => part?.trim())

@@ -1,16 +1,23 @@
 import { Users } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Footer } from './components/layout/footer'
+import { NavRail, TabBar } from './components/layout/nav-rail'
 import { TopBar } from './components/layout/top-bar'
 import { SearchBox } from './components/search/search-box'
 import { InvalidHandle } from './components/states/invalid-handle'
 import { StateMessage } from './components/states/state-message'
+import { useGroups } from './lib/groups'
 import { cleanHandle, handleProblem } from './lib/handle'
-import { useRoute } from './lib/route'
+import { scopeFromRoute, scopeName } from './lib/rankings/rankings'
+import { sectionOf, useRoute } from './lib/route'
 import { site } from './lib/site'
 import { Compare } from './pages/compare'
+import { GroupPage } from './pages/group'
+import { GroupsHome } from './pages/groups'
 import { Home } from './pages/home'
 import { Profile } from './pages/profile'
+import { RankingPage } from './pages/ranking'
+import { RankingsHome } from './pages/rankings'
 
 export default function App() {
   const { route } = useRoute()
@@ -20,17 +27,30 @@ export default function App() {
   const vsProblem = route.handle && route.vs ? handleProblem(route.vs) : null
   const sameTwice = handle && vs ? handle.toLowerCase() === vs.toLowerCase() : false
   const [fetchedAt, setFetchedAt] = useState<number | null>(null)
+  const groups = useGroups()
+  const section = sectionOf(route)
+  const { country, city, org } = route
+  const scope = useMemo(() => scopeFromRoute({ country, city, org }), [country, city, org])
+  const groupName = route.group ? (groups.find((group) => group.id === route.group)?.name ?? route.name) : null
 
   useEffect(() => {
-    document.title =
-      handle && !problem
-        ? vs && !vsProblem
-          ? `${handle} vs ${vs} · ${site.name}`
-          : `${handle} · ${site.name}`
-        : site.name
-  }, [handle, vs, problem, vsProblem])
+    const title = route.group
+      ? (groupName ?? 'Group')
+      : route.groups
+        ? 'Groups'
+        : scope
+          ? `${scopeName(scope)} ranking`
+          : route.rankings
+            ? 'Rankings'
+            : handle && !problem
+              ? vs && !vsProblem
+                ? `${handle} vs ${vs}`
+                : handle
+              : null
+    document.title = title ? `${title} · ${site.name}` : site.name
+  }, [route.group, route.groups, route.rankings, groupName, scope, handle, vs, problem, vsProblem])
 
-  function page() {
+  function players() {
     if (!route.handle || !handle) return <Home />
     if (problem) {
       const other = route.vs
@@ -70,6 +90,17 @@ export default function App() {
     return <Profile handle={handle} onFetched={setFetchedAt} />
   }
 
+  function page() {
+    if (route.group) return <GroupPage id={route.group} sharedName={route.name} sharedMembers={route.members} />
+    if (route.groups) return <GroupsHome />
+    if (scope) return <RankingPage scope={scope} focus={route.focus} />
+    if (route.rankings) return <RankingsHome />
+    return players()
+  }
+
+  const home = section === 'players' && !route.handle
+  const onProfile = section === 'players' && Boolean(route.handle) && !problem
+
   return (
     <div className="flex min-h-svh flex-col">
       <a
@@ -78,11 +109,18 @@ export default function App() {
       >
         Skip to content
       </a>
-      <TopBar>{route.handle ? <SearchBox variant="compact" /> : null}</TopBar>
-      <main id="main" className="flex-1">
-        {page()}
-      </main>
-      <Footer fetchedAt={route.handle && !problem ? (fetchedAt ?? undefined) : undefined} />
+      <TopBar>{home ? null : <SearchBox variant="compact" />}</TopBar>
+      <div className="flex flex-1">
+        <NavRail active={section} />
+        {/* On phones the tab bar covers the bottom edge, so the page leaves room for it. */}
+        <div className="flex min-w-0 flex-1 flex-col pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0">
+          <main id="main" className="flex-1">
+            {page()}
+          </main>
+          <Footer fetchedAt={onProfile ? (fetchedAt ?? undefined) : undefined} />
+        </div>
+      </div>
+      <TabBar active={section} />
     </div>
   )
 }
