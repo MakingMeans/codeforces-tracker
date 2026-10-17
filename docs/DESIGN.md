@@ -156,13 +156,15 @@ stays the reference.
 
 ### Anatomy
 
-Every emblem is a 64 × 64 SVG with three parts:
+Every emblem is a 64 × 64 SVG with four parts:
 
 1. **Frame.** A hexagon with a darker inner hexagon. It gains parts as the rank rises.
 2. **Figure.** A chess piece inside the hex. Codeforces rank names come from chess titles, so
    the figure tells the same story: a pawn promoted up to the king.
 3. **Stars.** 1 to 7 faceted stars on a ring concentric with the hex, **one per rank colour**.
    Ranks that share a colour share a star count, and the frame tells them apart.
+4. **Division.** Where in its rank the rating sits, as a roman numeral on a small plate over the
+   hex's bottom corner (see below).
 
 | Tier | Rank                      | Frame                     | Figure                                   | Stars |
 | ---- | ------------------------- | ------------------------- | ---------------------------------------- | ----- |
@@ -194,6 +196,38 @@ All figures are flat blocks (trapezoids, bars, diamonds and octagons), with no c
 - **Details are cut-outs.** The knight's eye, the bishop's slit and the crown's band are drawn in
   the page navy (the `ink` option), like holes in the shape.
 
+### Divisions
+
+Each rank is split into divisions, **I being the lowest**. A rank whose span divides by three gets
+three divisions; the others get four. Two exceptions: International Master is only 100 points
+wide, so it gets two of 50, and Legendary Grandmaster has no ceiling, so it gets four of 200 with
+the last one open.
+
+| Rank                      | Span        | Divisions                                           |
+| ------------------------- | ----------- | --------------------------------------------------- |
+| Newbie                    | below 1200  | 3 of 400: I up to 399, II 400–799, III 800–1199     |
+| Pupil                     | 1200–1399   | 4 of 50                                             |
+| Specialist                | 1400–1599   | 4 of 50                                             |
+| Expert                    | 1600–1899   | 3 of 100                                            |
+| Candidate Master          | 1900–2099   | 4 of 50                                             |
+| Master                    | 2100–2299   | 4 of 50                                             |
+| International Master      | 2300–2399   | 2 of 50                                             |
+| Grandmaster               | 2400–2599   | 4 of 50                                             |
+| International Grandmaster | 2600–2999   | 4 of 100                                            |
+| Legendary Grandmaster     | 3000 and up | 4 of 200: I 3000–3199 … III 3400–3599, IV from 3600 |
+
+The table lives in `src/lib/codeforces/ranks.ts` (`DIVISIONS`, `divisionFor`) and in
+`rank-emblems.js`; a test keeps the two equal.
+
+- **The plate.** Navy, with cut corners and a 1 px border in the rank colour, like the page's
+  buttons. It sits over the hex's bottom corner, clear of the figure and of up to seven stars.
+- **The numeral.** Drawn in straight bars and a V in the rank colour, like the figures, so it needs
+  no font and stays crisp in the exported SVGs.
+- **Only on the emblem.** Text next to an emblem keeps the plain rank name ("Pupil"). The
+  division is in the emblem's accessible name ("Pupil II rank emblem, 2 stars").
+- **Not on the rank ladder.** The home page's ladder shows ranks, not a rating, so its emblems
+  carry no plate. Unrated never has one.
+
 ### Using the emblems
 
 - **Sizes.** 140 px in the profile header, up to 100 px on the home page's rank ladder (the
@@ -202,8 +236,8 @@ All figures are flat blocks (trapezoids, bars, diamonds and octagons), with no c
   Stars are countable from 44 px up; at 28 px they read as a row of dots.
 - **Accessibility.** Every emblem has `role="img"`, an `aria-label` and a `<title>` with the rank
   name and star count. Next to text, the rank name is always written out too.
-- **The emblem in a history row is the rank held going into the contest.** It comes from the
-  rating before the contest, not the rating after it.
+- **The emblem in a history row is the rank held going into the contest.** It and its division
+  come from the rating before the contest, not the rating after it.
 
 ## Accessibility checklist
 

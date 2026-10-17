@@ -35,7 +35,8 @@ match history, styled like a game tracker. Think tracker.gg for Valorant, but fo
 - **Upcoming contests** on the home page, with a countdown.
 - **Compare two handles** side by side, including the contests both of them entered.
 
-Ranks are drawn as original angular emblems, one per rank. Codeforces has no rank artwork of its own.
+Ranks are drawn as original angular emblems, one per rank, with a roman numeral for the division
+within the rank (Pupil II, Legendary Grandmaster IV…). Codeforces has no rank artwork of its own.
 
 ## Usage
 
