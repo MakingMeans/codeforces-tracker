@@ -4,10 +4,12 @@ import { formatAgo, formatDelta, formatMonthYear, formatNumber } from '../../lib
 import { divisionFor } from '../../lib/codeforces/ranks'
 import type { ProfileUser } from '../../lib/codeforces/user'
 import { useNow } from '../../lib/use-now'
+import { linkHandler, routeHref, type Route } from '../../lib/route'
 import { CompareForm } from '../compare/compare-form'
 import { RankEmblem } from '../rank-emblem'
 import { ButtonLink } from '../ui/button'
 import { HandleName } from './handle-name'
+import { ProfileChips } from './profile-chips'
 import { ProfilePhoto } from './profile-photo'
 
 function Meta({ label, children }: { label: string; children: ReactNode }) {
@@ -16,6 +18,33 @@ function Meta({ label, children }: { label: string; children: ReactNode }) {
       <dt className="font-label text-xs font-semibold tracking-[0.16em] text-ink-muted uppercase">{label}</dt>
       <dd className="font-semibold tabular-nums">{children}</dd>
     </div>
+  )
+}
+
+function Place({ route, children }: { route: Partial<Route>; children: string }) {
+  return (
+    <a
+      href={routeHref(route)}
+      onClick={linkHandler(route)}
+      className="text-ink underline decoration-ink/35 underline-offset-3 hover:decoration-ink"
+    >
+      {children}
+    </a>
+  )
+}
+
+/** Organization, city and country, each a link to its ranking. */
+function Location({ user }: { user: ProfileUser }) {
+  const { organization: org, city, country } = user
+  if (!org && !city && !country) return null
+  return (
+    <p className="text-ink-muted">
+      {org ? <Place route={{ org }}>{org}</Place> : null}
+      {org && (city || country) ? ' · ' : null}
+      {city ? country ? <Place route={{ country, city }}>{city}</Place> : city : null}
+      {city && country ? ', ' : null}
+      {country ? <Place route={{ country }}>{country}</Place> : null}
+    </p>
   )
 }
 
@@ -38,9 +67,8 @@ export function ProfileHeader({ user }: { user: ProfileUser }) {
           <h1 className="font-display text-[clamp(38px,5vw,56px)] leading-none tracking-[0.01em] break-all">
             <HandleName handle={user.handle} rank={rank} />
           </h1>
-          {user.organization || user.location ? (
-            <p className="text-ink-muted">{[user.organization, user.location].filter(Boolean).join(' · ')}</p>
-          ) : null}
+          <Location user={user} />
+          <ProfileChips handle={user.handle} />
           <dl className="mt-1.5 flex flex-wrap gap-x-6 gap-y-2">
             <Meta label="Contribution">{formatDelta(user.contribution)}</Meta>
             <Meta label="Friends of">{formatNumber(user.friendOfCount)}</Meta>

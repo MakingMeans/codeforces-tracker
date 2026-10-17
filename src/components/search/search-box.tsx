@@ -72,6 +72,7 @@ export function SearchBox({ variant, initial = '', to, exclude, label = 'Codefor
   return (
     <form
       role="search"
+      aria-label={fix ? label : 'Players'}
       onSubmit={submit}
       noValidate
       className={cn('grid gap-2', hero ? 'max-w-[640px]' : 'w-full max-w-[420px]', fix && 'justify-self-stretch')}
