@@ -14,12 +14,12 @@ export function StatTiles({ items }: { items: StatTile[] }) {
       {items.map(({ label, value, color }) => (
         <div
           key={label}
-          className="cut grid min-w-[7.5rem] gap-1.5 px-4 py-3 [--cut:8px] [--cut-fill:var(--color-surface)] [--cut-line:var(--color-line)]"
+          className="cut grid min-w-[8.5rem] gap-2 px-5 py-3.5 [--cut:8px] [--cut-fill:var(--color-surface)] [--cut-line:var(--color-line)]"
         >
-          <dt className="order-2 font-label text-[11px] font-semibold tracking-[0.14em] text-ink-muted uppercase">
+          <dt className="order-2 font-label text-[12px] font-semibold tracking-[0.14em] text-ink-muted uppercase">
             {label}
           </dt>
-          <dd className="order-1 font-display text-[28px] leading-none tabular-nums" style={{ color }}>
+          <dd className="order-1 font-display text-[36px] leading-none tabular-nums" style={{ color }}>
             {value}
           </dd>
         </div>
