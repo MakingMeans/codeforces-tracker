@@ -10,8 +10,9 @@ const EXAMPLES: [string, string][] = [
   ['Benq', 'tourist'],
 ]
 
+// The focused field rises above what follows (the other field, the button), so its suggestions are never covered.
 const box =
-  'cut relative flex items-stretch [--cut:14px] [--cut-fill:var(--color-surface)] [--cut-line:var(--color-line-strong)] has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-3 has-[input:focus-visible]:outline-ink has-[input:focus-visible]:[--cut-line:var(--color-ink)]'
+  'cut relative z-10 flex items-stretch focus-within:z-30 [--cut:14px] [--cut-fill:var(--color-surface)] [--cut-line:var(--color-line-strong)] has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-3 has-[input:focus-visible]:outline-ink has-[input:focus-visible]:[--cut-line:var(--color-ink)]'
 const input =
   'w-0 min-w-0 flex-1 bg-transparent px-4 py-4 text-lg text-ink placeholder:text-ink-muted focus-visible:outline-none'
 const label = 'font-label text-[13px] font-semibold tracking-[0.16em] text-ink-muted uppercase'
