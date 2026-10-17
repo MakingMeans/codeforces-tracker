@@ -130,9 +130,9 @@ All motion is CSS; there is no animation library.
 
 ## Navigation
 
-Four sections, the same everywhere: **Players** (search and profiles), **Compare** (picking two
-players, and comparisons), **Rankings** and **Groups**. Compare opened from a profile starts with
-that player as the first one.
+Three sections, the same everywhere: **Players** (search and profiles), **Compare** (picking two
+players, and comparisons) and **Rankings**. Compare opened from a profile starts with that player as
+the first one.
 
 - **Desktop.** A 76 px rail on the left, under the top bar, that stays in view. Each section is an
   icon over an 11 px uppercase label: icons alone read worse. The current one is in `ink` with a 3 px
@@ -141,20 +141,20 @@ that player as the first one.
   marked by a red bar on top. Pages leave 64 px plus the safe-area inset free at the bottom.
 - **Top bar.** The wordmark, the handle search on every page but the home page, and the GitHub link.
 
-## Rankings and groups
+## Rankings
 
-- **Search with a scope.** Above the field, chips pick what to find: Player, Country, City,
-  Organization or Group. Places are suggested as you type from the daily snapshot, accents ignored;
+- **Search with a scope.** Above the field, chips pick what to find: Player, Country, City or
+  Organization. Places are suggested as you type from the daily snapshot, accents ignored;
   names that start with the text come first, then the biggest. It is a WAI-ARIA combobox: arrow keys
   move through the list, Enter opens, Escape closes.
-- **Handle suggestions.** Every handle field (the searches, Compare, adding to a group) suggests
+- **Handle suggestions.** Every handle field (the searches and Compare) suggests
   rated players from the snapshot as you type: handles that start with the text first, then those
   that contain it, best rated first, each with a 32 px emblem, rating and country. An empty field
   offers recent searches. Enter on a highlighted suggestion picks it; otherwise Enter searches what
   was typed, so a handle missing from the snapshot (unrated, or away for a month) still works.
 - **Suggestion lists sit on top.** Cut boxes isolate their stacking, so a field with suggestions
   lifts its own container (`relative z-20`, the top bar `z-30`) above what follows on the page.
-- **Average rank.** Next to a ranking's or group's title, a 128 px emblem (96 px on phones) of the
+- **Average rank.** Next to a ranking's title, a 128 px emblem (96 px on phones) of the
   rank and division the average rating falls in, with "Average rank · Newbie III" under the title.
 - **Stat tiles.** A big Anton number (36 px) over a small label, ratings in their rank colour: players,
   competed this month, average, and **Team rating · top 3**, Codeforces' team formula on the best
@@ -170,8 +170,7 @@ that player as the first one.
   `win` with a 4 px bar, and scrolled into view. When they are far down, the list shows its first
   page, a `···` gap, then the rows around them.
 - **Profile chips.** Under the location, which links to each ranking: one chip per place
-  (`#58 Colombia`, the number in Anton), one per group of yours the player is in, and **Add to
-  group**, a small panel with a checkbox per group and a field to start a new one.
+  (`#58 Colombia`, the number in Anton). None show for a player missing from the rankings.
 
 ## Match history rows
 
@@ -281,7 +280,7 @@ The table lives in `src/lib/codeforces/ranks.ts` (`DIVISIONS`, `divisionFor`) an
 
 - **Sizes.** 140 px in the profile header, up to 100 px on the home page's rank ladder (the
   emblem fills its cell), 92 px on the rating card, 84 px in the match history (64 px in rows on
-  phones), 80 px in the comparison header, 84 px in ranking and group tables (64 px on phones), 128 px for a ranking's average rank,
+  phones), 80 px in the comparison header, 84 px in ranking tables (64 px on phones), 128 px for a ranking's average rank,
   32 px in handle suggestions.
   Stars are countable from 44 px up; at 28 px they read as a row of dots.
 - **Accessibility.** Every emblem has `role="img"`, an `aria-label` and a `<title>` with the rank

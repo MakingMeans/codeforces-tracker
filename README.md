@@ -41,11 +41,8 @@ match history, styled like a game tracker. Think tracker.gg for Valorant, but fo
 - **Rankings** by country, city and organization: every rated player who was on Codeforces in the last
   month, in order, with the average rating and the team rating of the best three. A profile shows the
   player's place in each (`#58 Colombia`), and its organization, city and country link to them.
-- **Groups** of your own (friends, a team, a class): members ranked live, with their average and their
-  best team of three. Groups stay in your browser and can be shared by link. Codeforces does not publish
-  anyone's friends or groups, so these are yours to make.
-- **Search by scope** on the home page: a player, a country, a city, an organization or one of your groups,
-  with suggestions as you type.
+- **Search by scope** on the home page: a player, a country, a city or an organization, with suggestions
+  as you type.
 
 Ranks are drawn as original angular emblems, one per rank, with a roman numeral for the division
 within the rank (Pupil II, Legendary Grandmaster IV…). Codeforces has no rank artwork of its own.
@@ -59,7 +56,6 @@ within the rank (Pupil II, Legendary Grandmaster IV…). Codeforces has no rank 
 | Rankings                  | `?rankings`                                           |
 | A country's ranking       | `?country=<name>`, a city in it: `&city=<name>`       |
 | An organization's ranking | `?org=<name>`                                         |
-| Your groups               | `?groups`; a group's “Copy share link” gives its URL  |
 | Jump to the search box    | Press `/`                                             |
 
 Every view is a plain URL, so it can be bookmarked or shared, and the browser's back and forward buttons
@@ -96,8 +92,6 @@ directly; it answers with `Access-Control-Allow-Origin: *`, so no proxy or key i
   `scripts/build-rankings.ts`) and publishes it with the site as `data/rankings.json`: about 136,000
   players, 1.5 MB gzipped. A Web Worker parses it; the rankings are up to a day old, profiles stay live.
   If Codeforces cannot be reached, the copy already published is kept.
-- **Groups** live in `localStorage`. A share link carries the group's name and members, and their
-  ratings come live from one `user.info` call.
 - **Photos.** `userpic.codeforces.org` sometimes fails, and its CDN can cache the error for days. The
   photo is tried as given, then with a cache-busting query, then the small avatar, then a neutral local
   image.
@@ -145,12 +139,11 @@ src/
     api/          Codeforces client: retries, rate limiting, cancellation, typed errors
     codeforces/   pure data rules: ranks, contests, activity, insights, comparison, team rating (tested)
     rankings/     the daily snapshot: its format, reading it, and the rankings it answers (tested)
-    groups.ts     your own groups, kept in this browser (tested)
     charts/       scales and grids behind the charts (tested)
     emblem.ts     the rank emblems as SVG markup (tested against docs/design)
   workers/        the details and rankings workers: big downloads parsed off the main thread
   components/     layout · ui · search · home · profile · charts · history · compare · states
-  pages/          home, profile, compare, rankings, ranking, groups, group
+  pages/          home, profile, compare, compare-start, rankings, ranking
   index.css       design tokens and the few component styles written as CSS
 scripts/          build-rankings.ts: the daily rankings snapshot, run in the deploy workflow
 tests/fixtures/   small hand-written API responses used by the tests
@@ -198,7 +191,7 @@ Issues and pull requests are welcome.
 - [x] Accessibility pass, screenshots
 - [x] First deployment to GitHub Pages
 - [x] Rank divisions on the emblems
-- [x] Rankings by country, city and organization, and groups of your own
+- [x] Rankings by country, city and organization
 
 ## Credits
 
