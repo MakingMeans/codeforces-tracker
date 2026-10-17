@@ -9,6 +9,8 @@ import { useCallback, useMemo, useSyncExternalStore, type MouseEvent } from 'rea
 export interface Route {
   handle: string | null
   vs: string | null
+  /** The page for picking two players to compare (`?compare`), `handle` filling the first. */
+  compare: boolean
   /** The rankings page (`?rankings`). */
   rankings: boolean
   /** A ranking: a country, a city within it, or an organization. */
@@ -28,6 +30,7 @@ export interface Route {
 const NAVIGATE = 'cf-tracker:navigate'
 /** Parameters in the order they are written, so equal routes give equal URLs. */
 const ORDER = [
+  'compare',
   'handle',
   'vs',
   'rankings',
@@ -47,6 +50,7 @@ export function readRoute(search: string): Route {
   return {
     handle: text('handle'),
     vs: text('vs'),
+    compare: params.has('compare'),
     rankings: params.has('rankings'),
     country: text('country'),
     city: text('city'),
@@ -84,11 +88,12 @@ export function navigate(route: Partial<Route>, { replace = false } = {}) {
   if (!replace) window.scrollTo({ top: 0 })
 }
 
-export type Section = 'players' | 'rankings' | 'groups'
+export type Section = 'players' | 'compare' | 'rankings' | 'groups'
 
-/** Which section a page belongs to: profiles and comparisons are under Players. */
+/** Which section a page belongs to: search and profiles under Players, comparisons under Compare. */
 export function sectionOf(route: Route): Section {
   if (route.groups || route.group) return 'groups'
+  if (route.compare || (route.handle && route.vs)) return 'compare'
   if (route.rankings || route.country || route.org) return 'rankings'
   return 'players'
 }

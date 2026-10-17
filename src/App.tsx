@@ -12,6 +12,7 @@ import { scopeFromRoute, scopeName } from './lib/rankings/rankings'
 import { sectionOf, useRoute } from './lib/route'
 import { site } from './lib/site'
 import { Compare } from './pages/compare'
+import { CompareStart } from './pages/compare-start'
 import { GroupPage } from './pages/group'
 import { GroupsHome } from './pages/groups'
 import { Home } from './pages/home'
@@ -34,21 +35,23 @@ export default function App() {
   const groupName = route.group ? (groups.find((group) => group.id === route.group)?.name ?? route.name) : null
 
   useEffect(() => {
-    const title = route.group
-      ? (groupName ?? 'Group')
-      : route.groups
-        ? 'Groups'
-        : scope
-          ? `${scopeName(scope)} ranking`
-          : route.rankings
-            ? 'Rankings'
-            : handle && !problem
-              ? vs && !vsProblem
-                ? `${handle} vs ${vs}`
-                : handle
-              : null
+    const title = route.compare
+      ? 'Compare'
+      : route.group
+        ? (groupName ?? 'Group')
+        : route.groups
+          ? 'Groups'
+          : scope
+            ? `${scopeName(scope)} ranking`
+            : route.rankings
+              ? 'Rankings'
+              : handle && !problem
+                ? vs && !vsProblem
+                  ? `${handle} vs ${vs}`
+                  : handle
+                : null
     document.title = title ? `${title} · ${site.name}` : site.name
-  }, [route.group, route.groups, route.rankings, groupName, scope, handle, vs, problem, vsProblem])
+  }, [route.compare, route.group, route.groups, route.rankings, groupName, scope, handle, vs, problem, vsProblem])
 
   function players() {
     if (!route.handle || !handle) return <Home />
@@ -91,6 +94,7 @@ export default function App() {
   }
 
   function page() {
+    if (route.compare) return <CompareStart key={handle ?? ''} initial={handle && !problem ? handle : null} />
     if (route.group) return <GroupPage id={route.group} sharedName={route.name} sharedMembers={route.members} />
     if (route.groups) return <GroupsHome />
     if (scope) return <RankingPage scope={scope} focus={route.focus} />
@@ -99,7 +103,10 @@ export default function App() {
   }
 
   const home = section === 'players' && !route.handle
-  const onProfile = section === 'players' && Boolean(route.handle) && !problem
+  const onProfile =
+    Boolean(route.handle) && !problem && !route.compare && section !== 'rankings' && section !== 'groups'
+  /** The profile on screen, which Compare in the navigation starts from. */
+  const profileHandle = section === 'players' && handle && !problem ? handle : null
 
   return (
     <div className="flex min-h-svh flex-col">
@@ -111,7 +118,7 @@ export default function App() {
       </a>
       <TopBar>{home ? null : <SearchBox variant="compact" />}</TopBar>
       <div className="flex flex-1">
-        <NavRail active={section} />
+        <NavRail active={section} handle={profileHandle} />
         {/* On phones the tab bar covers the bottom edge, so the page leaves room for it. */}
         <div className="flex min-w-0 flex-1 flex-col pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0">
           <main id="main" className="flex-1">
@@ -120,7 +127,7 @@ export default function App() {
           <Footer fetchedAt={onProfile ? (fetchedAt ?? undefined) : undefined} />
         </div>
       </div>
-      <TabBar active={section} />
+      <TabBar active={section} handle={profileHandle} />
     </div>
   )
 }
