@@ -20,8 +20,9 @@ match history, styled like a game tracker. Think tracker.gg for Valorant, but fo
 ## Features
 
 - **Search any handle.** The handle is checked in the browser (3–24 letters, digits, `_`, `.` or `-`)
-  before Codeforces is asked. A handle that does not exist can be corrected right where it failed. Recent
-  searches are remembered on your device and can be removed one by one.
+  before Codeforces is asked. As you type, rated players whose handle starts with (then contains) the
+  text are suggested, best first. A handle that does not exist can be corrected right where it failed.
+  Recent searches are remembered on your device and can be removed one by one.
 - **Profile header.** Photo, handle in its rank colour, organisation and location, rank emblem, current
   and peak rating, contribution, friends, registration date and last visit, plus a link to the profile
   on Codeforces.
@@ -35,7 +36,8 @@ match history, styled like a game tracker. Think tracker.gg for Valorant, but fo
 - **Insights.** Problems solved by difficulty, most-solved tags, languages used and a contest summary
   (best place, biggest gain, biggest loss).
 - **Upcoming contests** on the home page, with a countdown.
-- **Compare two handles** side by side, including the contests both of them entered.
+- **Compare two handles** side by side, including the contests both of them entered, from any profile or
+  from the Compare section, which suggests handles as you type.
 - **Rankings** by country, city and organization: every rated player who was on Codeforces in the last
   month, in order, with the average rating and the team rating of the best three. A profile shows the
   player's place in each (`#58 Colombia`), and its organization, city and country link to them.
@@ -53,7 +55,7 @@ within the rank (Pupil II, Legendary Grandmaster IV…). Codeforces has no rank 
 | What                      | How                                                   |
 | ------------------------- | ----------------------------------------------------- |
 | Look up a handle          | Type it in the search box, or open `?handle=<handle>` |
-| Compare two handles       | `?handle=<a>&vs=<b>`                                  |
+| Compare two handles       | `?handle=<a>&vs=<b>`, or pick them at `?compare`      |
 | Rankings                  | `?rankings`                                           |
 | A country's ranking       | `?country=<name>`, a city in it: `&city=<name>`       |
 | An organization's ranking | `?org=<name>`                                         |

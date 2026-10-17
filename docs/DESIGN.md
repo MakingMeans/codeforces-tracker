@@ -130,8 +130,9 @@ All motion is CSS; there is no animation library.
 
 ## Navigation
 
-Three sections, the same everywhere: **Players** (search, profiles, comparisons), **Rankings** and
-**Groups**.
+Four sections, the same everywhere: **Players** (search and profiles), **Compare** (picking two
+players, and comparisons), **Rankings** and **Groups**. Compare opened from a profile starts with
+that player as the first one.
 
 - **Desktop.** A 76 px rail on the left, under the top bar, that stays in view. Each section is an
   icon over an 11 px uppercase label: icons alone read worse. The current one is in `ink` with a 3 px
@@ -146,13 +147,21 @@ Three sections, the same everywhere: **Players** (search, profiles, comparisons)
   Organization or Group. Places are suggested as you type from the daily snapshot, accents ignored;
   names that start with the text come first, then the biggest. It is a WAI-ARIA combobox: arrow keys
   move through the list, Enter opens, Escape closes.
-- **Stat tiles.** A big Anton number over a small label, ratings in their rank colour: players,
+- **Handle suggestions.** Every handle field (the searches, Compare, adding to a group) suggests
+  rated players from the snapshot as you type: handles that start with the text first, then those
+  that contain it, best rated first, each with a 32 px emblem, rating and country. An empty field
+  offers recent searches. Enter on a highlighted suggestion picks it; otherwise Enter searches what
+  was typed, so a handle missing from the snapshot (unrated, or away for a month) still works.
+- **Suggestion lists sit on top.** Cut boxes isolate their stacking, so a field with suggestions
+  lifts its own container (`relative z-20`, the top bar `z-30`) above what follows on the page.
+- **Stat tiles.** A big Anton number (36 px) over a small label, ratings in their rank colour: players,
   competed this month, average, and **Team rating · top 3**, Codeforces' team formula on the best
   three (the rating of a player the team would beat half the time, the team winning if any member
   wins).
-- **Player tables.** Fixed layout, so long handles are cut instead of widening the page. Place in
-  Anton; the emblem at 44 px with its division; the handle in its rank colour, linking to the profile;
-  rating in rank colour, best rating muted. City, organization or country columns are hidden on
+- **Player tables.** Fixed layout, so long handles are cut instead of widening the page. Text at
+  17 px; the place in 24 px Anton; the emblem at 60 px (52 px on phones) with its division; the
+  handle at 18 px in its rank colour, linking to the profile; the rating at 18 px semibold in its rank
+  colour, best rating muted. City, organization or country columns are hidden on
   phones. Equal ratings share a place (1, 2, 2, 4).
 - **Competed this month.** A 7 px `win` square after the handle, with the words for screen readers.
 - **The player you came from.** Arriving from a profile's chip, their row is tinted, outlined in
@@ -269,7 +278,8 @@ The table lives in `src/lib/codeforces/ranks.ts` (`DIVISIONS`, `divisionFor`) an
 
 - **Sizes.** 140 px in the profile header, up to 100 px on the home page's rank ladder (the
   emblem fills its cell), 92 px on the rating card, 84 px in the match history (64 px in rows on
-  phones), 80 px in the comparison header, 44 px in ranking and group tables.
+  phones), 80 px in the comparison header, 60 px in ranking and group tables (52 px on phones),
+  32 px in handle suggestions.
   Stars are countable from 44 px up; at 28 px they read as a row of dots.
 - **Accessibility.** Every emblem has `role="img"`, an `aria-label` and a `<title>` with the rank
   name and star count. Next to text, the rank name is always written out too.
