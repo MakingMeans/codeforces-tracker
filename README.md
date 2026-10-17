@@ -45,7 +45,7 @@ match history, styled like a game tracker. Think tracker.gg for Valorant, but fo
   as you type.
 
 Ranks are drawn as original angular emblems, one per rank, with a roman numeral for the division
-within the rank (Pupil II, Legendary Grandmaster IV…). Codeforces has no rank artwork of its own.
+within the rank (I, II or III: Pupil II, Legendary Grandmaster III…). Codeforces has no rank artwork of its own.
 
 ## Usage
 

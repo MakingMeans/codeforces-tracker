@@ -245,25 +245,25 @@ All figures are flat blocks (trapezoids, bars, diamonds and octagons), with no c
 
 ### Divisions
 
-Each rank is split into divisions, **I being the lowest**. A rank whose span divides by three gets
-three divisions; the others get four. Two exceptions: International Master is only 100 points
-wide, so it gets two of 50, and Legendary Grandmaster has no ceiling, so it gets four of 200 with
-the last one open.
+Every rank has **three divisions, I, II and III**, I the lowest. The rank's span is cut in
+thirds, rounded to tens so the boundaries are easy to remember: a 200-point rank splits 70 / 60 / 70,
+a 400-point one 130 / 140 / 130. Newbie's I takes everything below 400, and Legendary
+Grandmaster's III has no ceiling.
 
-| Rank                      | Span        | Divisions                                           |
-| ------------------------- | ----------- | --------------------------------------------------- |
-| Newbie                    | below 1200  | 3 of 400: I up to 399, II 400–799, III 800–1199     |
-| Pupil                     | 1200–1399   | 4 of 50                                             |
-| Specialist                | 1400–1599   | 4 of 50                                             |
-| Expert                    | 1600–1899   | 3 of 100                                            |
-| Candidate Master          | 1900–2099   | 4 of 50                                             |
-| Master                    | 2100–2299   | 4 of 50                                             |
-| International Master      | 2300–2399   | 2 of 50                                             |
-| Grandmaster               | 2400–2599   | 4 of 50                                             |
-| International Grandmaster | 2600–2999   | 4 of 100                                            |
-| Legendary Grandmaster     | 3000 and up | 4 of 200: I 3000–3199 … III 3400–3599, IV from 3600 |
+| Rank                      | Span        | Divisions                                  |
+| ------------------------- | ----------- | ------------------------------------------ |
+| Newbie                    | below 1200  | I up to 399 · II 400–799 · III 800–1199    |
+| Pupil                     | 1200–1399   | I 1200–1269 · II 1270–1329 · III 1330–1399 |
+| Specialist                | 1400–1599   | I 1400–1469 · II 1470–1529 · III 1530–1599 |
+| Expert                    | 1600–1899   | I 1600–1699 · II 1700–1799 · III 1800–1899 |
+| Candidate Master          | 1900–2099   | I 1900–1969 · II 1970–2029 · III 2030–2099 |
+| Master                    | 2100–2299   | I 2100–2169 · II 2170–2229 · III 2230–2299 |
+| International Master      | 2300–2399   | I 2300–2329 · II 2330–2369 · III 2370–2399 |
+| Grandmaster               | 2400–2599   | I 2400–2469 · II 2470–2529 · III 2530–2599 |
+| International Grandmaster | 2600–2999   | I 2600–2729 · II 2730–2869 · III 2870–2999 |
+| Legendary Grandmaster     | 3000 and up | I 3000–3199 · II 3200–3399 · III 3400+     |
 
-The table lives in `src/lib/codeforces/ranks.ts` (`DIVISIONS`, `divisionFor`) and in
+The starts live in `src/lib/codeforces/ranks.ts` (`DIVISIONS`, `divisionFor`) and in
 `rank-emblems.js`; a test keeps the two equal.
 
 - **The plate.** Navy, with cut corners and a 1 px border in the rank colour, like the page's
@@ -273,8 +273,8 @@ The table lives in `src/lib/codeforces/ranks.ts` (`DIVISIONS`, `divisionFor`) an
 - **Only on the emblem.** Text next to an emblem keeps the plain rank name ("Pupil"). The
   division is in the emblem's accessible name ("Pupil II rank emblem, 2 stars").
 - **Not on the rank ladder.** The home page's ladder shows ranks, not a rating, so its emblems
-  carry no plate; each rank lists its divisions instead ("I–IV · 50 each", the ranges in a tooltip
-  and for screen readers), with a line explaining them. Unrated never has one.
+  carry no plate; each rank lists where its II and III start instead ("II 1270 · III 1330", the
+  full ranges in a tooltip and for screen readers), with a line explaining them. Unrated never has one.
 
 ### Using the emblems
 
