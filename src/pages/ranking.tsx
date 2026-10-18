@@ -7,7 +7,7 @@ import { StatTiles } from '../components/rankings/stat-tiles'
 import { StateMessage } from '../components/states/state-message'
 import { Button, ButtonLink } from '../components/ui/button'
 import { formatDate, plural } from '../lib/codeforces/format'
-import { rankFor } from '../lib/codeforces/ranks'
+import { averageRankFor, rankFor } from '../lib/codeforces/ranks'
 import { useRankings } from '../lib/rankings/load'
 import { scopeName, scopeRoute, type RankingsIndex, type Scope } from '../lib/rankings/rankings'
 import { linkHandler, routeHref, type Route } from '../lib/route'
@@ -134,7 +134,7 @@ function Ranking({ rankings, scope, focus }: { rankings: RankingsIndex; scope: S
             items={[
               { label: 'Players', value: all.players },
               { label: 'Competed this month', value: all.active },
-              { label: 'Average', value: current.average ?? '—', color: rankFor(current.average).color },
+              { label: 'Average', value: current.average ?? '—', color: averageRankFor(current.average).color },
               {
                 label: 'Team rating · top 3',
                 value: current.teamTopThree ?? '—',

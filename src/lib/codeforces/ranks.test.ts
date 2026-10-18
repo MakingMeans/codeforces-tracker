@@ -1,6 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import { contrast } from '../contrast'
-import { DIVISIONS, divisionFor, nextRank, rankFor, RANKS, romanFor, UNRATED } from './ranks'
+import {
+  averageRankFor,
+  DIVISIONS,
+  divisionFor,
+  NEWBIE_AVERAGE,
+  nextRank,
+  rankFor,
+  RANKS,
+  romanFor,
+  UNRATED,
+} from './ranks'
 
 const SURFACE = '#16232f'
 const SURFACE_2 = '#1d2c3a'
@@ -45,14 +55,25 @@ describe('nextRank', () => {
   })
 })
 
+describe('averageRankFor', () => {
+  it('draws a Newbie average in yellow', () => {
+    expect(averageRankFor(1169)).toEqual({ ...RANKS[0], color: NEWBIE_AVERAGE })
+  })
+
+  it('leaves every other rank as it is', () => {
+    expect(averageRankFor(1424)).toBe(rankFor(1424))
+    expect(averageRankFor(2405)).toBe(rankFor(2405))
+    expect(averageRankFor(null)).toBe(UNRATED)
+  })
+})
+
 describe('rank colours', () => {
-  it.each([...RANKS, UNRATED].map((rank) => [rank.name, rank.color]))(
-    '%s reads at 4.5:1 or more on panels',
-    (_, color) => {
-      expect(contrast(color, SURFACE)).toBeGreaterThanOrEqual(4.5)
-      expect(contrast(color, SURFACE_2)).toBeGreaterThanOrEqual(4.5)
-    },
-  )
+  it.each(
+    [...RANKS, UNRATED, { name: 'Newbie average', color: NEWBIE_AVERAGE }].map((rank) => [rank.name, rank.color]),
+  )('%s reads at 4.5:1 or more on panels', (_, color) => {
+    expect(contrast(color, SURFACE)).toBeGreaterThanOrEqual(4.5)
+    expect(contrast(color, SURFACE_2)).toBeGreaterThanOrEqual(4.5)
+  })
 })
 
 describe('divisionFor', () => {
