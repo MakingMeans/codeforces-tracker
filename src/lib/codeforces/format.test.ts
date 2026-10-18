@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatAgo, formatCountdown, formatDelta, formatDuration, formatNumber, plural } from './format'
+import { formatAgo, formatCountdown, formatDateTime, formatDelta, formatDuration, formatNumber, plural } from './format'
 
 const MIN = 60_000
 const HOUR = 60 * MIN
@@ -59,5 +59,12 @@ describe('formatAgo', () => {
     [400 * DAY, 'Mar 2023'],
   ])('%i ms ago is "%s"', (ms, text) => {
     expect(formatAgo(ms, then)).toBe(text)
+  })
+})
+
+describe('formatDateTime', () => {
+  it('gives the date and the time in the visitor’s zone', () => {
+    // 08:04 UTC is 4:04 AM in New York, the zone the tests run in.
+    expect(formatDateTime(Date.UTC(2026, 9, 17, 8, 4))).toBe('Oct 17, 2026, 4:04 AM')
   })
 })
