@@ -21,10 +21,15 @@ export interface Rankings {
   org: Int32Array
   /** 1 when the player competed in a rated contest in the last month. */
   active: Uint8Array
+  /** Row → rating a week ago, for the players whose rank changed since. */
+  moves: Map<number, number>
 }
 
 /** What the worker posts: the handles still joined, the columns as transferable arrays. */
-export type RankingsPayload = Omit<Rankings, 'handles'> & { handles: string }
+export type RankingsPayload = Omit<Rankings, 'handles' | 'moves'> & {
+  handles: string
+  moves: [row: number, before: number][]
+}
 
 export class RankingsFormatError extends Error {
   constructor(message: string) {
@@ -37,6 +42,17 @@ const isNumbers = (value: unknown, length: number): value is number[] =>
   Array.isArray(value) && value.length === length && value.every((n) => Number.isInteger(n))
 const isStrings = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((item) => typeof item === 'string')
+const isMoves = (value: unknown, count: number) =>
+  Array.isArray(value) &&
+  value.every(
+    (move) =>
+      Array.isArray(move) &&
+      move.length === 2 &&
+      Number.isInteger(move[0]) &&
+      move[0] >= 0 &&
+      move[0] < count &&
+      Number.isInteger(move[1]),
+  )
 
 /** Checks a parsed rankings.json and returns it typed, or throws `RankingsFormatError`. */
 export function validateRankings(value: unknown): RankingsFile {
@@ -53,6 +69,9 @@ export function validateRankings(value: unknown): RankingsFile {
   const columns = [file.rating, file.maxRating, file.country, file.city, file.org]
   if (!columns.every((column) => isNumbers(column, count)) || file.active.length !== count) {
     throw new RankingsFormatError('The rankings columns do not line up.')
+  }
+  if (file.moves !== undefined && !isMoves(file.moves, count)) {
+    throw new RankingsFormatError('The rankings file has broken rank changes.')
   }
   return file as RankingsFile
 }
@@ -71,6 +90,7 @@ export function toPayload(file: RankingsFile): RankingsPayload {
     city: Int32Array.from(file.city),
     org: Int32Array.from(file.org),
     active: Uint8Array.from(file.active, (flag) => (flag === '1' ? 1 : 0)),
+    moves: file.moves ?? [],
   }
 }
 
@@ -84,4 +104,5 @@ export const transferables = (payload: RankingsPayload) =>
 export const fromPayload = (payload: RankingsPayload): Rankings => ({
   ...payload,
   handles: payload.handles ? payload.handles.split('\n') : [],
+  moves: new Map(payload.moves),
 })

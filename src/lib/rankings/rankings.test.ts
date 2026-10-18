@@ -58,10 +58,15 @@ const USERS: RatedUser[] = [
 ]
 const ACTIVE = new Set(['MakingMeans', 'Luxuan', 'tourist', 'osvarp'])
 const GENERATED = Date.UTC(2026, 9, 17)
+/** Ratings a week ago, for two players who changed rank since. */
+const MOVED = new Map([
+  ['MakingMeans', 1180],
+  ['osvarp', 2120],
+])
 
 const load = () => {
   // Through JSON and back, as the file travels.
-  const file = validateRankings(JSON.parse(JSON.stringify(encodeRankings(USERS, ACTIVE, GENERATED))))
+  const file = validateRankings(JSON.parse(JSON.stringify(encodeRankings(USERS, ACTIVE, GENERATED, MOVED))))
   return createRankings(fromPayload(toPayload(file)))
 }
 
@@ -96,6 +101,14 @@ describe('encodeRankings', () => {
   it('flags this month’s competitors', () => {
     expect(file.active).toBe('10010011')
   })
+
+  it('keeps the rating a week ago of each player who changed rank, by row', () => {
+    expect(encodeRankings(USERS, ACTIVE, GENERATED, MOVED).moves).toEqual([
+      [3, 2120],
+      [6, 1180],
+    ])
+    expect(file.moves).toEqual([])
+  })
 })
 
 describe('validateRankings', () => {
@@ -110,6 +123,17 @@ describe('validateRankings', () => {
     expect(() => validateRankings({ ...good(), handles: undefined })).toThrow(RankingsFormatError)
     expect(() => validateRankings({ ...good(), rating: [1, 2] })).toThrow(RankingsFormatError)
     expect(() => validateRankings(null)).toThrow(RankingsFormatError)
+  })
+
+  it('refuses rank changes for rows it does not have', () => {
+    expect(() => validateRankings({ ...good(), moves: [[USERS.length, 1200]] })).toThrow(RankingsFormatError)
+    expect(() => validateRankings({ ...good(), moves: [[0]] })).toThrow(RankingsFormatError)
+  })
+
+  it('reads a file written before rank changes existed', () => {
+    const { moves, ...older } = good()
+    expect(moves).toEqual([])
+    expect(fromPayload(toPayload(validateRankings(older))).moves).toEqual(new Map())
   })
 
   it('hands over every column without copying', () => {
@@ -189,6 +213,12 @@ describe('rankings', () => {
       },
     ])
     expect(rankings.suggest('country', ' ')).toEqual([])
+  })
+
+  it('knows who changed rank this week', () => {
+    const row = rankings.data.handles.indexOf('MakingMeans')
+    expect(rankings.data.moves.get(row)).toBe(1180)
+    expect(rankings.data.moves.size).toBe(2)
   })
 
   it('lists countries, most players first', () => {

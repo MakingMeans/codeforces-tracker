@@ -197,8 +197,9 @@ function Ranking({ rankings, scope, focus }: { rankings: RankingsIndex; scope: S
         ) : null}
         <p className="text-sm text-ink-muted">
           <span aria-hidden className="mr-1.5 inline-block h-[7px] w-[7px] bg-win align-middle" />
-          competed in a rated contest this month. Places come from Codeforces’ list of rated users, read once a day;
-          players who left the {KIND[found.kind].toLowerCase()} empty are not here.
+          competed in a rated contest this month. Places come from Codeforces’ list of rated users, read every three
+          hours with the latest contests’ rating changes; players who left the {KIND[found.kind].toLowerCase()} empty
+          are not here.
         </p>
       </div>
     </>

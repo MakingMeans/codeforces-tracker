@@ -5,7 +5,7 @@ import { linkHandler, routeHref } from '../../lib/route'
 
 /**
  * Under the profile's name: the player's place in their country, city and
- * organization from the daily rankings, each a link to that ranking with the
+ * organization from the rankings snapshot, each a link to that ranking with the
  * player marked. Nothing shows for a player missing from the rankings.
  */
 export function ProfileChips({ handle }: { handle: string }) {
@@ -22,7 +22,7 @@ export function ProfileChips({ handle }: { handle: string }) {
             <a
               href={routeHref(route)}
               onClick={linkHandler(route)}
-              title={`#${place.position} of ${place.total} in today’s ${place.name} ranking`}
+              title={`#${place.position} of ${place.total} in the latest ${place.name} ranking`}
               className="cut inline-flex items-center gap-2 px-3 py-1.5 text-sm [--cut:7px] [--cut-fill:var(--color-surface)] [--cut-line:var(--color-line-strong)] hover:[--cut-fill:var(--color-surface-2)] hover:[--cut-line:var(--color-ink)]"
             >
               <span className="font-display text-base leading-none">#{place.position}</span>

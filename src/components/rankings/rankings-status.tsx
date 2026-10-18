@@ -4,7 +4,7 @@ import { StateMessage } from '../states/state-message'
 import { Button } from '../ui/button'
 import { ScanLoader } from '../ui/scan-loader'
 
-/** While the daily rankings load, or why they cannot. */
+/** While the rankings load, or why they cannot. */
 export function RankingsStatus({
   state,
   onRetry,
@@ -23,7 +23,7 @@ export function RankingsStatus({
   if (state.status === 'missing') {
     return (
       <StateMessage icon={CloudOff} title="Rankings unavailable">
-        <p>This version of the site was published without the daily rankings. They come back with the next update.</p>
+        <p>This version of the site was published without the rankings. They come back with the next update.</p>
       </StateMessage>
     )
   }
