@@ -7,14 +7,14 @@ export interface StatTile {
   color?: string
 }
 
-/** The figures at the top of a ranking: big number, small label. */
+/** The figures at the top of a ranking: big number, small label; two even columns on phones. */
 export function StatTiles({ items }: { items: StatTile[] }) {
   return (
-    <dl className="flex flex-wrap gap-2">
+    <dl className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
       {items.map(({ label, value, color }) => (
         <div
           key={label}
-          className="cut grid min-w-[8.5rem] gap-2 px-5 py-3.5 [--cut:8px] [--cut-fill:var(--color-surface)] [--cut-line:var(--color-line)]"
+          className="cut grid content-start gap-2 px-4 py-3.5 [--cut:8px] [--cut-fill:var(--color-surface)] [--cut-line:var(--color-line)] sm:min-w-[8.5rem] sm:px-5"
         >
           <dt className="order-2 font-label text-[12px] font-semibold tracking-[0.14em] text-ink-muted uppercase">
             {label}
