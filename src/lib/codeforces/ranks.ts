@@ -30,6 +30,19 @@ export function rankFor(rating: number | null | undefined): Rank {
   return RANKS.findLast((rank) => rating >= (rank.min ?? -Infinity)) ?? RANKS[0]
 }
 
+/** The yellow a place's average takes when it falls in Newbie (see docs/DESIGN.md, "Rankings"). */
+export const NEWBIE_AVERAGE = '#facc15'
+
+/**
+ * The rank an average rating falls in, as rankFor, but drawn in yellow when it is
+ * Newbie, so a country's, city's or organization's average stands apart from
+ * Newbie's and Unrated's greys. Every other rank keeps its colour.
+ */
+export function averageRankFor(average: number | null | undefined): Rank {
+  const rank = rankFor(average)
+  return rank.tier === 0 ? { ...rank, color: NEWBIE_AVERAGE } : rank
+}
+
 /**
  * Where each of a rank's three divisions starts, by tier; the emblem shows the
  * division as a roman numeral, I the lowest. The span is cut in thirds, rounded
