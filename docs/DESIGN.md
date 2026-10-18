@@ -180,6 +180,8 @@ the first one.
   chevron after the handle, up in `win` or down in `loss`, with "up from Pupil this week" in its
   tooltip and for screen readers. The note under the table explains it.
 - **Competed this month.** A 7 px `win` square after the handle, with the words for screen readers.
+- **How fresh.** Above the table, and next to the Countries list, "updated 2 hours ago", counting on while
+  the page stays open, with the exact date and time in its tooltip.
 - **The player you came from.** Arriving from a profile's chip, their row is tinted, outlined in
   `win` with a 4 px bar, and scrolled into view. When they are far down, the list shows its first
   page, a `···` gap, then the rows around them.
