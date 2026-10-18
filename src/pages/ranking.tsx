@@ -4,9 +4,10 @@ import { PlayerTable, type PlayerRow } from '../components/rankings/player-table
 import { AverageRankEmblem, AverageRankLabel } from '../components/rankings/average-rank'
 import { RankingsStatus } from '../components/rankings/rankings-status'
 import { StatTiles } from '../components/rankings/stat-tiles'
+import { UpdatedAgo } from '../components/rankings/updated-ago'
 import { StateMessage } from '../components/states/state-message'
 import { Button, ButtonLink } from '../components/ui/button'
-import { formatDate, plural } from '../lib/codeforces/format'
+import { plural } from '../lib/codeforces/format'
 import { averageRankFor, rankFor } from '../lib/codeforces/ranks'
 import { useRankings } from '../lib/rankings/load'
 import { scopeName, scopeRoute, type RankingsIndex, type Scope } from '../lib/rankings/rankings'
@@ -171,7 +172,7 @@ function Ranking({ rankings, scope, focus }: { rankings: RankingsIndex; scope: S
             Competed this month only
           </button>
           <p className="text-sm text-ink-muted tabular-nums">
-            {plural(listed.rows.length, 'player')} · updated {formatDate(data.generatedAt)}
+            {plural(listed.rows.length, 'player')} · <UpdatedAgo time={data.generatedAt} />
           </p>
         </div>
 

@@ -24,6 +24,16 @@ export const plural = (count: number, word: string, many = `${word}s`) =>
 export const formatMonthYear = (time: number) =>
   new Date(time).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
 
+/** "Oct 18, 2026, 3:58 AM" in the visitor's time zone. */
+export const formatDateTime = (time: number) =>
+  new Date(time).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  })
+
 /** "Tue, Oct 20, 10:35 AM" in the visitor's time zone. */
 export const formatStart = (time: number) =>
   new Date(time).toLocaleString('en-US', {

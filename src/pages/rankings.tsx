@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { RankingsStatus } from '../components/rankings/rankings-status'
+import { UpdatedAgo } from '../components/rankings/updated-ago'
 import { ScopedSearch } from '../components/search/scoped-search'
 import { Button } from '../components/ui/button'
 import { Panel } from '../components/ui/panel'
-import { formatDate, formatNumber, plural } from '../lib/codeforces/format'
+import { formatNumber, plural } from '../lib/codeforces/format'
 import { averageRankFor, rankFor } from '../lib/codeforces/ranks'
 import { useRankings } from '../lib/rankings/load'
 import type { RankingsIndex } from '../lib/rankings/rankings'
@@ -18,7 +19,11 @@ function Countries({ rankings }: { rankings: RankingsIndex }) {
   return (
     <Panel
       title="Countries"
-      aside={`${plural(countries.length, 'country', 'countries')} · updated ${formatDate(rankings.data.generatedAt)}`}
+      aside={
+        <>
+          {plural(countries.length, 'country', 'countries')} · <UpdatedAgo time={rankings.data.generatedAt} />
+        </>
+      }
     >
       <table className="w-full table-fixed border-separate border-spacing-x-0 border-spacing-y-1.5 text-[17px]">
         <caption className="sr-only">Countries by number of rated players</caption>
