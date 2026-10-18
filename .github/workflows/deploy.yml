@@ -3,9 +3,11 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-  # Once a day, to refresh the rankings snapshot (Codeforces regenerates its list around midnight UTC).
+  # Every three hours, to refresh the rankings snapshot: Codeforces rebuilds its list around midnight UTC,
+  # and the build lays each contest's rating changes over it. GitHub delays or drops some scheduled runs,
+  # so one a day could leave the rankings a day behind; minute 25 avoids the busy top of the hour.
   schedule:
-    - cron: '40 1 * * *'
+    - cron: '25 */3 * * *'
   workflow_dispatch:
 
 permissions:
