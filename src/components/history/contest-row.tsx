@@ -1,9 +1,19 @@
-import { ArrowUpRight, Clock, Hourglass, Minus, TrendingDown, TrendingUp, type LucideIcon } from 'lucide-react'
+import {
+  ArrowUpRight,
+  ChevronsDown,
+  ChevronsUp,
+  Clock,
+  Hourglass,
+  Minus,
+  TrendingDown,
+  TrendingUp,
+  type LucideIcon,
+} from 'lucide-react'
 import { memo } from 'react'
 import { cn } from '../../lib/cn'
 import type { ContestEntry, ContestOutcome } from '../../lib/codeforces/contests'
 import { formatDate, formatDelta, formatDuration, formatNumber } from '../../lib/codeforces/format'
-import { divisionFor, rankFor, romanFor, UNRATED } from '../../lib/codeforces/ranks'
+import { divisionFor, rankChange, rankFor, romanFor, UNRATED } from '../../lib/codeforces/ranks'
 import { RankEmblem } from '../rank-emblem'
 import { ProblemChips } from './problem-chips'
 
@@ -31,6 +41,22 @@ function ResultTag({ outcome, className }: { outcome: ContestOutcome; className?
     >
       <Icon aria-hidden className="h-3.5 w-3.5" />
       {label}
+    </span>
+  )
+}
+
+/** "Up to Pupil" or "Down to Newbie", when the contest changed the rank. */
+function RankMove({ move, to }: { move: 'up' | 'down'; to: number }) {
+  const Icon = move === 'up' ? ChevronsUp : ChevronsDown
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 font-label text-xs font-bold tracking-[0.16em] uppercase',
+        move === 'up' ? 'text-win' : 'text-loss',
+      )}
+    >
+      <Icon aria-hidden className="h-3.5 w-3.5" />
+      {move === 'up' ? 'Up' : 'Down'} to {rankFor(to).name}
     </span>
   )
 }
@@ -64,6 +90,8 @@ export const ContestRow = memo(function ContestRow({ contest }: { contest: Conte
   const delta = contest.outcome === 'pending' ? '—' : formatDelta(contest.after - contest.before)
   const failed =
     contest.failed === 0 ? 'No failed attempts' : `${contest.failed} failed attempt${contest.failed === 1 ? '' : 's'}`
+  // Pending and unrated contests keep the rating, so they never move it.
+  const move = rankChange(contest.before, contest.after)
 
   return (
     <li
@@ -115,6 +143,7 @@ export const ContestRow = memo(function ContestRow({ contest }: { contest: Conte
         <ProblemChips problems={contest.problems} />
         <span>{failed}</span>
         {contest.place ? <span>Place #{formatNumber(contest.place)}</span> : null}
+        {move ? <RankMove move={move} to={contest.after} /> : null}
         <span className="cr-tag-compact">
           <ResultTag outcome={contest.outcome} />
         </span>
