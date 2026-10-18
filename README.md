@@ -166,8 +166,17 @@ public/           static files, resolved through import.meta.env.BASE_URL
 `.github/workflows/deploy.yml` builds the site and publishes it to GitHub Pages on every push to `main`,
 and every three hours on a schedule to refresh the rankings snapshot (GitHub delays or skips some scheduled
 runs, so one a day could leave the rankings a day behind). The repository uses **Settings → Pages →
-Source: GitHub Actions**. GitHub pauses scheduled workflows in repositories with no activity for 60 days;
-the workflow can also be run by hand from the Actions tab.
+Source: GitHub Actions**. The workflow can also be run by hand from the Actions tab.
+
+It looks after itself:
+
+- **The schedule stays on.** GitHub turns off the schedule of a public repository after 60 days without
+  commits. Every scheduled run enables the workflow again through the API (the `keepalive` job), which is
+  what the keepalive-workflow action does, so the rankings keep refreshing while nobody commits.
+- **Stale rankings fail the run.** When Codeforces cannot be read, the copy already published is kept and
+  the run shows a warning. Once the published rankings are a day old (eight runs in a row) or missing, the
+  `freshness` job fails after the deploy, and GitHub emails about the failed run. The rankings pages also
+  say how long ago they were updated.
 
 The site lives under a repository sub-path, so `vite.config.ts` sets `base: '/codeforces-tracker/'` and
 files in `public/` are referenced through `import.meta.env.BASE_URL`.
