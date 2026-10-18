@@ -32,15 +32,17 @@ match history, styled like a game tracker. Think tracker.gg for Valorant, but fo
   (all time, last year, last month) and longest streaks of consecutive days.
 - **Match history.** Every contest entered live, most recent first, Valorant-style: tinted by result,
   with the rank held going in, problems solved and missed, failed attempts, place, rating before → after
-  and the delta. Filter by Rated / Unrated and by year.
+  and the delta (green for a gain, red for a loss, yellow for a rated contest with no change). A contest
+  that moved you to another rank says so ("Up to Specialist"). Filter by Rated / Unrated and by year.
 - **Insights.** Problems solved by difficulty, most-solved tags, languages used and a contest summary
   (best place, biggest gain, biggest loss).
 - **Upcoming contests** on the home page, with a countdown.
 - **Compare two handles** side by side, including the contests both of them entered, from any profile or
   from the Compare section, which suggests handles as you type.
 - **Rankings** by country, city and organization: every rated player who was on Codeforces in the last
-  month, in order, with the average rating and the team rating of the best three. A profile shows the
-  player's place in each (`#58 Colombia`), and its organization, city and country link to them.
+  month, in order, with the average rating and the team rating of the best three. Players who moved up or
+  down a rank in the last week are marked with an arrow. A profile shows the player's place in each
+  (`#58 Colombia`), and its organization, city and country link to them.
 - **Search by scope** on the home page: a player, a country, a city or an organization, with suggestions
   as you type.
 
@@ -73,9 +75,10 @@ directly; it answers with `Access-Control-Allow-Origin: *`, so no proxy or key i
 | `user.status`  | Activity, solved problems, streaks, per-contest problems and attempts, languages, tags |
 | `contest.list` | Contest names, durations, phases and upcoming contests                                 |
 
-| Daily, at build time | Used for                                                             |
-| -------------------- | -------------------------------------------------------------------- |
-| `user.ratedList`     | Rankings by country, city and organization; a player's place in each |
+| Every three hours, at build time | Used for                                                                  |
+| -------------------------------- | ------------------------------------------------------------------------- |
+| `user.ratedList`                 | Rankings by country, city and organization; a player's place in each      |
+| `contest.ratingChanges`          | The last week's contests, laid over the list; who moved up or down a rank |
 
 - **Rate limit.** Codeforces allows about one call every two seconds. When it answers HTTP 429 or
   `Call limit exceeded`, the request is retried after 2, 4 and 6 seconds. At most three requests are
@@ -88,10 +91,16 @@ directly; it answers with `Access-Control-Allow-Origin: *`, so no proxy or key i
   the results then render in a React transition. Measured on the production build with `jiangly`, no
   main-thread task reaches 50 ms on a desktop CPU.
 - **Rankings snapshot.** Codeforces serves its list of rated users without CORS headers, so the browser
-  cannot fetch it. The deploy workflow downloads it once a day (`npm run data`, in
+  cannot fetch it. The deploy workflow downloads it every three hours (`npm run data`, in
   `scripts/build-rankings.ts`) and publishes it with the site as `data/rankings.json`: about 136,000
-  players, 1.5 MB gzipped. A Web Worker parses it; the rankings are up to a day old, profiles stay live.
-  If Codeforces cannot be reached, the copy already published is kept.
+  players, 1.5 MB gzipped. A Web Worker parses it; profiles stay live. If Codeforces cannot be reached,
+  the copy already published is kept.
+- **Recent contests.** Codeforces rebuilds that list only once a day, around midnight UTC, so a contest
+  rated in the afternoon would not count until the next day. The build also reads the rating changes of
+  every contest that ended in the last week and walks each player's changes in order, from wherever the
+  list's rating is along them, so a contest is never counted twice (`src/lib/rankings/recent.ts`). A
+  contest shows in the rankings within about three hours of being rated. The same changes give each
+  player's rating a week ago, which is how the rankings know who moved up or down a rank.
 - **Photos.** `userpic.codeforces.org` sometimes fails, and its CDN can cache the error for days. The
   photo is tried as given, then with a cache-busting query, then the small avatar, then a neutral local
   image.
@@ -113,7 +122,7 @@ npm run dev
 ```
 
 Then open http://localhost:5173/codeforces-tracker/. The sub-path matches the one GitHub Pages serves.
-The rankings pages need the daily snapshot: run `npm run data` once (it writes the git-ignored
+The rankings pages need the snapshot: run `npm run data` once (it writes the git-ignored
 `public/data/rankings.json`).
 
 ### Scripts
@@ -138,14 +147,14 @@ src/
   lib/
     api/          Codeforces client: retries, rate limiting, cancellation, typed errors
     codeforces/   pure data rules: ranks, contests, activity, insights, comparison, team rating (tested)
-    rankings/     the daily snapshot: its format, reading it, and the rankings it answers (tested)
+    rankings/     the snapshot: its format, recent contests, reading it, the rankings it answers (tested)
     charts/       scales and grids behind the charts (tested)
     emblem.ts     the rank emblems as SVG markup (tested against docs/design)
   workers/        the details and rankings workers: big downloads parsed off the main thread
   components/     layout · ui · search · home · profile · charts · history · compare · states
   pages/          home, profile, compare, compare-start, rankings, ranking
   index.css       design tokens and the few component styles written as CSS
-scripts/          build-rankings.ts: the daily rankings snapshot, run in the deploy workflow
+scripts/          build-rankings.ts: the rankings snapshot, run in the deploy workflow
 tests/fixtures/   small hand-written API responses used by the tests
 docs/DESIGN.md    design system: colours, type, shapes, charts, emblems
 docs/design/      approved visual sample, rank emblem source, reference sheet and SVG exports
@@ -155,7 +164,8 @@ public/           static files, resolved through import.meta.env.BASE_URL
 ## Deployment
 
 `.github/workflows/deploy.yml` builds the site and publishes it to GitHub Pages on every push to `main`,
-and once a day on a schedule to refresh the rankings snapshot. The repository uses **Settings → Pages →
+and every three hours on a schedule to refresh the rankings snapshot (GitHub delays or skips some scheduled
+runs, so one a day could leave the rankings a day behind). The repository uses **Settings → Pages →
 Source: GitHub Actions**. GitHub pauses scheduled workflows in repositories with no activity for 60 days;
 the workflow can also be run by hand from the Actions tab.
 
