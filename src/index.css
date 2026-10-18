@@ -17,6 +17,7 @@
   --color-on-accent: #0f1923;
   --color-win: #4fe0b6;
   --color-loss: #ff4655;
+  --color-even: #facc15;
   --color-neutral: #8b97a3;
 
   /* Activity heatmap: one teal hue, from no submissions to 7+. */
@@ -239,6 +240,10 @@
   .contest-row.is-loss {
     --tint: rgb(255 70 85 / 0.16);
     --bar: var(--color-loss);
+  }
+  .contest-row.is-even {
+    --tint: rgb(250 204 21 / 0.12);
+    --bar: var(--color-even);
   }
   .cr-date {
     grid-area: date;

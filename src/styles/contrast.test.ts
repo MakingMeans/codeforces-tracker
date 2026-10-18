@@ -28,6 +28,8 @@ describe('design tokens', () => {
     ['on-accent', 'accent'],
     ['win', 'surface'],
     ['loss', 'surface'],
+    ['even', 'surface'],
+    ['even', 'surface-2'],
     ['neutral', 'surface'],
     ['neutral', 'surface-2'],
   ])('%s text on %s is at least 4.5:1', (text, background) => {
