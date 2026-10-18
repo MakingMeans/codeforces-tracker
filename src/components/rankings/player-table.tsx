@@ -1,6 +1,7 @@
+import { ChevronsDown, ChevronsUp } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { cn } from '../../lib/cn'
-import { divisionFor, rankFor } from '../../lib/codeforces/ranks'
+import { divisionFor, rankChange, rankFor } from '../../lib/codeforces/ranks'
 import { linkHandler, routeHref } from '../../lib/route'
 import { RankEmblem } from '../rank-emblem'
 
@@ -13,6 +14,8 @@ export interface PlayerRow {
   maxRating: number | null
   /** Competed in a rated contest this month. */
   active?: boolean
+  /** Rating a week ago, when the player has changed rank since: an arrow up or down after the handle. */
+  weekAgo?: number | null
   /** One cell per extra column. */
   extra?: ReactNode[]
   /** The player the visitor came from, marked in the list (and found by `tr[data-focus]`). */
@@ -32,6 +35,12 @@ interface PlayerTableProps {
 const fill = 'bg-surface-2 py-2'
 const cell = `${fill} px-2 sm:px-3`
 const extraCell = 'hidden sm:table-cell'
+
+/** Up or down a rank since a week ago, or nothing. */
+function moveOf(row: PlayerRow) {
+  const change = rankChange(row.weekAgo, row.rating)
+  return change && { up: change === 'up', was: rankFor(row.weekAgo) }
+}
 
 /** Players in order: place, emblem and handle, rating and best rating, and any extra columns. */
 export function PlayerTable({ caption, extraColumns = [], rows, gapAfter }: PlayerTableProps) {
@@ -64,7 +73,10 @@ export function PlayerTable({ caption, extraColumns = [], rows, gapAfter }: Play
         <tbody>
           {rows.map((row, i) => {
             const rank = rankFor(row.rating)
+            const move = moveOf(row)
             const columns = 4 + extraColumns.length
+            const MoveIcon = move?.up ? ChevronsUp : ChevronsDown
+            const moveText = move ? `${move.up ? 'up' : 'down'} from ${move.was.name} this week` : ''
             return [
               gapAfter !== undefined && i === gapAfter + 1 ? (
                 <tr key="gap" aria-hidden>
@@ -105,6 +117,15 @@ export function PlayerTable({ caption, extraColumns = [], rows, gapAfter }: Play
                     >
                       {row.handle}
                     </a>
+                    {move ? (
+                      <span
+                        title={`Changed rank: ${moveText}`}
+                        className={cn('shrink-0', move.up ? 'text-win' : 'text-loss')}
+                      >
+                        <MoveIcon aria-hidden className="h-4 w-4" />
+                        <span className="sr-only">, {moveText}</span>
+                      </span>
+                    ) : null}
                     {row.active ? (
                       <span title="Competed in a rated contest this month" className="h-2 w-2 shrink-0 bg-win">
                         <span className="sr-only">, competed this month</span>

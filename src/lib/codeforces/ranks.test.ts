@@ -6,6 +6,7 @@ import {
   divisionFor,
   NEWBIE_AVERAGE,
   nextRank,
+  rankChange,
   rankFor,
   RANKS,
   romanFor,
@@ -52,6 +53,26 @@ describe('nextRank', () => {
 
   it('is undefined at the top', () => {
     expect(nextRank(3500)).toBeUndefined()
+  })
+})
+
+describe('rankChange', () => {
+  it('says up or down when the rank changes', () => {
+    expect(rankChange(1190, 1230)).toBe('up')
+    expect(rankChange(1267, 1424)).toBe('up')
+    expect(rankChange(1610, 1580)).toBe('down')
+    expect(rankChange(2390, 2410)).toBe('up')
+  })
+
+  it('ignores a move within a rank, divisions included', () => {
+    expect(rankChange(1210, 1290)).toBeNull()
+    expect(rankChange(1400, 1400)).toBeNull()
+  })
+
+  it('does not count a first contest, from unrated', () => {
+    expect(rankChange(0, 1250)).toBeNull()
+    expect(rankChange(null, 1250)).toBeNull()
+    expect(rankChange(1250, null)).toBeNull()
   })
 })
 

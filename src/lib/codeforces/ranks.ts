@@ -30,6 +30,18 @@ export function rankFor(rating: number | null | undefined): Rank {
   return RANKS.findLast((rank) => rating >= (rank.min ?? -Infinity)) ?? RANKS[0]
 }
 
+/**
+ * Up or down when two ratings fall in different ranks (divisions do not count),
+ * null in the same rank. A missing or 0 first rating is someone unrated before
+ * their first contest, which is no change of rank either.
+ */
+export function rankChange(from: number | null | undefined, to: number | null | undefined): 'up' | 'down' | null {
+  if (!from || to == null) return null
+  const was = rankFor(from).tier
+  const now = rankFor(to).tier
+  return was === now ? null : now > was ? 'up' : 'down'
+}
+
 /** The yellow a place's average takes when it falls in Newbie (see docs/DESIGN.md, "Rankings"). */
 export const NEWBIE_AVERAGE = '#facc15'
 
