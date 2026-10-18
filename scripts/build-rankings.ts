@@ -12,9 +12,11 @@
  *
  * When Codeforces cannot be reached, the copy already published is kept, so a
  * deploy never loses the rankings; without either, the site builds without them
- * and the rankings pages say so.
+ * and the rankings pages say so. Either way the run shows a warning, and the
+ * snapshot's time goes to the workflow (`generated-at`), which fails the run once
+ * the rankings are a day old.
  */
-import { mkdir, writeFile } from 'node:fs/promises'
+import { appendFile, mkdir, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { encodeRankings, type RankingsFile, type RatedUser } from '../src/lib/rankings/format.ts'
 import { applyRecent, RECENT_DAYS, type RatingChange } from '../src/lib/rankings/recent.ts'
@@ -33,6 +35,18 @@ interface Contest {
 }
 
 const sleep = (ms: number) => new Promise((done) => setTimeout(done, ms))
+const message = (error: unknown) => (error instanceof Error ? error.message : String(error))
+
+/** A warning in the log that GitHub Actions also pins to the run's summary. */
+function warn(text: string) {
+  console.log(process.env.GITHUB_ACTIONS ? `::warning title=Rankings::${text}` : text)
+}
+
+/** When the published snapshot was made, for the workflow's freshness check; empty when there is none. */
+async function report(generatedAt: number | null) {
+  const output = process.env.GITHUB_OUTPUT
+  if (output) await appendFile(output, `generated-at=${generatedAt ?? ''}\n`)
+}
 
 async function api<T>(method: string, query: string): Promise<T> {
   for (let attempt = 0; ; attempt++) {
@@ -64,7 +78,7 @@ async function recentChanges(): Promise<RatingChange[]> {
   try {
     contests = await api<Contest[]>('contest.list', 'gym=false')
   } catch (error) {
-    console.warn(`No recent contests: ${error instanceof Error ? error.message : error}`)
+    warn(`No recent contests, so the rankings only have Codeforces' daily list: ${message(error)}`)
     return []
   }
   const ended = contests.filter(
@@ -77,7 +91,7 @@ async function recentChanges(): Promise<RatingChange[]> {
       const rated = await api<RatingChange[]>('contest.ratingChanges', `contestId=${contest.id}`)
       changes.push(...rated.filter((change) => change.ratingUpdateTimeSeconds >= since))
     } catch (error) {
-      console.warn(`Skipped contest ${contest.id}: ${error instanceof Error ? error.message : error}`)
+      warn(`Skipped contest ${contest.id} this time: ${message(error)}`)
     }
   }
   console.log(`${ended.length} contests in the last ${RECENT_DAYS} days, ${changes.length} rating changes`)
@@ -109,16 +123,21 @@ async function save(json: string) {
 try {
   const file = await build()
   await save(JSON.stringify(file))
+  await report(file.generatedAt)
   const active = [...file.active].filter((flag) => flag === '1').length
   console.log(
     `rankings.json: ${file.rating.length} players (${active} competed this month, ${file.moves?.length ?? 0} changed rank this week), ${file.countries.length} countries, ${file.cities.length} cities, ${file.orgs.length} organizations`,
   )
 } catch (error) {
-  console.warn(`Could not build the rankings: ${error instanceof Error ? error.message : error}`)
   try {
-    await save(await published())
-    console.warn('Kept the copy already published.')
+    const copy = await published()
+    await save(copy)
+    const { generatedAt } = JSON.parse(copy) as { generatedAt?: number }
+    await report(typeof generatedAt === 'number' ? generatedAt : null)
+    const when = typeof generatedAt === 'number' ? ` (made ${new Date(generatedAt).toISOString()})` : ''
+    warn(`Could not build the rankings, kept the copy already published${when}: ${message(error)}`)
   } catch (fallback) {
-    console.warn(`No rankings in this build: ${fallback instanceof Error ? fallback.message : fallback}`)
+    await report(null)
+    warn(`No rankings in this build: ${message(error)}; the published copy: ${message(fallback)}`)
   }
 }
