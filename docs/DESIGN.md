@@ -17,18 +17,19 @@ name), and the emblems are about 30 % larger than drawn there.
 
 All colours are tokens, defined once in `src/index.css` (`@theme`). The page is dark-only.
 
-| Token       | Value             | Use                                         | Contrast                                 |
-| ----------- | ----------------- | ------------------------------------------- | ---------------------------------------- |
-| `bg`        | `#0F1923`         | Page background                             | —                                        |
-| `surface`   | `#16232F`         | Panels, rows                                | —                                        |
-| `surface-2` | `#1D2C3A`         | Inputs, stat cards, hover                   | —                                        |
-| `line`      | `#ECE8E1` at 12 % | 1 px borders, corner ticks                  | —                                        |
-| `ink`       | `#ECE8E1`         | Main text                                   | 14.5:1 on `bg`, 11.7:1 on `surface-2`    |
-| `ink-muted` | `#9AA5B1`         | Secondary text                              | 7.1:1 on `bg`, 5.7:1 on `surface-2`      |
-| `accent`    | `#FF4655`         | Primary actions, accent bars, rating losses | 5.3:1 on `bg`, 4.8:1 on `surface`        |
-| `on-accent` | `#0F1923`         | Text on red buttons                         | 5.3:1 on `accent`                        |
-| `win`       | `#4FE0B6`         | Rating gained                               | 9.6:1 on `surface`                       |
-| `neutral`   | `#8B97A3`         | No change, unrated, pending                 | 5.4:1 on `surface`, 4.8:1 on `surface-2` |
+| Token       | Value             | Use                                         | Contrast                                  |
+| ----------- | ----------------- | ------------------------------------------- | ----------------------------------------- |
+| `bg`        | `#0F1923`         | Page background                             | —                                         |
+| `surface`   | `#16232F`         | Panels, rows                                | —                                         |
+| `surface-2` | `#1D2C3A`         | Inputs, stat cards, hover                   | —                                         |
+| `line`      | `#ECE8E1` at 12 % | 1 px borders, corner ticks                  | —                                         |
+| `ink`       | `#ECE8E1`         | Main text                                   | 14.5:1 on `bg`, 11.7:1 on `surface-2`     |
+| `ink-muted` | `#9AA5B1`         | Secondary text                              | 7.1:1 on `bg`, 5.7:1 on `surface-2`       |
+| `accent`    | `#FF4655`         | Primary actions, accent bars, rating losses | 5.3:1 on `bg`, 4.8:1 on `surface`         |
+| `on-accent` | `#0F1923`         | Text on red buttons                         | 5.3:1 on `accent`                         |
+| `win`       | `#4FE0B6`         | Rating gained, up a rank                    | 9.6:1 on `surface`                        |
+| `even`      | `#FACC15`         | Rated, but no change                        | 10.4:1 on `surface`, 9.3:1 on `surface-2` |
+| `neutral`   | `#8B97A3`         | Unrated, pending                            | 5.4:1 on `surface`, 4.8:1 on `surface-2`  |
 
 Rules:
 
@@ -54,6 +55,11 @@ change.
 
 In Legendary Grandmaster the first letter of the handle takes `ink`, as on Codeforces. A user
 with no rated contest is **Unrated** (`neutral`), never Newbie.
+
+**A place's average is the one exception.** When the average rating of a country, city or
+organization falls in Newbie, its emblem, its "Average rank" line and its Average figure are drawn in
+yellow `#FACC15` (`NEWBIE_AVERAGE`, `averageRankFor`), with Newbie's figure and stars unchanged.
+Every other rank keeps its colour there too. A player's own Newbie rank stays grey everywhere.
 
 ### Chart colours
 
@@ -144,7 +150,7 @@ the first one.
 ## Rankings
 
 - **Search with a scope.** Above the field, chips pick what to find: Player, Country, City or
-  Organization. Places are suggested as you type from the daily snapshot, accents ignored;
+  Organization. Places are suggested as you type from the rankings snapshot, accents ignored;
   names that start with the text come first, then the biggest. It is a WAI-ARIA combobox: arrow keys
   move through the list, Enter opens, Escape closes.
 - **Handle suggestions.** Every handle field (the searches and Compare) suggests
@@ -156,15 +162,23 @@ the first one.
   lifts its own container (`relative z-20`, the top bar `z-30`) above what follows on the page.
 - **Average rank.** Next to a ranking's title, a 128 px emblem (96 px on phones) of the
   rank and division the average rating falls in, with "Average rank · Newbie III" under the title.
+  A Newbie average is yellow (see "Rank colours"); the Countries table's Average column follows it.
 - **Stat tiles.** A big Anton number (36 px) over a small label, ratings in their rank colour: players,
   competed this month, average, and **Team rating · top 3**, Codeforces' team formula on the best
   three (the rating of a player the team would beat half the time, the team winning if any member
-  wins).
+  wins). Two even columns on phones, a wrapping row from 640 px.
 - **Player tables.** Fixed layout, so long handles are cut instead of widening the page. Text at
-  17 px; the place in 24 px Anton; the emblem at 84 px (64 px on phones) with its division; the
-  handle at 18 px in its rank colour, linking to the profile; the rating at 18 px semibold in its rank
-  colour, best rating muted. City, organization or country columns are hidden on
-  phones. Equal ratings share a place (1, 2, 2, 4).
+  17 px; the place in 24 px Anton; the emblem at 84 px with its division; the handle at 18 px in its
+  rank colour, linking to the profile; the rating at 18 px semibold in its rank colour, best rating
+  muted. Equal ratings share a place (1, 2, 2, 4).
+- **Player tables on phones** (under 640 px). The handle gets the room: the place column narrows to
+  44 px (20 px Anton), the rating column to 72 px, cells keep 8 px of padding, the emblem is 56 px
+  and never shrinks, 10 px from the handle, and handle and rating are 16 px. The best rating and the
+  city, organization or country columns are hidden.
+- **Changed rank this week.** A player whose rank is not the one they had a week ago (the build
+  compares with their rating before the week's contests; divisions do not count) gets a 16 px double
+  chevron after the handle, up in `win` or down in `loss`, with "up from Pupil this week" in its
+  tooltip and for screen readers. The note under the table explains it.
 - **Competed this month.** A 7 px `win` square after the handle, with the words for screen readers.
 - **The player you came from.** Arriving from a profile's chip, their row is tinted, outlined in
   `win` with a 4 px bar, and scrolled into view. When they are far down, the list shows its first
@@ -177,9 +191,13 @@ the first one.
 A row says its result **three ways**, so it never relies on colour alone:
 
 1. A tinted background and a 4 px bar on the left: `win` for a gain, `accent` for a loss,
-   `neutral` for no change, unrated or pending.
+   `even` (yellow) for a rated contest with no change, `neutral` for unrated or pending.
 2. The signed delta in Anton (`+62`, `−33`, `0`, or `—` while pending).
-3. A Rated / Unrated / Pending label with an icon.
+3. A Rated / Unrated / Pending label with an icon, in the colour of the delta.
+
+**A contest that changed the rank** (Newbie to Pupil, Expert to Specialist; divisions do not count,
+nor a first contest from unrated) says so next to the place: "Up to Specialist" or "Down to Pupil" in
+the label style, with a double chevron, in `win` or `loss`. The row itself looks like any other.
 
 On desktop the row is a single line: date and duration, the emblem held going in, the contest
 name, problem chips, failed attempts and place, rating before → after, the delta, and a link.
@@ -280,7 +298,7 @@ The starts live in `src/lib/codeforces/ranks.ts` (`DIVISIONS`, `divisionFor`) an
 
 - **Sizes.** 140 px in the profile header, up to 100 px on the home page's rank ladder (the
   emblem fills its cell), 92 px on the rating card, 84 px in the match history (64 px in rows on
-  phones), 80 px in the comparison header, 84 px in ranking tables (64 px on phones), 128 px for a ranking's average rank,
+  phones), 80 px in the comparison header, 84 px in ranking tables (56 px on phones), 128 px for a ranking's average rank,
   32 px in handle suggestions.
   Stars are countable from 44 px up; at 28 px they read as a row of dots.
 - **Accessibility.** Every emblem has `role="img"`, an `aria-label` and a `<title>` with the rank
