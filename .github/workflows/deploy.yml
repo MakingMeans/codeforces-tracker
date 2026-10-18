@@ -22,6 +22,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      generated-at: ${{ steps.data.outputs.generated-at }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -29,8 +31,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      # Downloads Codeforces' rated list into public/data/rankings.json (keeps the published copy if it fails).
-      - run: npm run data
+      # Downloads Codeforces' rated list into public/data/rankings.json (keeps the published copy if it
+      # fails, with a warning on the run) and reports when the snapshot was made.
+      - id: data
+        run: npm run data
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -45,3 +49,37 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # After the deploy, so the site still goes out: fails the run, which GitHub emails about, when the
+  # published rankings are a day old (Codeforces could not be read for eight runs in a row) or missing.
+  freshness:
+    needs: [build, deploy]
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Check that the rankings are less than a day old
+        env:
+          GENERATED_AT: ${{ needs.build.outputs.generated-at }}
+        run: |
+          if [ -z "$GENERATED_AT" ]; then
+            echo "::error title=Rankings::This deploy has no rankings."
+            exit 1
+          fi
+          hours=$(( ($(date +%s) - GENERATED_AT / 1000) / 3600 ))
+          if [ "$hours" -ge 24 ]; then
+            echo "::error title=Rankings::The rankings are $hours hours old: Codeforces could not be read for a day."
+            exit 1
+          fi
+          echo "The rankings are $hours hours old."
+
+  # GitHub turns off the schedule of a public repository after 60 days without commits. Enabling the
+  # workflow again through the API, which is what the keepalive-workflow action does, keeps it on.
+  keepalive:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - run: gh api --method PUT "repos/$GITHUB_REPOSITORY/actions/workflows/deploy.yml/enable"
+        env:
+          GH_TOKEN: ${{ github.token }}
