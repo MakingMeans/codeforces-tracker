@@ -1,4 +1,4 @@
-import { MapPinOff } from 'lucide-react'
+import { ChevronsDown, ChevronsUp, MapPinOff } from 'lucide-react'
 import { startTransition, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { PlayerTable, type PlayerRow } from '../components/rankings/player-table'
 import { AverageRankEmblem, AverageRankLabel } from '../components/rankings/average-rank'
@@ -93,6 +93,7 @@ function Ranking({ rankings, scope, focus }: { rankings: RankingsIndex; scope: S
       rating: data.rating[row],
       maxRating: data.maxRating[row],
       active: data.active[row] === 1,
+      weekAgo: data.moves.get(row) ?? null,
       extra:
         found.kind === 'country'
           ? [cells.city, cells.org]
@@ -197,9 +198,14 @@ function Ranking({ rankings, scope, focus }: { rankings: RankingsIndex; scope: S
         ) : null}
         <p className="text-sm text-ink-muted">
           <span aria-hidden className="mr-1.5 inline-block h-[7px] w-[7px] bg-win align-middle" />
-          competed in a rated contest this month. Places come from Codeforces’ list of rated users, read every three
-          hours with the latest contests’ rating changes; players who left the {KIND[found.kind].toLowerCase()} empty
-          are not here.
+          competed in a rated contest this month.{' '}
+          <span aria-hidden className="inline-flex align-middle">
+            <ChevronsUp className="h-4 w-4 text-win" />
+            <ChevronsDown className="h-4 w-4 text-loss" />
+          </span>{' '}
+          up or down a rank in the last week. Places come from Codeforces’ list of rated users, read every three hours
+          with the latest contests’ rating changes; players who left the {KIND[found.kind].toLowerCase()} empty are not
+          here.
         </p>
       </div>
     </>
