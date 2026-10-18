@@ -1,9 +1,9 @@
 /**
- * The daily rankings snapshot, published as data/rankings.json next to the site.
+ * The rankings snapshot, published as data/rankings.json next to the site.
  *
  * Codeforces serves its list of rated users (`user.ratedList`) as a static file
  * without `Access-Control-Allow-Origin`, so the browser cannot download it. A
- * scheduled GitHub Actions run fetches it once a day (scripts/build-rankings.ts)
+ * scheduled GitHub Actions run fetches it every three hours (scripts/build-rankings.ts)
  * and publishes it in this compact, column-per-field form: 136,000 players come
  * to about 5 MB of JSON, 1.5 MB gzipped.
  *
@@ -30,6 +30,11 @@ export interface RankingsFile {
   org: number[]
   /** "1" when the player competed in a rated contest in the last month, "0" otherwise. */
   active: string
+  /**
+   * [row, rating a week ago] for every player whose rank changed in the last week.
+   * Missing in files written before it existed.
+   */
+  moves?: [row: number, before: number][]
 }
 
 /** The fields of a Codeforces user this snapshot keeps. */
@@ -65,7 +70,13 @@ function dictionary() {
 const byRating = (a: RatedUser, b: RatedUser) =>
   b.rating - a.rating || (a.handle.toLowerCase() < b.handle.toLowerCase() ? -1 : 1)
 
-export function encodeRankings(users: RatedUser[], active: Set<string>, generatedAt: number): RankingsFile {
+/** `moved` maps a handle to its rating a week ago, for the players who changed rank since. */
+export function encodeRankings(
+  users: RatedUser[],
+  active: Set<string>,
+  generatedAt: number,
+  moved: Map<string, number> = new Map(),
+): RankingsFile {
   const countries = dictionary()
   const orgs = dictionary()
   const cities: [number, string][] = []
@@ -85,6 +96,7 @@ export function encodeRankings(users: RatedUser[], active: Set<string>, generate
     active: '',
   }
   const handles: string[] = []
+  const moves: [number, number][] = []
   let flags = ''
 
   for (const user of [...users].sort(byRating)) {
@@ -107,9 +119,12 @@ export function encodeRankings(users: RatedUser[], active: Set<string>, generate
     file.city.push(city)
     file.org.push(orgs.id(user.organization))
     flags += active.has(user.handle) ? '1' : '0'
+    const before = moved.get(user.handle)
+    if (before !== undefined) moves.push([handles.length - 1, before])
   }
 
   file.handles = handles.join('\n')
   file.active = flags
+  file.moves = moves
   return file
 }

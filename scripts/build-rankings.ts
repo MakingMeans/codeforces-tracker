@@ -3,7 +3,10 @@
  * the last month, with country, city and organization, for the rankings pages.
  *
  * Codeforces serves this list without CORS headers, so the browser cannot fetch
- * it; this runs in GitHub Actions before each build (daily, on a schedule).
+ * it; this runs in GitHub Actions before each build (every three hours, on a
+ * schedule). Codeforces rebuilds the list once a day, so the rating changes of
+ * the last week's contests are laid over it (src/lib/rankings/recent.ts): a
+ * contest counts here a few hours after it is rated, not the next day.
  *
  *   npm run data
  *
@@ -14,21 +17,31 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { encodeRankings, type RankingsFile, type RatedUser } from '../src/lib/rankings/format.ts'
+import { applyRecent, RECENT_DAYS, type RatingChange } from '../src/lib/rankings/recent.ts'
 
-const API = 'https://codeforces.com/api/user.ratedList'
+const API = 'https://codeforces.com/api'
 const PUBLISHED = 'https://makingmeans.github.io/codeforces-tracker/data/rankings.json'
 const OUT = resolve(import.meta.dirname, '../public/data/rankings.json')
 /** Fewer than this many players means Codeforces answered with something else. */
 const MIN_PLAYERS = 10_000
 
+interface Contest {
+  id: number
+  phase: string
+  startTimeSeconds?: number
+  durationSeconds: number
+}
+
 const sleep = (ms: number) => new Promise((done) => setTimeout(done, ms))
 
-async function ratedList(query: string): Promise<RatedUser[]> {
+async function api<T>(method: string, query: string): Promise<T> {
   for (let attempt = 0; ; attempt++) {
-    const response = await fetch(`${API}?${query}`, { headers: { 'User-Agent': 'cf-tracker rankings build' } })
+    const response = await fetch(`${API}/${method}?${query}`, {
+      headers: { 'User-Agent': 'cf-tracker rankings build' },
+    })
     const body = (await response.json().catch(() => null)) as {
       status: string
-      result?: RatedUser[]
+      result?: T
       comment?: string
     } | null
     if (body?.status === 'OK' && body.result) return body.result
@@ -37,16 +50,49 @@ async function ratedList(query: string): Promise<RatedUser[]> {
       await sleep(5000 * (attempt + 1))
       continue
     }
-    throw new Error(`user.ratedList?${query} answered HTTP ${response.status}: ${body?.comment ?? 'not the API'}`)
+    throw new Error(`${method}?${query} answered HTTP ${response.status}: ${body?.comment ?? 'not the API'}`)
   }
 }
 
+/**
+ * The rating changes of every contest that ended in the last week. What cannot be
+ * read is left out (the next run tries again): the rankings still build.
+ */
+async function recentChanges(): Promise<RatingChange[]> {
+  const since = Date.now() / 1000 - RECENT_DAYS * 86_400
+  let contests: Contest[]
+  try {
+    contests = await api<Contest[]>('contest.list', 'gym=false')
+  } catch (error) {
+    console.warn(`No recent contests: ${error instanceof Error ? error.message : error}`)
+    return []
+  }
+  const ended = contests.filter(
+    (contest) => contest.phase === 'FINISHED' && (contest.startTimeSeconds ?? 0) + contest.durationSeconds >= since,
+  )
+  const changes: RatingChange[] = []
+  for (const contest of ended) {
+    await sleep(2500)
+    try {
+      const rated = await api<RatingChange[]>('contest.ratingChanges', `contestId=${contest.id}`)
+      changes.push(...rated.filter((change) => change.ratingUpdateTimeSeconds >= since))
+    } catch (error) {
+      console.warn(`Skipped contest ${contest.id}: ${error instanceof Error ? error.message : error}`)
+    }
+  }
+  console.log(`${ended.length} contests in the last ${RECENT_DAYS} days, ${changes.length} rating changes`)
+  return changes
+}
+
 async function build(): Promise<RankingsFile> {
-  const everyone = await ratedList('activeOnly=false&includeRetired=false')
+  const everyone = await api<RatedUser[]>('user.ratedList', 'activeOnly=false&includeRetired=false')
   await sleep(2500) // Codeforces allows about one call every two seconds.
-  const competed = await ratedList('activeOnly=true&includeRetired=false')
+  const competed = await api<RatedUser[]>('user.ratedList', 'activeOnly=true&includeRetired=false')
   if (everyone.length < MIN_PLAYERS) throw new Error(`Only ${everyone.length} players in the list.`)
-  return encodeRankings(everyone, new Set(competed.map((user) => user.handle)), Date.now())
+  await sleep(2500)
+  const recent = applyRecent(everyone, await recentChanges())
+  const active = new Set([...competed.map((user) => user.handle), ...recent.competed])
+  return encodeRankings(recent.users, active, Date.now(), recent.moved)
 }
 
 async function published(): Promise<string> {
@@ -65,7 +111,7 @@ try {
   await save(JSON.stringify(file))
   const active = [...file.active].filter((flag) => flag === '1').length
   console.log(
-    `rankings.json: ${file.rating.length} players (${active} competed this month), ${file.countries.length} countries, ${file.cities.length} cities, ${file.orgs.length} organizations`,
+    `rankings.json: ${file.rating.length} players (${active} competed this month, ${file.moves?.length ?? 0} changed rank this week), ${file.countries.length} countries, ${file.cities.length} cities, ${file.orgs.length} organizations`,
   )
 } catch (error) {
   console.warn(`Could not build the rankings: ${error instanceof Error ? error.message : error}`)

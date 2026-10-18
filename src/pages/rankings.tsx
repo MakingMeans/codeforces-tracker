@@ -98,8 +98,8 @@ export function RankingsHome() {
               Rankings
             </h1>
             <p className="max-w-[62ch] text-lg text-ink-muted">
-              Every rated player who was on Codeforces in the last month, by country, city or organization. Updated once
-              a day.
+              Every rated player who was on Codeforces in the last month, by country, city or organization. Updated
+              every three hours.
             </p>
           </div>
           <div className="relative z-20">
