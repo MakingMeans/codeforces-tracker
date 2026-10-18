@@ -11,7 +11,7 @@ import { ProblemChips } from './problem-chips'
 const RESULT: Record<ContestOutcome, { label: string; icon: LucideIcon; tone: string }> = {
   gain: { label: 'Rated', icon: TrendingUp, tone: 'text-win' },
   loss: { label: 'Rated', icon: TrendingDown, tone: 'text-loss' },
-  even: { label: 'Rated', icon: Minus, tone: 'text-ink-muted' },
+  even: { label: 'Rated', icon: Minus, tone: 'text-even' },
   unrated: { label: 'Unrated', icon: Minus, tone: 'text-ink-muted' },
   pending: { label: 'Pending', icon: Hourglass, tone: 'text-ink-muted' },
 }
@@ -66,7 +66,14 @@ export const ContestRow = memo(function ContestRow({ contest }: { contest: Conte
     contest.failed === 0 ? 'No failed attempts' : `${contest.failed} failed attempt${contest.failed === 1 ? '' : 's'}`
 
   return (
-    <li className={cn('contest-row', contest.outcome === 'gain' && 'is-gain', contest.outcome === 'loss' && 'is-loss')}>
+    <li
+      className={cn(
+        'contest-row',
+        contest.outcome === 'gain' && 'is-gain',
+        contest.outcome === 'loss' && 'is-loss',
+        contest.outcome === 'even' && 'is-even',
+      )}
+    >
       <div className="cr-date text-sm leading-snug">
         <time dateTime={new Date(contest.start).toISOString()} className="font-semibold">
           {formatDate(contest.start)}
