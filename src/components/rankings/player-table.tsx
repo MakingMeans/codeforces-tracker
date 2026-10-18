@@ -28,7 +28,9 @@ interface PlayerTableProps {
   gapAfter?: number
 }
 
-const cell = 'bg-surface-2 px-3 py-2'
+// Phones get narrower place and rating columns and a smaller emblem, so the handle keeps the room.
+const fill = 'bg-surface-2 py-2'
+const cell = `${fill} px-2 sm:px-3`
 const extraCell = 'hidden sm:table-cell'
 
 /** Players in order: place, emblem and handle, rating and best rating, and any extra columns. */
@@ -40,13 +42,13 @@ export function PlayerTable({ caption, extraColumns = [], rows, gapAfter }: Play
         <caption className="sr-only">{caption}</caption>
         <thead>
           <tr className="font-label text-[12px] font-semibold tracking-[0.14em] text-ink-muted uppercase">
-            <th scope="col" className="w-16 px-3 py-1 text-right">
+            <th scope="col" className="w-11 px-1.5 py-1 text-right sm:w-16 sm:px-3">
               #
             </th>
-            <th scope="col" className="px-3 py-1 text-left">
+            <th scope="col" className="px-2 py-1 text-left sm:px-3">
               Player
             </th>
-            <th scope="col" className="w-24 px-3 py-1 text-right">
+            <th scope="col" className="w-[4.5rem] px-2 py-1 text-right sm:w-24 sm:px-3">
               Rating
             </th>
             <th scope="col" className={cn('w-24 px-3 py-1 text-right', extraCell)}>
@@ -79,21 +81,26 @@ export function PlayerTable({ caption, extraColumns = [], rows, gapAfter }: Play
                     '[&>td]:bg-[#1f3a36] [&>td]:shadow-[inset_0_1px_0_var(--color-win),inset_0_-1px_0_var(--color-win)] [&>td:first-child]:shadow-[inset_4px_0_0_var(--color-win),inset_0_1px_0_var(--color-win),inset_0_-1px_0_var(--color-win)]',
                 )}
               >
-                <td className={cn(cell, 'text-right font-display text-2xl leading-none tabular-nums')}>
+                <td
+                  className={cn(
+                    fill,
+                    'px-1.5 text-right font-display text-xl leading-none tabular-nums sm:px-3 sm:text-2xl',
+                  )}
+                >
                   {row.position ?? ''}
                 </td>
                 <td className={cell}>
-                  <span className="flex min-w-0 items-center gap-3">
+                  <span className="flex min-w-0 items-center gap-2.5 sm:gap-3">
                     <RankEmblem
                       rank={rank}
                       division={divisionFor(row.rating)}
                       size={84}
-                      className="h-16 w-16 sm:h-[84px] sm:w-[84px]"
+                      className="h-14 w-14 shrink-0 sm:h-[84px] sm:w-[84px]"
                     />
                     <a
                       href={routeHref({ handle: row.handle })}
                       onClick={linkHandler({ handle: row.handle })}
-                      className="min-w-0 truncate text-lg font-semibold underline-offset-3 hover:underline"
+                      className="min-w-0 truncate text-base font-semibold underline-offset-3 hover:underline sm:text-lg"
                       style={{ color: rank.color }}
                     >
                       {row.handle}
@@ -106,7 +113,10 @@ export function PlayerTable({ caption, extraColumns = [], rows, gapAfter }: Play
                     {row.highlight ? <span className="sr-only">, the profile you came from</span> : null}
                   </span>
                 </td>
-                <td className={cn(cell, 'text-right text-lg font-semibold tabular-nums')} style={{ color: rank.color }}>
+                <td
+                  className={cn(cell, 'text-right text-base font-semibold tabular-nums sm:text-lg')}
+                  style={{ color: rank.color }}
+                >
                   {row.rating ?? <span className="text-ink-muted">Unrated</span>}
                 </td>
                 <td className={cn(cell, extraCell, 'text-right text-ink-muted tabular-nums')}>
