@@ -56,11 +56,6 @@ change.
 In Legendary Grandmaster the first letter of the handle takes `ink`, as on Codeforces. A user
 with no rated contest is **Unrated** (`neutral`), never Newbie.
 
-**A place's average is the one exception.** When the average rating of a country, city or
-organization falls in Newbie, its emblem, its "Average rank" line and its Average figure are drawn in
-yellow `#FACC15` (`NEWBIE_AVERAGE`, `averageRankFor`), with Newbie's figure and stars unchanged.
-Every other rank keeps its colour there too. A player's own Newbie rank stays grey everywhere.
-
 ### Chart colours
 
 Validated with the `dataviz` palette validator against `surface`.
@@ -162,7 +157,6 @@ the first one.
   lifts its own container (`relative z-20`, the top bar `z-30`) above what follows on the page.
 - **Average rank.** Next to a ranking's title, a 128 px emblem (96 px on phones) of the
   rank and division the average rating falls in, with "Average rank · Newbie III" under the title.
-  A Newbie average is yellow (see "Rank colours"); the Countries table's Average column follows it.
 - **Stat tiles.** A big Anton number (36 px) over a small label, ratings in their rank colour: players,
   competed this month, average, and **Team rating · top 3**, Codeforces' team formula on the best
   three (the rating of a player the team would beat half the time, the team winning if any member
