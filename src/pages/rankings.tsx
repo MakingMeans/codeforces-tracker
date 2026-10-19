@@ -5,7 +5,7 @@ import { ScopedSearch } from '../components/search/scoped-search'
 import { Button } from '../components/ui/button'
 import { Panel } from '../components/ui/panel'
 import { formatNumber, plural } from '../lib/codeforces/format'
-import { averageRankFor, rankFor } from '../lib/codeforces/ranks'
+import { rankFor } from '../lib/codeforces/ranks'
 import { useRankings } from '../lib/rankings/load'
 import type { RankingsIndex } from '../lib/rankings/rankings'
 import { linkHandler, routeHref } from '../lib/route'
@@ -64,7 +64,7 @@ function Countries({ rankings }: { rankings: RankingsIndex }) {
               <td className="bg-surface-2 px-3 py-3 text-right tabular-nums">{formatNumber(country.players)}</td>
               <td
                 className="hidden bg-surface-2 px-3 py-3 text-right tabular-nums sm:table-cell"
-                style={{ color: averageRankFor(country.average).color }}
+                style={{ color: rankFor(country.average).color }}
               >
                 {country.average}
               </td>

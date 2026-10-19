@@ -1,15 +1,14 @@
-import { averageRankFor, divisionFor, romanFor } from '../../lib/codeforces/ranks'
+import { divisionFor, rankFor, romanFor } from '../../lib/codeforces/ranks'
 import { RankEmblem } from '../rank-emblem'
 
-const nameOf = (average: number) =>
-  [averageRankFor(average).name, romanFor(divisionFor(average))].filter(Boolean).join(' ')
+const nameOf = (average: number) => [rankFor(average).name, romanFor(divisionFor(average))].filter(Boolean).join(' ')
 
 /** A big emblem of the rank and division an average rating falls in, next to a ranking's title. */
 export function AverageRankEmblem({ average }: { average: number | null }) {
   if (average === null) return null
   return (
     <RankEmblem
-      rank={averageRankFor(average)}
+      rank={rankFor(average)}
       division={divisionFor(average)}
       size={128}
       label={`Average rank: ${nameOf(average)}`}
@@ -18,14 +17,11 @@ export function AverageRankEmblem({ average }: { average: number | null }) {
   )
 }
 
-/** "Average rank · Newbie III", in the colour of the emblem, under the title. */
+/** "Average rank · Newbie III", in the rank's colour, under the title. */
 export function AverageRankLabel({ average }: { average: number | null }) {
   if (average === null) return null
   return (
-    <p
-      className="font-label text-sm font-bold tracking-[0.14em] uppercase"
-      style={{ color: averageRankFor(average).color }}
-    >
+    <p className="font-label text-sm font-bold tracking-[0.14em] uppercase" style={{ color: rankFor(average).color }}>
       Average rank · {nameOf(average)}
     </p>
   )
